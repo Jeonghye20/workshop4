@@ -6,30 +6,38 @@
   <title>내 담당 학급 — 정보 AI 학습 플랫폼</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* ── 홈(반 선택) 전용 스타일 ─────────────────────── */
+    /* ── 홈 전용 스타일 ─────────────────────── */
 
     .home-wrap {
-      min-height: calc(100vh - var(--nav-height) - var(--gnb-height));
+      height: calc(100vh - var(--nav-height) - var(--gnb-height));
       background: var(--color-light);
-      padding: var(--space-xl);
+      padding: 16px 32px 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .home-inner {
-      max-width: 1000px;
+      max-width: 1060px;
+      width: 100%;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
     }
 
     /* 요약 스트립 */
     .home-summary {
       display: flex;
       align-items: center;
-      gap: 0;
       background: var(--color-white);
       border: 1px solid var(--color-border);
       border-radius: 10px;
       overflow: hidden;
-      margin-bottom: var(--space-xl);
+      margin-bottom: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      flex-shrink: 0;
     }
 
     .home-summary-item {
@@ -37,195 +45,337 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
-      padding: var(--space-md) var(--space-lg);
+      gap: 2px;
+      padding: 10px var(--space-lg);
       border-right: 1px solid var(--color-border);
     }
 
     .home-summary-item:last-child { border-right: none; }
 
     .home-summary-value {
-      font-size: 26px;
+      font-size: 22px;
       font-weight: 700;
       line-height: 1;
       color: var(--color-ink);
     }
 
     .home-summary-label {
-      font-size: 12px;
-      color: var(--color-gray);
-    }
-
-    /* 학급 카드 그리드 */
-    .class-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-lg);
-    }
-
-    .class-card {
-      background: var(--color-white);
-      border: 1.5px solid var(--color-border);
-      border-radius: 12px;
-      padding: var(--space-lg);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-      cursor: pointer;
-      transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .class-card:hover {
-      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
-      transform: translateY(-2px);
-    }
-
-    /* 진행 중 카드 강조 */
-    .class-card.is-active {
-      border-color: var(--color-mid);
-      border-width: 2px;
-    }
-
-    .class-card.is-active::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: var(--color-mid);
-    }
-
-    /* 수업 없는 카드 */
-    .class-card.is-idle {
-      opacity: 0.75;
-    }
-
-    .class-card.is-idle:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      transform: translateY(-1px);
-    }
-
-    /* 카드 헤더 */
-    .cc-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: var(--space-md);
-    }
-
-    .cc-name {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--color-ink);
-      line-height: 1;
-    }
-
-    .cc-meta {
-      font-size: 12px;
-      color: var(--color-gray);
-      margin-top: 5px;
-    }
-
-    /* 구분선 */
-    .cc-divider {
-      border: none;
-      border-top: 1px solid var(--color-border);
-      margin: var(--space-md) 0;
-    }
-
-    /* 수업 정보 */
-    .cc-lesson-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--color-gray);
-      margin-bottom: 4px;
-    }
-
-    .cc-lesson-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--color-ink);
-      margin-bottom: 3px;
-    }
-
-    .cc-lesson-unit {
-      font-size: 12px;
-      color: var(--color-gray);
-      margin-bottom: var(--space-md);
-    }
-
-    /* 진행률 행 */
-    .cc-progress-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-sm);
-    }
-
-    .cc-progress-label {
       font-size: 11px;
       color: var(--color-gray);
-      white-space: nowrap;
     }
 
-    .cc-progress-pct {
+    /* ── 탭 네비게이션 ── */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-gray);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--color-ink); }
+
+    .tab-btn.active {
+      color: var(--color-mid);
+      border-bottom-color: var(--color-mid);
+    }
+
+    /* ── 탭 패널 ── */
+    .tab-panel { display: none; flex: 1; min-height: 0; flex-direction: column; gap: 12px; }
+    .tab-panel.active { display: flex; }
+
+    /* ── 내 학급 탭: 상단 2열 ── */
+    .upper-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .section-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .section-card-title {
       font-size: 12px;
       font-weight: 700;
-      white-space: nowrap;
-    }
-
-    /* 학생 현황 칩 */
-    .cc-stats {
+      color: var(--color-ink);
+      margin-bottom: 10px;
       display: flex;
-      gap: var(--space-sm);
-      flex-wrap: wrap;
-      margin-bottom: var(--space-md);
-    }
-
-    .cc-stat {
-      display: inline-flex;
       align-items: center;
-      gap: 4px;
-      font-size: 12px;
-      font-weight: 600;
+      gap: var(--space-xs);
     }
 
-    .cc-dot {
-      width: 7px;
-      height: 7px;
+    /* ── 타임라인 ── */
+    .timeline { display: flex; flex-direction: column; gap: 5px; }
+
+    .tl-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      transition: background 0.15s;
+    }
+
+    .tl-item.tl-done {
+      opacity: 0.4;
+    }
+
+    .tl-item.tl-current {
+      border-color: var(--color-mid);
+      background: rgba(6,90,130,0.05);
+      cursor: pointer;
+    }
+
+    .tl-item.tl-current:hover {
+      background: rgba(6,90,130,0.09);
+    }
+
+    .tl-item.tl-upcoming {
+      border-color: var(--color-border);
+      background: var(--color-light);
+    }
+
+    .tl-time {
+      width: 34px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--color-gray);
+      flex-shrink: 0;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .tl-item.tl-current .tl-time { color: var(--color-mid); }
+
+    .tl-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
     }
 
-    /* 카드 푸터 */
-    .cc-footer {
+    .tl-body { flex: 1; min-width: 0; }
+
+    .tl-row {
       display: flex;
-      justify-content: flex-end;
-      padding-top: var(--space-sm);
-      border-top: 1px solid var(--color-border);
-      margin-top: var(--space-sm);
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 1px;
     }
 
-    /* 섹션 헤더 */
-    .section-head {
+    .tl-period {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-ink);
+    }
+
+    .tl-class {
+      font-size: 12px;
+      color: var(--color-gray);
+    }
+
+    .tl-sub {
+      font-size: 11px;
+      color: var(--color-gray);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── 반별 현황 비교 테이블 ── */
+    .cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .cmp-table th {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-gray);
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+      background: var(--color-light);
+    }
+
+    .cmp-table td {
+      padding: 8px 8px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: middle;
+    }
+
+    .cmp-table tbody tr:last-child td { border-bottom: none; }
+
+    .cmp-table tbody tr.row-active {
+      background: rgba(6,90,130,0.06);
+      cursor: pointer;
+    }
+
+    .cmp-table tbody tr.row-active:hover {
+      background: rgba(6,90,130,0.11);
+    }
+
+    .cmp-table tbody tr.row-inactive {
+      cursor: default;
+    }
+
+    .cmp-class-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--color-ink);
+    }
+
+    .cmp-class-sub {
+      font-size: 10px;
+      color: var(--color-gray);
+      margin-top: 1px;
+    }
+
+    .cmp-progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cmp-pct {
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      width: 32px;
+      text-align: right;
+    }
+
+    .cmp-score {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* ── 하단 컴팩트 카드 4개 ── */
+    .strip-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+
+    .class-strip-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .cc-compact {
+      background: var(--color-white);
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cc-compact:hover {
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+    }
+
+    .cc-compact.is-active {
+      border-color: var(--color-mid);
+      border-width: 2px;
+    }
+
+    .cc-compact.is-active::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--color-mid);
+    }
+
+    .cc-compact.is-idle {
+      opacity: 0.7;
+    }
+
+    .ccc-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: var(--space-md);
+      margin-bottom: 5px;
     }
 
-    .section-title {
+    .ccc-name {
       font-size: 15px;
       font-weight: 700;
       color: var(--color-ink);
     }
 
-    .section-hint {
-      font-size: 12px;
+    .ccc-meta {
+      font-size: 10px;
       color: var(--color-gray);
+      margin-bottom: 4px;
+    }
+
+    .ccc-lesson {
+      font-size: 11px;
+      color: var(--color-gray);
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ccc-progress {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ccc-pct {
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* ── 스텁 패널 (자료실·공지·설정) ── */
+    .stub-panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gray);
+      font-size: 14px;
+      border: 2px dashed var(--color-border);
+      border-radius: 8px;
+    }
+
+    /* page-header 간격 조정 */
+    .home-wrap .page-header {
+      margin-bottom: 12px;
+      flex-shrink: 0;
     }
   </style>
 </head>
@@ -298,218 +448,333 @@
       </div>
     </div>
 
-    <!-- 학급 카드 -->
-    <div class="section-head">
-      <div class="section-title">📚 내 담당 학급</div>
-      <div class="section-hint">학급 카드를 클릭하면 해당 반의 대시보드로 이동합니다</div>
+    <!-- 탭 네비게이션 -->
+    <div class="tab-nav" role="tablist">
+      <button class="tab-btn active" role="tab" aria-selected="true"  data-tab="tab-classes">내 학급</button>
+      <button class="tab-btn"        role="tab" aria-selected="false" data-tab="tab-materials">자료실</button>
+      <button class="tab-btn"        role="tab" aria-selected="false" data-tab="tab-notices">공지</button>
+      <button class="tab-btn"        role="tab" aria-selected="false" data-tab="tab-settings">설정</button>
     </div>
 
-    <div class="class-grid">
+    <!-- ════════════════════════════════════════
+         탭 1: 내 학급
+         ════════════════════════════════════════ -->
+    <div class="tab-panel active" id="tab-classes" role="tabpanel">
 
-      <!-- ───────────────────────────────────────
-           1학년 3반 — 수업 진행 중 (주요 이동 대상)
-           ─────────────────────────────────────── -->
-      <div class="class-card is-active"
-           onclick="location.href='wf01_dashboard.html'"
-           role="button"
-           tabindex="0"
-           aria-label="1학년 3반 대시보드 열기">
+      <!-- 상단 2열: 타임라인 + 반별 현황 -->
+      <div class="upper-grid">
 
-        <div class="cc-head">
-          <div>
-            <div class="cc-name">1학년 3반</div>
-            <div class="cc-meta">담당 교사: 김지현 · 학생 26명</div>
+        <!-- 왼쪽: 오늘 수업 일정 (타임라인) -->
+        <div class="section-card">
+          <div class="section-card-title">📅 오늘 수업 일정</div>
+          <div class="timeline">
+
+            <!-- 1교시: 완료 -->
+            <div class="tl-item tl-done" aria-label="1교시 완료">
+              <div class="tl-time">09:00<br>1교시</div>
+              <div class="tl-dot" style="background: var(--color-gray)"></div>
+              <div class="tl-body">
+                <div class="tl-row">
+                  <span class="tl-period">1학년 3반</span>
+                </div>
+                <div class="tl-sub">변수와 자료형 이해하기</div>
+              </div>
+              <span class="badge badge-gray" style="font-size:10px">완료</span>
+            </div>
+
+            <!-- 2교시: 진행 중 (클릭 → wf01) -->
+            <div class="tl-item tl-current"
+                 onclick="location.href='wf01_dashboard.html'"
+                 role="button"
+                 tabindex="0"
+                 aria-label="2교시 진행 중 — 1학년 3반 대시보드로 이동">
+              <div class="tl-time" style="color: var(--color-mid)">현재<br>2교시</div>
+              <div class="tl-dot" style="background: var(--color-mid)"></div>
+              <div class="tl-body">
+                <div class="tl-row">
+                  <span class="tl-period" style="color: var(--color-mid)">1학년 3반</span>
+                  <span class="tl-class">· 진행 중 68%</span>
+                </div>
+                <div class="tl-sub">변수와 자료형 이해하기</div>
+              </div>
+              <span class="badge badge-mid" style="font-size:10px">진행 중</span>
+            </div>
+
+            <!-- 4교시: 예정 -->
+            <div class="tl-item tl-upcoming" aria-label="4교시 예정">
+              <div class="tl-time">14:00<br>4교시</div>
+              <div class="tl-dot" style="background: var(--color-border)"></div>
+              <div class="tl-body">
+                <div class="tl-row">
+                  <span class="tl-period">1학년 4반</span>
+                </div>
+                <div class="tl-sub">변수와 자료형 이해하기</div>
+              </div>
+              <span class="badge badge-gray" style="font-size:10px">예정</span>
+            </div>
+
+            <!-- 5교시: 예정 -->
+            <div class="tl-item tl-upcoming" aria-label="5교시 예정">
+              <div class="tl-time">15:00<br>5교시</div>
+              <div class="tl-dot" style="background: var(--color-border)"></div>
+              <div class="tl-body">
+                <div class="tl-row">
+                  <span class="tl-period">2학년 1반</span>
+                </div>
+                <div class="tl-sub">알고리즘과 문제 해결</div>
+              </div>
+              <span class="badge badge-gray" style="font-size:10px">예정</span>
+            </div>
+
+          </div><!-- /timeline -->
+        </div><!-- /timeline section-card -->
+
+        <!-- 오른쪽: 반별 현황 비교 테이블 -->
+        <div class="section-card">
+          <div class="section-card-title">📊 반별 현황</div>
+          <table class="cmp-table">
+            <thead>
+              <tr>
+                <th>학급</th>
+                <th>진행률</th>
+                <th>반 평균 점수</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <!-- 1학년 3반: 진행 중 강조 + 클릭 가능 -->
+              <tr class="row-active"
+                  onclick="location.href='wf01_dashboard.html'"
+                  role="button"
+                  tabindex="0"
+                  aria-label="1학년 3반 대시보드로 이동">
+                <td>
+                  <div class="cmp-class-name" style="color: var(--color-mid)">1학년 3반</div>
+                  <div class="cmp-class-sub">🟢 수업 중 · 26명</div>
+                </td>
+                <td>
+                  <div class="cmp-progress-wrap">
+                    <div class="progress-bar" style="width: 90px; height: 5px">
+                      <div class="progress-fill progress-fill-primary" style="width: 68%"></div>
+                    </div>
+                    <span class="cmp-pct" style="color: var(--color-mid)">68%</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="cmp-score" style="color: var(--color-ok)">82점</span>
+                </td>
+              </tr>
+
+              <!-- 1학년 4반: 오후 예정 -->
+              <tr class="row-inactive">
+                <td>
+                  <div class="cmp-class-name">1학년 4반</div>
+                  <div class="cmp-class-sub">⏰ 오후 예정 · 24명</div>
+                </td>
+                <td>
+                  <div class="cmp-progress-wrap">
+                    <div class="progress-bar" style="width: 90px; height: 5px">
+                      <div class="progress-fill progress-fill-primary" style="width: 0%"></div>
+                    </div>
+                    <span class="cmp-pct text-gray">–</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="cmp-score text-gray">–</span>
+                </td>
+              </tr>
+
+              <!-- 2학년 1반: 완료 -->
+              <tr class="row-inactive">
+                <td>
+                  <div class="cmp-class-name">2학년 1반</div>
+                  <div class="cmp-class-sub">✓ 수업 완료 · 28명</div>
+                </td>
+                <td>
+                  <div class="cmp-progress-wrap">
+                    <div class="progress-bar" style="width: 90px; height: 5px">
+                      <div class="progress-fill progress-fill-ok" style="width: 91%"></div>
+                    </div>
+                    <span class="cmp-pct" style="color: var(--color-ok)">91%</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="cmp-score">88점</span>
+                </td>
+              </tr>
+
+              <!-- 2학년 2반: 완료 -->
+              <tr class="row-inactive">
+                <td>
+                  <div class="cmp-class-name">2학년 2반</div>
+                  <div class="cmp-class-sub">✓ 단원 진행 · 25명</div>
+                </td>
+                <td>
+                  <div class="cmp-progress-wrap">
+                    <div class="progress-bar" style="width: 90px; height: 5px">
+                      <div class="progress-fill progress-fill-primary" style="width: 78%"></div>
+                    </div>
+                    <span class="cmp-pct" style="color: var(--color-mid)">78%</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="cmp-score">79점</span>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div><!-- /comparison section-card -->
+
+      </div><!-- /upper-grid -->
+
+      <!-- 하단: 컴팩트 카드 4개 가로 나열 -->
+      <div>
+        <div class="strip-header">📚 담당 학급</div>
+        <div class="class-strip-grid">
+
+          <!-- 1학년 3반 (진행 중 — 강조) -->
+          <div class="cc-compact is-active"
+               onclick="location.href='wf01_dashboard.html'"
+               role="button"
+               tabindex="0"
+               aria-label="1학년 3반 대시보드 열기">
+            <div class="ccc-head">
+              <div class="ccc-name">1학년 3반</div>
+              <span class="badge badge-ok" style="font-size:10px">수업 중</span>
+            </div>
+            <div class="ccc-meta">26명 · Ⅲ-2-01</div>
+            <div class="ccc-lesson">변수와 자료형 이해하기</div>
+            <div class="ccc-progress">
+              <div class="progress-bar" style="flex:1; height:4px">
+                <div class="progress-fill progress-fill-primary" style="width:68%"></div>
+              </div>
+              <span class="ccc-pct" style="color: var(--color-mid)">68%</span>
+            </div>
           </div>
-          <span class="badge badge-ok">🟢 수업 중</span>
-        </div>
 
-        <hr class="cc-divider">
-
-        <div class="cc-lesson-label">오늘의 수업</div>
-        <div class="cc-lesson-title">변수와 자료형 이해하기</div>
-        <div class="cc-lesson-unit">3차시 · Ⅲ-2-01 프로그래밍 시작하기</div>
-
-        <div class="cc-progress-row">
-          <span class="cc-progress-label">학급 진행률</span>
-          <div class="progress-bar" style="flex:1; height:6px">
-            <div class="progress-fill progress-fill-primary" style="width:68%"></div>
+          <!-- 1학년 4반 (오후 예정) -->
+          <div class="cc-compact"
+               onclick="alert('1학년 4반은 오후 수업 시작 후 활성화됩니다.')"
+               role="button"
+               tabindex="0"
+               aria-label="1학년 4반">
+            <div class="ccc-head">
+              <div class="ccc-name">1학년 4반</div>
+              <span class="badge badge-mid" style="font-size:10px">오후</span>
+            </div>
+            <div class="ccc-meta">24명 · Ⅲ-2-01</div>
+            <div class="ccc-lesson">변수와 자료형 이해하기</div>
+            <div class="ccc-progress">
+              <div class="progress-bar" style="flex:1; height:4px">
+                <div class="progress-fill progress-fill-primary" style="width:0%"></div>
+              </div>
+              <span class="ccc-pct text-gray">–</span>
+            </div>
           </div>
-          <span class="cc-progress-pct" style="color: var(--color-mid)">68%</span>
-        </div>
 
-        <div class="cc-stats">
-          <span class="cc-stat" style="color: var(--color-ok)">
-            <span class="cc-dot" style="background: var(--color-ok)"></span>완료 9명
-          </span>
-          <span class="cc-stat" style="color: var(--color-mid)">
-            <span class="cc-dot" style="background: var(--color-mid)"></span>진행 중 15명
-          </span>
-          <span class="cc-stat" style="color: var(--color-warn)">
-            <span class="cc-dot" style="background: var(--color-warn)"></span>도움 요청 2명
-          </span>
-        </div>
+          <!-- 2학년 1반 (완료) -->
+          <div class="cc-compact"
+               onclick="alert('2학년 1반 대시보드는 준비 중입니다.')"
+               role="button"
+               tabindex="0"
+               aria-label="2학년 1반">
+            <div class="ccc-head">
+              <div class="ccc-name">2학년 1반</div>
+              <span class="badge badge-gray" style="font-size:10px">완료</span>
+            </div>
+            <div class="ccc-meta">28명 · Ⅳ-1-02</div>
+            <div class="ccc-lesson">알고리즘과 문제 해결</div>
+            <div class="ccc-progress">
+              <div class="progress-bar" style="flex:1; height:4px">
+                <div class="progress-fill progress-fill-ok" style="width:100%"></div>
+              </div>
+              <span class="ccc-pct" style="color: var(--color-ok)">100%</span>
+            </div>
+          </div>
 
-        <div class="alert alert-warn" style="font-size:12px; padding: 6px 12px; margin-bottom: var(--space-md);">
-          ⚠ 관심 필요 학생 2명 — 박지호, 정다은
-        </div>
+          <!-- 2학년 2반 (수업 없음) -->
+          <div class="cc-compact is-idle"
+               onclick="alert('2학년 2반 대시보드는 준비 중입니다.')"
+               role="button"
+               tabindex="0"
+               aria-label="2학년 2반">
+            <div class="ccc-head">
+              <div class="ccc-name">2학년 2반</div>
+              <span class="badge badge-gray" style="font-size:10px">없음</span>
+            </div>
+            <div class="ccc-meta">25명 · Ⅴ-1-01</div>
+            <div class="ccc-lesson">데이터 분석 입문</div>
+            <div class="ccc-progress">
+              <div class="progress-bar" style="flex:1; height:4px">
+                <div class="progress-fill progress-fill-primary" style="width:40%"></div>
+              </div>
+              <span class="ccc-pct" style="color: var(--color-mid)">40%</span>
+            </div>
+          </div>
 
-        <div class="cc-footer">
-          <button class="btn btn-primary btn-sm" aria-label="1학년 3반 대시보드 열기">
-            대시보드 열기 →
-          </button>
-        </div>
+        </div><!-- /class-strip-grid -->
       </div>
 
-      <!-- ───────────────────────────────────────
-           1학년 4반 — 오후 수업 예정
-           ─────────────────────────────────────── -->
-      <div class="class-card"
-           onclick="alert('1학년 4반 대시보드는 오후 수업 시작 후 활성화됩니다.')"
-           role="button"
-           tabindex="0"
-           aria-label="1학년 4반">
+    </div><!-- /tab-classes -->
 
-        <div class="cc-head">
-          <div>
-            <div class="cc-name">1학년 4반</div>
-            <div class="cc-meta">담당 교사: 김지현 · 학생 24명</div>
-          </div>
-          <span class="badge badge-mid">⏰ 오후 수업</span>
-        </div>
+    <!-- ════════════════════════════════════════
+         탭 2: 자료실
+         ════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-materials" role="tabpanel">
+      <div class="stub-panel">📁 자료실 — 준비 중</div>
+    </div>
 
-        <hr class="cc-divider">
+    <!-- ════════════════════════════════════════
+         탭 3: 공지
+         ════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-notices" role="tabpanel">
+      <div class="stub-panel">📢 공지 — 준비 중</div>
+    </div>
 
-        <div class="cc-lesson-label">오늘의 수업</div>
-        <div class="cc-lesson-title">변수와 자료형 이해하기</div>
-        <div class="cc-lesson-unit">3차시 · Ⅲ-2-01 프로그래밍 시작하기</div>
-
-        <div class="cc-progress-row">
-          <span class="cc-progress-label">학급 진행률</span>
-          <div class="progress-bar" style="flex:1; height:6px">
-            <div class="progress-fill progress-fill-primary" style="width:0%"></div>
-          </div>
-          <span class="cc-progress-pct text-gray">–</span>
-        </div>
-
-        <div class="cc-stats">
-          <span class="cc-stat text-gray">아직 수업 시작 전</span>
-        </div>
-
-        <div class="alert alert-info" style="font-size:12px; padding: 6px 12px; margin-bottom: var(--space-md);">
-          ⏰ 오후 2:00 수업 예정
-        </div>
-
-        <div class="cc-footer">
-          <button class="btn btn-ghost btn-sm" aria-label="1학년 4반 수업 준비" onclick="event.stopPropagation(); location.href='wf02_lesson.html'">
-            수업 준비 →
-          </button>
-        </div>
-      </div>
-
-      <!-- ───────────────────────────────────────
-           2학년 1반 — 수업 완료
-           ─────────────────────────────────────── -->
-      <div class="class-card"
-           onclick="alert('2학년 1반 대시보드는 준비 중입니다.')"
-           role="button"
-           tabindex="0"
-           aria-label="2학년 1반">
-
-        <div class="cc-head">
-          <div>
-            <div class="cc-name">2학년 1반</div>
-            <div class="cc-meta">담당 교사: 김지현 · 학생 28명</div>
-          </div>
-          <span class="badge badge-gray">✓ 수업 완료</span>
-        </div>
-
-        <hr class="cc-divider">
-
-        <div class="cc-lesson-label">오늘의 수업</div>
-        <div class="cc-lesson-title">알고리즘과 문제 해결</div>
-        <div class="cc-lesson-unit">5차시 · Ⅳ-1-02 정렬 알고리즘</div>
-
-        <div class="cc-progress-row">
-          <span class="cc-progress-label">학급 진행률</span>
-          <div class="progress-bar" style="flex:1; height:6px">
-            <div class="progress-fill progress-fill-ok" style="width:100%"></div>
-          </div>
-          <span class="cc-progress-pct" style="color: var(--color-ok)">100%</span>
-        </div>
-
-        <div class="cc-stats">
-          <span class="cc-stat" style="color: var(--color-ok)">
-            <span class="cc-dot" style="background: var(--color-ok)"></span>완료 28명
-          </span>
-        </div>
-
-        <div class="alert alert-ok" style="font-size:12px; padding: 6px 12px; margin-bottom: var(--space-md);">
-          ✔ 전원 수업 완료 · 실습 평균 91점
-        </div>
-
-        <div class="cc-footer">
-          <button class="btn btn-ghost btn-sm" aria-label="2학년 1반 결과 보기" onclick="event.stopPropagation(); location.href='wf05_result.html'">
-            결과 보기 →
-          </button>
-        </div>
-      </div>
-
-      <!-- ───────────────────────────────────────
-           2학년 2반 — 오늘 수업 없음
-           ─────────────────────────────────────── -->
-      <div class="class-card is-idle"
-           onclick="alert('2학년 2반 대시보드는 준비 중입니다.')"
-           role="button"
-           tabindex="0"
-           aria-label="2학년 2반">
-
-        <div class="cc-head">
-          <div>
-            <div class="cc-name">2학년 2반</div>
-            <div class="cc-meta">담당 교사: 김지현 · 학생 25명</div>
-          </div>
-          <span class="badge badge-gray">📅 수업 없음</span>
-        </div>
-
-        <hr class="cc-divider">
-
-        <div class="cc-lesson-label">다음 수업 (6/16 화)</div>
-        <div class="cc-lesson-title">데이터 분석 입문</div>
-        <div class="cc-lesson-unit">2차시 · Ⅴ-1-01 데이터의 이해</div>
-
-        <div class="cc-progress-row">
-          <span class="cc-progress-label">단원 진행률</span>
-          <div class="progress-bar" style="flex:1; height:6px">
-            <div class="progress-fill progress-fill-primary" style="width:40%"></div>
-          </div>
-          <span class="cc-progress-pct" style="color: var(--color-mid)">40%</span>
-        </div>
-
-        <div class="cc-stats">
-          <span class="cc-stat text-gray">오늘 수업 없음</span>
-        </div>
-
-        <div style="height: 30px; margin-bottom: var(--space-md);"></div>
-
-        <div class="cc-footer">
-          <button class="btn btn-ghost btn-sm" aria-label="2학년 2반 수업 준비" onclick="event.stopPropagation(); location.href='wf02_lesson.html'">
-            수업 준비 →
-          </button>
-        </div>
-      </div>
-
-    </div><!-- /class-grid -->
+    <!-- ════════════════════════════════════════
+         탭 4: 설정
+         ════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-settings" role="tabpanel">
+      <div class="stub-panel">⚙️ 설정 — 준비 중</div>
+    </div>
 
   </div><!-- /home-inner -->
 </div><!-- /home-wrap -->
 
 <script>
-  // 키보드 접근성 — Enter / Space 클릭 지원
-  document.querySelectorAll('.class-card').forEach(function(card) {
-    card.addEventListener('keydown', function(e) {
+  // 탭 전환
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(function(b) {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.tab-panel').forEach(function(p) {
+        p.classList.remove('active');
+      });
+      this.classList.add('active');
+      this.setAttribute('aria-selected', 'true');
+      document.getElementById(this.dataset.tab).classList.add('active');
+    });
+  });
+
+  // 키보드 접근성 — 카드/타임라인 항목 Enter / Space 지원
+  document.querySelectorAll('[role="button"]').forEach(function(el) {
+    el.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        card.click();
+        el.click();
+      }
+    });
+  });
+
+  // 비교 테이블 행 키보드 지원
+  document.querySelectorAll('.cmp-table tr[tabindex]').forEach(function(row) {
+    row.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        row.click();
       }
     });
   });
