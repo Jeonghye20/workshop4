@@ -571,3 +571,171 @@ tbody tr:hover { background: rgba(6,90,130,0.03); }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-gray); }
+
+/* =========================================================
+   GNB: 내 학급 버튼 + 학급 선택 버튼
+   ========================================================= */
+.gnb-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-light);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-mid);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gnb-back-btn:hover {
+  background: rgba(6,90,130,0.08);
+  border-color: var(--color-mid);
+}
+
+.gnb-class-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-white);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gnb-class-btn:hover {
+  border-color: var(--color-mid);
+  background: var(--color-light);
+}
+
+/* =========================================================
+   반 선택 모달
+   ========================================================= */
+.class-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: cmFadeIn 0.15s ease;
+}
+
+@keyframes cmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.class-modal {
+  background: var(--color-white);
+  border-radius: 14px;
+  padding: var(--space-xl);
+  width: 700px;
+  max-width: calc(100vw - 48px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+  animation: cmSlideUp 0.18s ease;
+}
+
+@keyframes cmSlideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.class-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.class-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.class-modal-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: var(--color-light);
+  border-radius: 50%;
+  font-size: 13px;
+  color: var(--color-gray);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.class-modal-close:hover { background: var(--color-border); color: var(--color-ink); }
+
+.class-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+/* 모달 학급 미니 카드 */
+.mc-card {
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: var(--space-md);
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.mc-card:hover { border-color: var(--color-mid); box-shadow: 0 4px 16px rgba(6,90,130,0.1); }
+
+.mc-card.mc-active {
+  border-color: var(--color-mid);
+  border-width: 2px;
+  background: rgba(6,90,130,0.02);
+}
+
+.mc-card.mc-active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--color-mid);
+}
+
+.mc-card.mc-inactive { opacity: 0.7; }
+
+.mc-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.mc-name { font-size: 18px; font-weight: 700; color: var(--color-ink); }
+.mc-meta { font-size: 11px; color: var(--color-gray); margin-top: 2px; }
+
+.mc-lesson {
+  font-size: 12px;
+  color: var(--color-gray);
+  margin-bottom: var(--space-sm);
+  line-height: 1.6;
+}
+
+.mc-lesson strong { color: var(--color-ink); font-weight: 600; }
+
+.mc-progress-row { display: flex; align-items: center; gap: var(--space-sm); }
+.mc-pct { font-size: 12px; font-weight: 700; white-space: nowrap; }

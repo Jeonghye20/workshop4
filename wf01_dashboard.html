@@ -299,11 +299,11 @@
     정보 코스웨어
   </div>
 
-  <select class="gnb-class-select input select" style="width: auto;" aria-label="학급 선택">
-    <option>1학년 3반</option>
-    <option>1학년 4반</option>
-    <option>2학년 1반</option>
-  </select>
+  <button class="gnb-back-btn" onclick="location.href='index.html'" aria-label="내 학급 목록으로 이동">← 내 학급</button>
+
+  <button class="gnb-class-btn" onclick="openClassModal()" aria-label="학급 선택">
+    1학년 3반 ▾
+  </button>
 
   <div class="gnb-actions">
     <button class="gnb-icon-btn" aria-label="알림">
@@ -639,7 +639,81 @@
       }, 3000);
     });
   })();
+
+  // 반 선택 모달
+  function openClassModal() {
+    document.getElementById('classModalOverlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeClassModal() {
+    document.getElementById('classModalOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeClassModal();
+  });
+  document.querySelectorAll('.mc-card').forEach(function(c) {
+    c.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); }
+    });
+  });
 </script>
+
+<!-- 반 선택 모달 -->
+<div class="class-modal-overlay" id="classModalOverlay" onclick="closeClassModal()" style="display:none">
+  <div class="class-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="classModalTitle">
+    <div class="class-modal-header">
+      <div class="class-modal-title" id="classModalTitle">📚 담당 학급 선택</div>
+      <button class="class-modal-close" onclick="closeClassModal()" aria-label="닫기">✕</button>
+    </div>
+    <div class="class-modal-grid">
+      <div class="mc-card mc-active" onclick="closeClassModal()" role="button" tabindex="0" aria-label="1학년 3반 선택 (현재)">
+        <div class="mc-card-head">
+          <div><div class="mc-name">1학년 3반</div><div class="mc-meta">학생 26명</div></div>
+          <span class="badge badge-ok">🟢 수업 중</span>
+        </div>
+        <div class="mc-lesson"><strong>변수와 자료형 이해하기</strong><br>3차시 · Ⅲ-2-01</div>
+        <div class="mc-progress-row">
+          <div class="progress-bar" style="flex:1;height:5px"><div class="progress-fill progress-fill-primary" style="width:68%"></div></div>
+          <span class="mc-pct" style="color:var(--color-mid)">68%</span>
+        </div>
+      </div>
+      <div class="mc-card mc-inactive" onclick="alert('해당 반은 준비 중입니다.')" role="button" tabindex="0" aria-label="1학년 4반">
+        <div class="mc-card-head">
+          <div><div class="mc-name">1학년 4반</div><div class="mc-meta">학생 24명</div></div>
+          <span class="badge badge-mid">⏰ 오후 수업</span>
+        </div>
+        <div class="mc-lesson"><strong>변수와 자료형 이해하기</strong><br>3차시 · Ⅲ-2-01</div>
+        <div class="mc-progress-row">
+          <div class="progress-bar" style="flex:1;height:5px"><div class="progress-fill progress-fill-primary" style="width:0%"></div></div>
+          <span class="mc-pct text-gray">–</span>
+        </div>
+      </div>
+      <div class="mc-card mc-inactive" onclick="alert('해당 반은 준비 중입니다.')" role="button" tabindex="0" aria-label="2학년 1반">
+        <div class="mc-card-head">
+          <div><div class="mc-name">2학년 1반</div><div class="mc-meta">학생 28명</div></div>
+          <span class="badge badge-gray">✓ 수업 완료</span>
+        </div>
+        <div class="mc-lesson"><strong>알고리즘과 문제 해결</strong><br>5차시 · Ⅳ-1-02</div>
+        <div class="mc-progress-row">
+          <div class="progress-bar" style="flex:1;height:5px"><div class="progress-fill progress-fill-ok" style="width:100%"></div></div>
+          <span class="mc-pct" style="color:var(--color-ok)">100%</span>
+        </div>
+      </div>
+      <div class="mc-card mc-inactive" onclick="alert('해당 반은 준비 중입니다.')" role="button" tabindex="0" aria-label="2학년 2반">
+        <div class="mc-card-head">
+          <div><div class="mc-name">2학년 2반</div><div class="mc-meta">학생 25명</div></div>
+          <span class="badge badge-gray">📅 수업 없음</span>
+        </div>
+        <div class="mc-lesson"><strong>데이터 분석 입문</strong><br>2차시 · Ⅴ-1-01</div>
+        <div class="mc-progress-row">
+          <div class="progress-bar" style="flex:1;height:5px"><div class="progress-fill progress-fill-primary" style="width:40%"></div></div>
+          <span class="mc-pct" style="color:var(--color-mid)">40%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
