@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WF-03 실시간 모니터링 — 정보 AI 학습 플랫폼</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .main-content { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* ── 모니터링 헤더 ──────────────────────────── */
+    .mon-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: 0 var(--space-lg);
+      height: 52px;
+      background: var(--color-white);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .mon-title { font-size: 14px; font-weight: 700; color: var(--color-ink); }
+    .mon-subtitle { font-size: 12px; color: var(--color-gray); }
+
+    .mon-divider { width: 1px; height: 24px; background: var(--color-border); }
+
+    .status-chip {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 600; border: 1px solid;
+    }
+    .chip-ok   { background: rgba(13,148,136,0.1); color: var(--color-ok);   border-color: rgba(13,148,136,0.3); }
+    .chip-mid  { background: rgba(6,90,130,0.1);   color: var(--color-mid);  border-color: rgba(6,90,130,0.3); }
+    .chip-warn { background: rgba(217,119,6,0.1);  color: var(--color-warn); border-color: rgba(217,119,6,0.3); }
+
+    .mon-spacer { flex: 1; }
+
+    /* ── 바디 ───────────────────────────────────── */
+    .mon-body { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── 학생 그리드 ────────────────────────────── */
+    .student-grid-wrap {
+      flex: 1; overflow-y: auto;
+      padding: var(--space-md);
+      background: var(--color-light);
+    }
+
+    .student-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-sm);
+    }
+
+    .student-card {
+      background: var(--color-white);
+      border: 2px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      display: flex; flex-direction: column;
+    }
+
+    .student-card:hover { border-color: var(--color-mid); box-shadow: 0 2px 10px rgba(6,90,130,0.12); }
+    .student-card.selected { border-color: var(--color-mid); box-shadow: 0 0 0 3px rgba(6,90,130,0.15); }
+    .student-card.help { border-color: var(--color-warn); }
+    .student-card.help:hover { border-color: #b45309; }
+    .student-card.help.selected { border-color: var(--color-warn); box-shadow: 0 0 0 3px rgba(217,119,6,0.15); }
+
+    .card-screen {
+      background: var(--color-dark);
+      padding: 8px 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 9.5px;
+      line-height: 1.55;
+      color: #cdd9e5;
+      height: 94px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-screen .kw  { color: #C792EA; }
+    .card-screen .st  { color: #C3E88D; }
+    .card-screen .cm  { color: #546E7A; font-style: italic; }
+    .card-screen .vr  { color: #82AAFF; }
+    .card-screen .nm  { color: #F78C6C; }
+    .card-screen .err { color: #EF4444; text-decoration: underline; }
+
+    .card-status-dot {
+      position: absolute; top: 6px; right: 8px;
+      width: 7px; height: 7px; border-radius: 50%;
+    }
+    .dot-ok   { background: var(--color-ok); box-shadow: 0 0 0 2px rgba(13,148,136,0.3); }
+    .dot-mid  { background: var(--color-mid); animation: blink 2s infinite; }
+    .dot-warn { background: var(--color-warn); animation: blink 0.8s infinite; }
+
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+    .card-footer {
+      padding: 6px 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .card-name {
+      font-size: 12px; font-weight: 600; color: var(--color-ink); flex: 1;
+    }
+
+    .card-progress {
+      display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+    }
+
+    .card-pct { font-size: 11px; font-weight: 700; color: var(--color-gray); }
+
+    .mini-bar {
+      width: 36px; height: 4px;
+      background: var(--color-light); border-radius: 2px; overflow: hidden;
+    }
+    .mini-fill { height: 100%; border-radius: 2px; }
+
+    .card-help-badge {
+      background: var(--color-warn); color: white;
+      font-size: 9px; font-weight: 700;
+      padding: 1px 5px; border-radius: 10px; flex-shrink: 0;
+    }
+
+    .card-chat-badge {
+      background: var(--color-light); color: var(--color-gray);
+      font-size: 9px; padding: 1px 5px; border-radius: 10px; flex-shrink: 0;
+    }
+
+    /* ── 우측 상세 패널 ─────────────────────────── */
+    .student-detail {
+      width: 360px; flex-shrink: 0;
+      border-left: 1px solid var(--color-border);
+      background: var(--color-white);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    .detail-header {
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .detail-name-row {
+      display: flex; align-items: center; gap: var(--space-sm); margin-bottom: 6px;
+    }
+
+    .detail-name { font-size: 16px; font-weight: 700; color: var(--color-ink); }
+
+    .detail-meta { font-size: 12px; color: var(--color-gray); }
+
+    .detail-progress-row {
+      display: flex; align-items: center; gap: var(--space-sm); margin-top: 8px;
+    }
+
+    .detail-body { flex: 1; overflow-y: auto; }
+
+    /* 코드 뷰어 */
+    .detail-code-wrap {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .detail-code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px var(--space-md);
+      background: #0f1117;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .detail-code-header span {
+      font-size: 11px; color: #8b9db0; font-family: monospace;
+    }
+
+    .detail-code {
+      background: var(--color-dark);
+      padding: var(--space-md);
+      font-family: 'Courier New', monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: #cdd9e5;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .detail-code .kw  { color: #C792EA; }
+    .detail-code .st  { color: #C3E88D; }
+    .detail-code .cm  { color: #546E7A; font-style: italic; }
+    .detail-code .vr  { color: #82AAFF; }
+    .detail-code .nm  { color: #F78C6C; }
+    .detail-code .err { color: #EF4444; border-bottom: 1px dashed #EF4444; }
+    .detail-code .ln  { color: #3d4f5a; margin-right: 12px; user-select: none; }
+
+    /* 액션 버튼 */
+    .detail-actions {
+      display: flex; gap: var(--space-sm);
+      padding: var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    /* 채팅 로그 */
+    .chat-log {
+      padding: var(--space-md);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .chat-label {
+      font-size: 11px; font-weight: 700; color: var(--color-gray);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .chat-msg {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+
+    .chat-msg-who {
+      font-size: 10px; font-weight: 600; color: var(--color-gray);
+    }
+
+    .chat-bubble {
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      max-width: 100%;
+      word-break: keep-all;
+    }
+
+    .bubble-student {
+      background: var(--color-light);
+      color: var(--color-ink);
+      border-radius: 8px 8px 8px 2px;
+    }
+
+    .bubble-ai {
+      background: rgba(6,90,130,0.08);
+      color: var(--color-ink);
+      border-radius: 8px 8px 2px 8px;
+    }
+
+    .bubble-system {
+      background: rgba(217,119,6,0.1);
+      color: var(--color-warn);
+      font-weight: 600;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    /* 선생님 첨삭 입력 */
+    .teacher-input-wrap {
+      padding: var(--space-md);
+      border-top: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .teacher-input-row {
+      display: flex; gap: var(--space-sm);
+    }
+
+    /* 스코어 수정 영역 */
+    .score-edit-wrap {
+      padding: var(--space-md);
+      border-top: 1px solid var(--color-border);
+      background: var(--color-light);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="wf-nav">
+  <a href="wf01_dashboard.html">WF-01 홈</a>
+  <a href="wf02_lesson.html">WF-02 수업설계</a>
+  <a href="wf03_monitoring.html" class="active">WF-03 모니터링</a>
+  <a href="wf04_scoring.html">WF-04 AI채점</a>
+  <a href="wf05_result.html">WF-05 결과</a>
+  <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
+  <a href="wfs03a_entry.html">S03a 엔트리실습</a>
+  <a href="wfs03b_python.html">S03b 파이썬실습</a>
+</nav>
+
+<header class="gnb">
+  <div class="gnb-logo"><span class="logo-badge">AI</span>정보 코스웨어</div>
+  <select class="gnb-class-select input select" style="width:auto;" aria-label="학급 선택">
+    <option>1학년 3반</option><option>1학년 4반</option>
+  </select>
+  <div class="gnb-actions">
+    <button class="gnb-icon-btn" aria-label="알림">🔔<span class="gnb-badge"></span></button>
+    <button class="gnb-icon-btn" aria-label="설정">⚙️</button>
+    <div class="gnb-avatar" title="김지현 선생님">김</div>
+  </div>
+</header>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <nav class="sidebar-menu">
+      <div class="sidebar-section-label">메뉴</div>
+      <div class="sidebar-menu-item active"><span class="menu-icon">🏠</span>홈</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf02_lesson.html'"><span class="menu-icon">📚</span>교과서</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf05_result.html'"><span class="menu-icon">📊</span>대시보드</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf04_scoring.html'"><span class="menu-icon">✅</span>평가</div>
+      <div class="sidebar-menu-item"><span class="menu-icon">📋</span>게시판</div>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <!-- 모니터링 헤더 -->
+    <div class="mon-header">
+      <div>
+        <div class="mon-title">실시간 모니터링</div>
+        <div class="mon-subtitle">Ⅲ-2-01 · 3차시: 변수와 자료형 이해하기</div>
+      </div>
+      <div class="mon-divider"></div>
+      <div class="status-chip chip-ok">✔ 완료 9명</div>
+      <div class="status-chip chip-mid">▶ 진행 중 15명</div>
+      <div class="status-chip chip-warn">✋ 도움 요청 2명</div>
+      <div class="mon-spacer"></div>
+      <span class="text-sm text-gray">접속 26 / 26명</span>
+      <div class="mon-divider"></div>
+      <button class="btn btn-ghost btn-sm" onclick="location.href='wf04_scoring.html'">채점으로 →</button>
+      <button class="btn btn-primary btn-sm" onclick="broadcastMsg()">📢 전체 공지</button>
+    </div>
+
+    <div class="mon-body">
+      <!-- 학생 그리드 -->
+      <div class="student-grid-wrap">
+        <div class="student-grid" id="student-grid"></div>
+      </div>
+
+      <!-- 우측 상세 패널 -->
+      <div class="student-detail" id="detail-panel">
+        <div class="detail-header">
+          <div class="detail-name-row">
+            <div class="detail-name" id="detail-name">박지호</div>
+            <span class="badge badge-solid-warn" id="detail-status">✋ 도움 요청</span>
+          </div>
+          <div class="detail-meta" id="detail-meta">3모둠 · AI 질문 4회 · 14:26 마지막 활동</div>
+          <div class="detail-progress-row">
+            <span class="text-sm text-gray">진행률</span>
+            <div class="progress-bar" style="flex:1">
+              <div class="progress-fill progress-fill-warn" id="detail-progress-bar" style="width:38%"></div>
+            </div>
+            <span class="text-sm font-semibold text-warn" id="detail-pct">38%</span>
+          </div>
+        </div>
+
+        <div class="detail-body">
+          <!-- 코드 뷰어 -->
+          <div class="detail-code-wrap">
+            <div class="detail-code-header">
+              <span>📄 student_work.py</span>
+              <span id="detail-code-status" style="color:#D97706;">● 오류 있음</span>
+            </div>
+            <div class="detail-code" id="detail-code">
+              <span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"박지호"</span><br>
+              <span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">16</span><br>
+              <span class="ln"> 3</span><span class="cm"># height 변수 — 자료형 오류</span><br>
+              <span class="ln"> 4</span><span class="err"><span class="vr">height</span> = <span class="st">"165"</span></span>  <span class="cm"># str로 잘못 저장됨</span><br>
+              <span class="ln"> 5</span><br>
+              <span class="ln"> 6</span><span class="kw">print</span>(<span class="vr">name</span>)<br>
+              <span class="ln"> 7</span><span class="kw">print</span>(<span class="vr">age</span>)<br>
+              <span class="ln"> 8</span><span class="cm"># type() 미사용</span>
+            </div>
+          </div>
+
+          <!-- 액션 버튼 -->
+          <div class="detail-actions">
+            <button class="btn btn-primary" style="flex:1" onclick="openAnnotation()" aria-label="코드 첨삭 시작">
+              ✏️ 코드 첨삭
+            </button>
+            <button class="btn btn-secondary" onclick="openScoreEdit()" aria-label="점수 직접 수정">
+              📊 점수 수정
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="alert('학생 화면 새 창에서 열기 (목업)')" aria-label="화면 확대">⛶</button>
+          </div>
+
+          <!-- AI 채팅 로그 -->
+          <div class="chat-log" id="chat-log">
+            <div class="chat-label">🤖 AI 튜터 대화 로그</div>
+
+            <div class="chat-msg">
+              <div class="chat-msg-who">박지호 · 14:23</div>
+              <div class="chat-bubble bubble-student">float가 뭔가요? 키 변수에 넣어야 하는데 오류 나요</div>
+            </div>
+            <div class="chat-msg">
+              <div class="chat-msg-who">AI 튜터 · 14:23</div>
+              <div class="chat-bubble bubble-ai">float는 소수점이 있는 숫자형이에요 😊<br>예시: <code style="font-family:monospace;background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:2px;">height = 165.5</code><br>따옴표 없이 소수점 숫자를 그대로 쓰면 됩니다!</div>
+            </div>
+            <div class="chat-msg">
+              <div class="chat-msg-who">박지호 · 14:24</div>
+              <div class="chat-bubble bubble-student">그렇게 했는데 type() 쓰면 뭔가 이상해요</div>
+            </div>
+            <div class="chat-msg">
+              <div class="chat-msg-who">AI 튜터 · 14:25</div>
+              <div class="chat-bubble bubble-ai">코드를 복사해서 붙여주실 수 있나요? 오류 메시지도 함께요! 그러면 정확히 어디가 문제인지 확인해드릴게요 🔍</div>
+            </div>
+            <div class="chat-msg">
+              <div class="chat-bubble bubble-system">⚠ 14:26 — 박지호 학생이 도움 요청 버튼을 눌렀습니다</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 선생님 첨삭 입력 -->
+        <div class="teacher-input-wrap">
+          <div class="chat-label" style="margin-bottom:8px;">선생님 피드백 전송</div>
+          <div class="teacher-input-row">
+            <input type="text" class="input" id="teacher-msg" placeholder="박지호 학생에게 직접 메시지..." style="flex:1">
+            <button class="btn btn-primary btn-sm" onclick="sendTeacherMsg()" aria-label="메시지 전송">전송</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 전체 공지 모달 -->
+<div class="modal-overlay" id="broadcast-modal">
+  <div class="modal" style="width:440px;">
+    <div class="modal-header">
+      <div class="modal-title">📢 전체 공지</div>
+      <button class="modal-close" onclick="closeBroadcast()" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="text-sm text-gray mb-md">모든 학생 화면에 메시지가 표시됩니다</div>
+      <textarea class="input" rows="3" placeholder="공지 내용 입력... (예: 10분 후 마무리합니다. 코드 저장 확인하세요.)" style="resize:none;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeBroadcast()">취소</button>
+      <button class="btn btn-primary" onclick="sendBroadcast()">📢 공지 전송</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">메시지 전송 완료</div>
+
+<style>
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s; }
+  .modal-overlay.open { opacity:1;pointer-events:auto; }
+  .modal { background:var(--color-white);border-radius:12px;width:560px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);transform:translateY(12px);transition:transform 0.2s; }
+  .modal-overlay.open .modal { transform:translateY(0); }
+  .modal-header { display:flex;align-items:center;justify-content:space-between;padding:var(--space-lg);border-bottom:1px solid var(--color-border); }
+  .modal-title { font-size:16px;font-weight:700;color:var(--color-ink);display:flex;align-items:center;gap:var(--space-sm); }
+  .modal-close { width:32px;height:32px;border-radius:50%;border:none;background:var(--color-light);font-size:14px;color:var(--color-gray);cursor:pointer; }
+  .modal-body { padding:var(--space-lg);overflow-y:auto;flex:1; }
+  .modal-footer { padding:var(--space-md) var(--space-lg);border-top:1px solid var(--color-border);display:flex;gap:var(--space-sm);justify-content:flex-end; }
+  .toast { position:fixed;top:calc(var(--nav-height) + var(--gnb-height) + 16px);right:var(--space-xl);background:var(--color-ink);color:white;padding:10px var(--space-md);border-radius:8px;font-size:13px;font-weight:500;z-index:900;display:flex;align-items:center;gap:var(--space-sm);box-shadow:0 4px 20px rgba(0,0,0,0.2);transform:translateY(-8px);opacity:0;pointer-events:none;transition:all 0.25s; }
+  .toast.show { transform:translateY(0);opacity:1; }
+</style>
+
+<script>
+var students = [
+  { id:3,  name:'박지호', status:'help',    progress:38,  chatCount:4, group:'3모둠', lastActive:'14:26',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"박지호"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">16</span><br><span class="ln"> 3</span><span class="cm"># height 변수 — 자료형 오류</span><br><span class="ln"> 4</span><span class="err"><span class="vr">height</span> = <span class="st">"165"</span></span>  <span class="cm"># str로 잘못 저장됨</span><br><span class="ln"> 5</span><br><span class="ln"> 6</span><span class="kw">print</span>(<span class="vr">name</span>)<br><span class="ln"> 7</span><span class="kw">print</span>(<span class="vr">age</span>)',
+    codeStatus:'● 오류 있음', codeStatusColor:'#D97706' },
+  { id:4,  name:'정다은', status:'help',    progress:25,  chatCount:3, group:'4모둠', lastActive:'14:21',
+    code:'<span class="ln"> 1</span><span class="cm"># 변수 선언 연습</span><br><span class="ln"> 2</span><span class="vr">myname</span> = <span class="st">"정다은"</span><br><span class="ln"> 3</span><span class="cm"># age 미완성</span><br><span class="ln"> 4</span><span class="err">age = </span><br><span class="ln"> 5</span><span class="kw">print</span>(<span class="vr">myname</span>)',
+    codeStatus:'● 미완성', codeStatusColor:'#D97706' },
+  { id:1,  name:'김민준', status:'done',    progress:100, chatCount:0, group:'1모둠', lastActive:'14:18',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>   = <span class="st">"김민준"</span>   <span class="cm"># str</span><br><span class="ln"> 2</span><span class="vr">age</span>    = <span class="nm">15</span>         <span class="cm"># int</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">172.5</span>     <span class="cm"># float</span><br><span class="ln"> 4</span><br><span class="ln"> 5</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">name</span>))<br><span class="ln"> 6</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">age</span>))<br><span class="ln"> 7</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">height</span>))',
+    codeStatus:'● 완료', codeStatusColor:'#0D9488' },
+  { id:2,  name:'이서연', status:'working', progress:72,  chatCount:1, group:'1모둠', lastActive:'14:28',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"이서연"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">15</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">162.0</span><br><span class="ln"> 4</span><br><span class="ln"> 5</span><span class="kw">print</span>(<span class="vr">name</span>, <span class="vr">age</span>)<br><span class="ln"> 6</span><span class="cm"># type() 추가 중...</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:5,  name:'최우진', status:'done',    progress:100, chatCount:0, group:'2모둠', lastActive:'14:15',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>   = <span class="st">"최우진"</span><br><span class="ln"> 2</span><span class="vr">age</span>    = <span class="nm">16</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">175.2</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">name</span>))   <span class="cm"># str</span><br><span class="ln"> 5</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">age</span>))    <span class="cm"># int</span><br><span class="ln"> 6</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">height</span>)) <span class="cm"># float</span>',
+    codeStatus:'● 완료', codeStatusColor:'#0D9488' },
+  { id:6,  name:'한수아', status:'working', progress:65,  chatCount:2, group:'2모둠', lastActive:'14:26',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"한수아"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">15</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">158.0</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">name</span>)',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:7,  name:'오준서', status:'working', progress:80,  chatCount:1, group:'3모둠', lastActive:'14:27',
+    code:'<span class="ln"> 1</span><span class="vr">student_name</span> = <span class="st">"오준서"</span><br><span class="ln"> 2</span><span class="vr">student_age</span>  = <span class="nm">16</span><br><span class="ln"> 3</span><span class="vr">student_h</span>    = <span class="nm">168.5</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">student_name</span>))',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:8,  name:'강지민', status:'done',    progress:100, chatCount:0, group:'3모둠', lastActive:'14:14',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"강지민"</span>  <span class="cm"># str</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">15</span>      <span class="cm"># int</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">163.5</span><span class="cm"># float</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">name</span>,<span class="vr">age</span>,<span class="vr">height</span>)<br><span class="ln"> 5</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">height</span>))',
+    codeStatus:'● 완료', codeStatusColor:'#0D9488' },
+  { id:9,  name:'윤서현', status:'working', progress:55,  chatCount:1, group:'4모둠', lastActive:'14:25',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"윤서현"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">15</span><br><span class="ln"> 3</span><span class="cm"># height 입력 중</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:10, name:'임채원', status:'working', progress:48,  chatCount:2, group:'4모둠', lastActive:'14:24',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"임채원"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">16</span><br><span class="ln"> 3</span><span class="cm"># float 공부 중</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:11, name:'신민재', status:'done',    progress:100, chatCount:0, group:'1모둠', lastActive:'14:12',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>=<span class="st">"신민재"</span>;  <span class="vr">age</span>=<span class="nm">15</span><br><span class="ln"> 2</span><span class="vr">height</span>=<span class="nm">170.0</span><br><span class="ln"> 3</span><span class="kw">for</span> v <span class="kw">in</span> [<span class="vr">name</span>,<span class="vr">age</span>,<span class="vr">height</span>]:<br><span class="ln"> 4</span>  <span class="kw">print</span>(<span class="vr">type</span>(v))',
+    codeStatus:'● 완료', codeStatusColor:'#0D9488' },
+  { id:12, name:'류하은', status:'working', progress:60,  chatCount:1, group:'2모둠', lastActive:'14:27',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"류하은"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">15</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">160.0</span><br><span class="ln"> 4</span><span class="cm"># type() 작성 중</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:13, name:'조현준', status:'working', progress:70,  chatCount:0, group:'2모둠', lastActive:'14:26',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>   = <span class="st">"조현준"</span><br><span class="ln"> 2</span><span class="vr">age</span>    = <span class="nm">16</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">177.0</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">name</span>, <span class="vr">age</span>)',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:14, name:'배나영', status:'done',    progress:100, chatCount:0, group:'3모둠', lastActive:'14:16',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>   = <span class="st">"배나영"</span>   <span class="cm"># str</span><br><span class="ln"> 2</span><span class="vr">age</span>    = <span class="nm">15</span>        <span class="cm"># int</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">155.5</span>    <span class="cm"># float</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">name</span>), <span class="vr">type</span>(<span class="vr">age</span>))',
+    codeStatus:'● 완료', codeStatusColor:'#0D9488' },
+  { id:15, name:'허지원', status:'working', progress:43,  chatCount:2, group:'4모둠', lastActive:'14:23',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"허지원"</span><br><span class="ln"> 2</span><span class="cm"># age 고민 중</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:16, name:'안도현', status:'working', progress:58,  chatCount:1, group:'1모둠', lastActive:'14:27',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"안도현"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">16</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">174.0</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:17, name:'송유진', status:'done',    progress:100, chatCount:0, group:'1모둠', lastActive:'14:19',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>=<span class="st">"송유진"</span><br><span class="ln"> 2</span><span class="vr">age</span>=<span class="nm">15</span>; <span class="vr">height</span>=<span class="nm">159.0</span><br><span class="ln"> 3</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">name</span>))<br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">height</span>))',
+    codeStatus:'● 완료', codeStatusColor:'#0D9488' },
+  { id:18, name:'전민서', status:'done',    progress:100, chatCount:0, group:'2모둠', lastActive:'14:20',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>   = <span class="st">"전민서"</span><br><span class="ln"> 2</span><span class="vr">age</span>    = <span class="nm">15</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">161.5</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">name</span>))',
+    codeStatus:'● 완료', codeStatusColor:'#0D9488' },
+  { id:19, name:'구태양', status:'working', progress:32,  chatCount:3, group:'3모둠', lastActive:'14:22',
+    code:'<span class="ln"> 1</span><span class="vr">n</span> = <span class="st">"구태양"</span><br><span class="ln"> 2</span><span class="cm"># 변수명 수정 중</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:20, name:'남서준', status:'done',    progress:100, chatCount:0, group:'4모둠', lastActive:'14:13',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>   = <span class="st">"남서준"</span>   <span class="cm"># str</span><br><span class="ln"> 2</span><span class="vr">age</span>    = <span class="nm">16</span>        <span class="cm"># int</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">179.5</span>    <span class="cm"># float</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="nm">3</span> <span class="kw">**</span> <span class="nm">2</span>)',
+    codeStatus:'● 완료', codeStatusColor:'#0D9488' },
+  { id:21, name:'노아름', status:'working', progress:67,  chatCount:1, group:'1모둠', lastActive:'14:26',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"노아름"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">15</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">164.0</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">name</span>)',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:22, name:'마준혁', status:'working', progress:52,  chatCount:2, group:'2모둠', lastActive:'14:25',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"마준혁"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">16</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:23, name:'문지아', status:'done',    progress:100, chatCount:0, group:'3모둠', lastActive:'14:17',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>   = <span class="st">"문지아"</span><br><span class="ln"> 2</span><span class="vr">age</span>    = <span class="nm">15</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">157.0</span><br><span class="ln"> 4</span><span class="kw">print</span>(<span class="vr">type</span>(<span class="vr">name</span>),<span class="vr">type</span>(<span class="vr">age</span>))',
+    codeStatus:'● 완료', codeStatusColor:'#0D9488' },
+  { id:24, name:'방현우', status:'working', progress:74,  chatCount:0, group:'4모둠', lastActive:'14:27',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>   = <span class="st">"방현우"</span><br><span class="ln"> 2</span><span class="vr">age</span>    = <span class="nm">16</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">182.0</span><br><span class="ln"> 4</span><span class="cm"># type() 작성 중</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:25, name:'서예은', status:'working', progress:45,  chatCount:1, group:'4모둠', lastActive:'14:24',
+    code:'<span class="ln"> 1</span><span class="vr">name</span> = <span class="st">"서예은"</span><br><span class="ln"> 2</span><span class="vr">age</span>  = <span class="nm">15</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' },
+  { id:26, name:'양지훈', status:'working', progress:61,  chatCount:1, group:'3모둠', lastActive:'14:26',
+    code:'<span class="ln"> 1</span><span class="vr">name</span>   = <span class="st">"양지훈"</span><br><span class="ln"> 2</span><span class="vr">age</span>    = <span class="nm">16</span><br><span class="ln"> 3</span><span class="vr">height</span> = <span class="nm">176.0</span>',
+    codeStatus:'● 작업 중', codeStatusColor:'#065A82' }
+];
+
+var codeSnippets = {
+  done:    ['<span class="vr">name</span>=<span class="st">"..."</span>', '<span class="vr">age</span>=<span class="nm">15</span>', '<span class="vr">height</span>=<span class="nm">164.5</span>', '<span class="kw">print</span>(<span class="vr">type</span>(...))'],
+  working: ['<span class="vr">name</span>=<span class="st">"..."</span>', '<span class="vr">age</span>=<span class="nm">15</span>', '<span class="cm"># 작업 중</span>'],
+  help:    ['<span class="vr">name</span>=<span class="st">"..."</span>', '<span class="err">height=<span class="st">"165"</span></span>', '<span class="cm"># 오류</span>']
+};
+
+var selectedId = 3;
+
+function getFillColor(status) {
+  if (status === 'done')    return 'background: var(--color-ok)';
+  if (status === 'help')    return 'background: var(--color-warn)';
+  return 'background: var(--color-mid)';
+}
+
+function getDotClass(status) {
+  if (status === 'done')    return 'dot-ok';
+  if (status === 'help')    return 'dot-warn';
+  return 'dot-mid';
+}
+
+function renderGrid() {
+  var grid = document.getElementById('student-grid');
+  grid.innerHTML = '';
+  students.forEach(function(s) {
+    var lines = (codeSnippets[s.status] || codeSnippets.working)
+      .map(function(l) { return l; }).join('<br>');
+    var card = document.createElement('div');
+    card.className = 'student-card' + (s.status === 'help' ? ' help' : '') + (s.id === selectedId ? ' selected' : '');
+    card.dataset.id = s.id;
+    card.innerHTML =
+      '<div class="card-screen">' +
+        '<div class="card-status-dot ' + getDotClass(s.status) + '"></div>' +
+        lines +
+      '</div>' +
+      '<div class="card-footer">' +
+        '<div class="card-name">' + s.name + '</div>' +
+        (s.status === 'help' ? '<span class="card-help-badge">도움요청</span>' : '') +
+        (s.chatCount > 0 && s.status !== 'help' ? '<span class="card-chat-badge">💬' + s.chatCount + '</span>' : '') +
+        '<div class="card-progress">' +
+          '<div class="mini-bar"><div class="mini-fill" style="width:' + s.progress + '%;' + getFillColor(s.status) + '"></div></div>' +
+          '<span class="card-pct">' + s.progress + '%</span>' +
+        '</div>' +
+      '</div>';
+    card.addEventListener('click', function() { selectStudent(s.id); });
+    grid.appendChild(card);
+  });
+}
+
+function selectStudent(id) {
+  selectedId = id;
+  renderGrid();
+  var s = students.find(function(st) { return st.id === id; });
+  if (!s) return;
+
+  document.getElementById('detail-name').textContent = s.name;
+
+  var statusEl = document.getElementById('detail-status');
+  if (s.status === 'help') {
+    statusEl.className = 'badge badge-solid-warn';
+    statusEl.textContent = '✋ 도움 요청';
+  } else if (s.status === 'done') {
+    statusEl.className = 'badge badge-solid-ok';
+    statusEl.textContent = '✔ 완료';
+  } else {
+    statusEl.className = 'badge badge-mid';
+    statusEl.textContent = '▶ 진행 중';
+  }
+
+  document.getElementById('detail-meta').textContent =
+    s.group + ' · AI 질문 ' + s.chatCount + '회 · ' + s.lastActive + ' 마지막 활동';
+
+  var bar = document.getElementById('detail-progress-bar');
+  bar.style.width = s.progress + '%';
+  bar.className = 'progress-fill ' + (s.status === 'help' ? 'progress-fill-warn' : s.status === 'done' ? 'progress-fill-ok' : 'progress-fill-primary');
+
+  var pct = document.getElementById('detail-pct');
+  pct.textContent = s.progress + '%';
+  pct.className = 'text-sm font-semibold ' + (s.status === 'help' ? 'text-warn' : s.status === 'done' ? 'text-ok' : 'text-mid');
+
+  document.getElementById('detail-code').innerHTML = s.code;
+
+  var cst = document.getElementById('detail-code-status');
+  cst.textContent = s.codeStatus;
+  cst.style.color = s.codeStatusColor;
+
+  var input = document.getElementById('teacher-msg');
+  input.placeholder = s.name + ' 학생에게 직접 메시지...';
+}
+
+function openAnnotation() { showToast('코드 첨삭 모드 시작 (목업)'); }
+function openScoreEdit()   { showToast('점수 수정 패널 열림 (목업)'); }
+function broadcastMsg()    { document.getElementById('broadcast-modal').classList.add('open'); }
+function closeBroadcast()  { document.getElementById('broadcast-modal').classList.remove('open'); }
+function sendBroadcast()   { closeBroadcast(); showToast('📢 전체 공지가 학생 화면에 표시되었습니다'); }
+
+function sendTeacherMsg() {
+  var input = document.getElementById('teacher-msg');
+  if (!input.value.trim()) return;
+  var s = students.find(function(st) { return st.id === selectedId; });
+  showToast('✉️ ' + (s ? s.name : '') + ' 학생에게 메시지 전송 완료');
+  input.value = '';
+}
+
+document.getElementById('broadcast-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeBroadcast();
+});
+
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2600);
+}
+
+renderGrid();
+</script>
+</body>
+</html>

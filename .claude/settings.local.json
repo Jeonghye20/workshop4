@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vercel --version)",
+      "Bash(python -m http.server 8080)",
+      "Bash(where python *)",
+      "Bash(npx --version)",
+      "Bash(npx serve *)",
+      "WebFetch(domain:docs.playentry.org)",
+      "Bash(curl *)",
+      "Bash(Start-Process *)",
+      "Bash(find /tmp -name \"*.png\")",
+      "Bash(find /var -name \"*.png\")",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  }
+}

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WF-01 교사 홈 — 정보 AI 학습 플랫폼</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── 대시보드 전용 스타일 ─────────────────────── */
+
+    /* 오늘의 수업 카드 */
+    .today-lesson-card {
+      border-left: 4px solid var(--color-pre);
+    }
+
+    .lesson-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .lesson-unit {
+      font-size: 12px;
+      color: var(--color-gray);
+    }
+
+    .lesson-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: var(--space-xs);
+    }
+
+    .lesson-progress-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .lesson-progress-label {
+      font-size: 12px;
+      color: var(--color-gray);
+      white-space: nowrap;
+    }
+
+    .lesson-progress-pct {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-mid);
+      white-space: nowrap;
+    }
+
+    .lesson-actions {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    /* 기분 체크 카드 */
+    .mood-card { border-left: 4px solid var(--color-mid); }
+
+    .mood-bars { display: flex; flex-direction: column; gap: 10px; margin: var(--space-md) 0; }
+
+    .mood-bar-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .mood-bar-label {
+      font-size: 13px;
+      width: 36px;
+      flex-shrink: 0;
+    }
+
+    .mood-bar-track {
+      flex: 1;
+      height: 12px;
+      background: var(--color-light);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .mood-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+
+    .mood-bar-good   { background: var(--color-ok); }
+    .mood-bar-normal { background: var(--color-mid); }
+    .mood-bar-care   { background: var(--color-warn); }
+
+    .mood-bar-count {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-ink);
+      width: 28px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .mood-legend {
+      display: flex;
+      gap: var(--space-md);
+      font-size: 11px;
+      color: var(--color-gray);
+      margin-bottom: var(--space-sm);
+    }
+
+    .mood-legend span { display: flex; align-items: center; gap: 4px; }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* 학습 현황 요약 */
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+    }
+
+    .summary-stat-card {
+      background: var(--color-light);
+      border-radius: 8px;
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: var(--space-xs);
+    }
+
+    .summary-stat-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .summary-stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-ink);
+      line-height: 1;
+    }
+
+    .summary-stat-label {
+      font-size: 12px;
+      color: var(--color-gray);
+    }
+
+    .summary-stat-sub {
+      font-size: 11px;
+      color: var(--color-gray);
+    }
+
+    /* 게시판·알림 카드 */
+    .board-list { display: flex; flex-direction: column; gap: 0; }
+
+    .board-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .board-item:last-child { border-bottom: none; }
+    .board-item:hover { background: rgba(0,0,0,0.02); }
+
+    .board-category {
+      flex-shrink: 0;
+      width: 52px;
+    }
+
+    .board-title-wrap { flex: 1; min-width: 0; }
+
+    .board-title {
+      font-size: 13px;
+      color: var(--color-ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .board-date {
+      font-size: 11px;
+      color: var(--color-gray);
+      flex-shrink: 0;
+    }
+
+    /* 대시보드 그리드 */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: var(--space-lg);
+    }
+
+    /* 빠른 이동 패널 (우측) */
+    .quick-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .quick-action-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-white);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+    }
+
+    .quick-action-btn:hover {
+      border-color: var(--color-mid);
+      background: rgba(6,90,130,0.03);
+    }
+
+    .qa-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .qa-icon-pre  { background: rgba(13,148,136,0.12); }
+    .qa-icon-mid  { background: rgba(6,90,130,0.12); }
+    .qa-icon-post { background: rgba(30,39,97,0.12); }
+    .qa-icon-warn { background: rgba(217,119,6,0.12); }
+
+    .qa-text-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+
+    .qa-text-desc {
+      font-size: 11px;
+      color: var(--color-gray);
+      margin-top: 2px;
+    }
+
+    /* 오늘 수업 상태 칩 */
+    .status-chips {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .status-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .chip-ok   { background: rgba(13,148,136,0.1); color: var(--color-ok); border-color: rgba(13,148,136,0.3); }
+    .chip-mid  { background: rgba(6,90,130,0.1);   color: var(--color-mid); border-color: rgba(6,90,130,0.3); }
+    .chip-warn { background: rgba(217,119,6,0.1);  color: var(--color-warn); border-color: rgba(217,119,6,0.3); }
+  </style>
+</head>
+<body>
+
+<!-- 화면 간 이동 네비게이션 -->
+<nav class="wf-nav">
+  <a href="index.html">🏠 홈</a>
+  <a href="wf01_dashboard.html" class="active">WF-01 1-3반 대시보드</a>
+  <a href="wf02_lesson.html">WF-02 수업설계</a>
+  <a href="wf03_monitoring.html">WF-03 모니터링</a>
+  <a href="wf04_scoring.html">WF-04 AI채점</a>
+  <a href="wf05_result.html">WF-05 결과</a>
+  <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
+  <a href="wfs03a_entry.html">S03a 엔트리실습</a>
+  <a href="wfs03b_python.html">S03b 파이썬실습</a>
+</nav>
+
+<!-- GNB -->
+<header class="gnb">
+  <div class="gnb-logo">
+    <span class="logo-badge">AI</span>
+    정보 코스웨어
+  </div>
+
+  <select class="gnb-class-select input select" style="width: auto;" aria-label="학급 선택">
+    <option>1학년 3반</option>
+    <option>1학년 4반</option>
+    <option>2학년 1반</option>
+  </select>
+
+  <div class="gnb-actions">
+    <button class="gnb-icon-btn" aria-label="알림">
+      🔔
+      <span class="gnb-badge"></span>
+    </button>
+    <button class="gnb-icon-btn" aria-label="설정">⚙️</button>
+    <div class="gnb-avatar" title="김지현 선생님">김</div>
+  </div>
+</header>
+
+<!-- 앱 레이아웃 -->
+<div class="app-layout">
+
+  <!-- 좌측 사이드바 -->
+  <aside class="sidebar">
+    <nav class="sidebar-menu">
+      <div class="sidebar-section-label">메뉴</div>
+      <div class="sidebar-menu-item active">
+        <span class="menu-icon">🏠</span>홈
+      </div>
+      <div class="sidebar-menu-item" onclick="location.href='wf02_lesson.html'">
+        <span class="menu-icon">📚</span>교과서
+      </div>
+      <div class="sidebar-menu-item" onclick="location.href='wf05_result.html'">
+        <span class="menu-icon">📊</span>대시보드
+      </div>
+      <div class="sidebar-menu-item" onclick="location.href='wf04_scoring.html'">
+        <span class="menu-icon">✅</span>평가
+      </div>
+      <div class="sidebar-menu-item">
+        <span class="menu-icon">📋</span>게시판
+      </div>
+    </nav>
+  </aside>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="main-content">
+
+    <!-- 페이지 헤더 -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">안녕하세요, 김지현 선생님 👋</div>
+        <div class="page-subtitle">2026년 6월 13일 금요일 · 1학년 3반 · 학생 26명</div>
+      </div>
+      <div class="flex gap-sm">
+        <button class="btn btn-ghost btn-sm" onclick="alert('학습 계획 화면으로 이동')">📅 주간 계획</button>
+        <button class="btn btn-primary btn-sm" onclick="location.href='wfs03a_entry.html'">🚀 수업 시작</button>
+      </div>
+    </div>
+
+    <!-- 오늘 수업 상태 칩 -->
+    <div class="status-chips">
+      <div class="status-chip chip-ok">✔ 완료 9명</div>
+      <div class="status-chip chip-mid">▶ 진행 중 15명</div>
+      <div class="status-chip chip-warn">✋ 도움 요청 2명</div>
+    </div>
+
+    <!-- 대시보드 그리드 -->
+    <div class="dashboard-grid">
+
+      <!-- 카드 1: 오늘의 수업 -->
+      <div class="card today-lesson-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📖</span> 오늘의 수업
+          </div>
+          <span class="badge badge-ok">진행 중</span>
+        </div>
+
+        <div class="lesson-meta">
+          <span class="badge badge-gray">3차시</span>
+          <span class="lesson-unit">Ⅲ-2-01 프로그래밍 시작하기</span>
+        </div>
+
+        <div class="lesson-title">변수와 자료형 이해하기</div>
+
+        <div class="lesson-progress-row">
+          <span class="lesson-progress-label">학급 평균 진행률</span>
+          <div class="progress-bar" style="flex:1">
+            <div class="progress-fill progress-fill-primary" style="width: 68%"></div>
+          </div>
+          <span class="lesson-progress-pct">68%</span>
+        </div>
+
+        <div class="flex gap-sm items-center mb-md" style="font-size: 12px; color: var(--color-gray);">
+          <span>⏱ 남은 시간 22분</span>
+          <span>·</span>
+          <span>실습 과제: 두 수 사칙연산 프로그램</span>
+        </div>
+
+        <div class="lesson-actions">
+          <button class="btn btn-primary" onclick="location.href='wf03_monitoring.html'" aria-label="수업 모니터링 화면으로 이동">
+            🖥 수업 모니터링
+          </button>
+          <button class="btn btn-ghost" onclick="location.href='wf02_lesson.html'" aria-label="자료 점검 화면으로 이동">
+            📝 자료 점검
+          </button>
+        </div>
+      </div>
+
+      <!-- 카드 2: 오늘의 기분 -->
+      <div class="card mood-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>😊</span> 오늘의 기분 체크
+          </div>
+          <span class="text-sm text-gray">응답 24/26명</span>
+        </div>
+
+        <div class="mood-legend">
+          <span><span class="legend-dot" style="background: var(--color-ok)"></span>좋음</span>
+          <span><span class="legend-dot" style="background: var(--color-mid)"></span>보통</span>
+          <span><span class="legend-dot" style="background: var(--color-warn)"></span>관심</span>
+        </div>
+
+        <div class="mood-bars">
+          <div class="mood-bar-row">
+            <span class="mood-bar-label text-ok font-bold">좋음</span>
+            <div class="mood-bar-track">
+              <div class="mood-bar-fill mood-bar-good" id="bar-good" style="width: 0%"></div>
+            </div>
+            <span class="mood-bar-count">14명</span>
+          </div>
+          <div class="mood-bar-row">
+            <span class="mood-bar-label text-mid font-bold">보통</span>
+            <div class="mood-bar-track">
+              <div class="mood-bar-fill mood-bar-normal" id="bar-normal" style="width: 0%"></div>
+            </div>
+            <span class="mood-bar-count">8명</span>
+          </div>
+          <div class="mood-bar-row">
+            <span class="mood-bar-label text-warn font-bold">관심</span>
+            <div class="mood-bar-track">
+              <div class="mood-bar-fill mood-bar-care" id="bar-care" style="width: 0%"></div>
+            </div>
+            <span class="mood-bar-count">2명</span>
+          </div>
+        </div>
+
+        <div class="alert alert-warn mt-sm">
+          <span>⚠</span>
+          <span><strong>관심 필요 학생 2명</strong> — 박지호, 정다은 학생이 오늘 수업에 집중하기 어렵다고 응답했습니다.</span>
+        </div>
+      </div>
+
+      <!-- 카드 3: 학습 현황 요약 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📈</span> 학습 현황 요약
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="location.href='wf05_result.html'">전체 보기 →</button>
+        </div>
+
+        <div class="summary-stats">
+          <div class="summary-stat-card">
+            <div class="summary-stat-icon">📚</div>
+            <div class="summary-stat-value" style="color: var(--color-mid)">68<span style="font-size:16px;font-weight:400">%</span></div>
+            <div class="summary-stat-label">진행률</div>
+            <div class="summary-stat-sub">전주 대비 +12%</div>
+          </div>
+          <div class="summary-stat-card" id="practiceScoreCard">
+            <div class="summary-stat-icon">💻</div>
+            <div class="summary-stat-value" style="color: var(--color-ok)" id="practiceScoreVal">82<span style="font-size:16px;font-weight:400">점</span></div>
+            <div class="summary-stat-label">실습 평균</div>
+            <div class="summary-stat-sub" id="practiceScoreSub">최고 100점</div>
+          </div>
+          <div class="summary-stat-card">
+            <div class="summary-stat-icon">📝</div>
+            <div class="summary-stat-value" style="color: var(--color-post)">76<span style="font-size:16px;font-weight:400">점</span></div>
+            <div class="summary-stat-label">테스트 평균</div>
+            <div class="summary-stat-sub">최저 45점</div>
+          </div>
+        </div>
+
+        <div class="mt-md">
+          <div class="flex justify-between items-center mb-sm">
+            <span class="text-sm text-gray">단원 전체 진도</span>
+            <span class="text-sm font-semibold" style="color: var(--color-mid)">3/5 단원</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill progress-fill-primary" style="width: 60%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 카드 4: 게시판·알림 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📋</span> 게시판 · 알림
+          </div>
+          <button class="btn btn-ghost btn-sm">더보기 →</button>
+        </div>
+
+        <div class="board-list">
+          <div class="board-item">
+            <span class="board-category"><span class="badge badge-solid-warn" style="font-size:10px">알림</span></span>
+            <div class="board-title-wrap">
+              <div class="board-title">기말 실습 평가 일정 안내 (6/20 예정)</div>
+            </div>
+            <span class="board-date">6/13</span>
+          </div>
+          <div class="board-item">
+            <span class="board-category"><span class="badge badge-solid-mid" style="font-size:10px">공지</span></span>
+            <div class="board-title-wrap">
+              <div class="board-title">2학기 교과서 재구성 가이드라인 배포</div>
+            </div>
+            <span class="board-date">6/12</span>
+          </div>
+          <div class="board-item">
+            <span class="board-category"><span class="badge badge-ok" style="font-size:10px">질문</span></span>
+            <div class="board-title-wrap">
+              <div class="board-title">김민준 — 파이썬 리스트 인덱싱 질문</div>
+            </div>
+            <span class="board-date">6/13</span>
+          </div>
+          <div class="board-item">
+            <span class="board-category"><span class="badge badge-ok" style="font-size:10px">질문</span></span>
+            <div class="board-title-wrap">
+              <div class="board-title">이서연 — 엔트리 반복문 오류 질문</div>
+            </div>
+            <span class="board-date">6/12</span>
+          </div>
+          <div class="board-item">
+            <span class="board-category"><span class="badge badge-gray" style="font-size:10px">공지</span></span>
+            <div class="board-title-wrap">
+              <div class="board-title">AI 채점 루브릭 업데이트 완료</div>
+            </div>
+            <span class="board-date">6/11</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dashboard-grid -->
+
+    <!-- 빠른 이동 패널 -->
+    <div class="card mt-lg">
+      <div class="card-header">
+        <div class="card-title"><span>⚡</span> 빠른 이동</div>
+      </div>
+      <div class="grid-4">
+        <button class="quick-action-btn" onclick="location.href='wf02_lesson.html'" aria-label="수업 설계 화면으로 이동">
+          <div class="qa-icon qa-icon-pre">📝</div>
+          <div>
+            <div class="qa-text-title">수업 설계</div>
+            <div class="qa-text-desc">차시 자료 편집 · 배포</div>
+          </div>
+        </button>
+        <button class="quick-action-btn" onclick="location.href='wf03_monitoring.html'" aria-label="실시간 모니터링 화면으로 이동">
+          <div class="qa-icon qa-icon-mid">🖥</div>
+          <div>
+            <div class="qa-text-title">실시간 모니터링</div>
+            <div class="qa-text-desc">학생 화면 · 튜터링</div>
+          </div>
+        </button>
+        <button class="quick-action-btn" onclick="location.href='wf04_scoring.html'" aria-label="AI 채점 화면으로 이동">
+          <div class="qa-icon qa-icon-warn">✅</div>
+          <div>
+            <div class="qa-text-title">AI 채점</div>
+            <div class="qa-text-desc">루브릭 · 실습 코드 채점</div>
+          </div>
+        </button>
+        <button class="quick-action-btn" onclick="location.href='wf05_result.html'" aria-label="학습 결과 대시보드로 이동">
+          <div class="qa-icon qa-icon-post">📊</div>
+          <div>
+            <div class="qa-text-title">학습 결과</div>
+            <div class="qa-text-desc">성취도 분석 · 리포트</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // 기분 바 애니메이션 (페이지 로드 후 실행)
+  window.addEventListener('load', function () {
+    const total = 24;
+    setTimeout(function () {
+      document.getElementById('bar-good').style.width   = Math.round(14 / total * 100) + '%';
+      document.getElementById('bar-normal').style.width = Math.round(8  / total * 100) + '%';
+      document.getElementById('bar-care').style.width   = Math.round(2  / total * 100) + '%';
+    }, 200);
+  });
+
+  // 사이드바 메뉴 클릭 강조
+  document.querySelectorAll('.sidebar-menu-item').forEach(function (item) {
+    item.addEventListener('click', function () {
+      document.querySelectorAll('.sidebar-menu-item').forEach(function (el) {
+        el.classList.remove('active');
+      });
+      this.classList.add('active');
+    });
+  });
+
+  // 실습 채점 점수 반영 (localStorage)
+  (function applyPracticeScore() {
+    const data = JSON.parse(localStorage.getItem('lms_scores') || '{}');
+    if (!data.entry) return;
+
+    const score = data.entry.score;
+    const scoreVal = document.getElementById('practiceScoreVal');
+    const scoreSub = document.getElementById('practiceScoreSub');
+    const scoreCard = document.getElementById('practiceScoreCard');
+
+    // 수치 업데이트
+    scoreVal.innerHTML = score + '<span style="font-size:16px;font-weight:400">점</span>';
+    scoreSub.textContent = data.entry.student + ' · ' + data.entry.mission.slice(0, 10) + '...';
+
+    // 새 점수 강조 효과
+    scoreCard.style.transition = 'box-shadow 0.4s';
+    scoreCard.style.boxShadow = '0 0 0 3px var(--color-ok)';
+    setTimeout(function() { scoreCard.style.boxShadow = ''; }, 2000);
+
+    // 토스트 알림
+    const toast = document.createElement('div');
+    toast.textContent = '✅ ' + data.entry.student + ' 실습 점수 반영: ' + score + '점';
+    toast.style.cssText = [
+      'position:fixed', 'bottom:24px', 'left:50%', 'transform:translateX(-50%)',
+      'background:#1E293B', 'color:white', 'padding:10px 20px', 'border-radius:8px',
+      'font-size:13px', 'font-weight:600', 'box-shadow:0 4px 12px rgba(0,0,0,0.2)',
+      'z-index:9999', 'opacity:0', 'transition:opacity 0.3s'
+    ].join(';');
+    document.body.appendChild(toast);
+    requestAnimationFrame(function() {
+      toast.style.opacity = '1';
+      setTimeout(function() {
+        toast.style.opacity = '0';
+        setTimeout(function() { toast.remove(); }, 300);
+      }, 3000);
+    });
+  })();
+</script>
+
+</body>
+</html>

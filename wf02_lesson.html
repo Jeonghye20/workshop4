@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WF-02 수업 설계·교과서 재구성 — 정보 AI 학습 플랫폼</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── WF-02 레이아웃 오버라이드 ───────────────── */
+    .main-content {
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── 상단 툴바 ──────────────────────────────── */
+    .lesson-toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 0 var(--space-lg);
+      height: 52px;
+      background: var(--color-white);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .lesson-breadcrumb {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lesson-breadcrumb-path {
+      font-size: 11px;
+      color: var(--color-gray);
+    }
+
+    .lesson-breadcrumb-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--color-border);
+      flex-shrink: 0;
+    }
+
+    /* ── 3분할 바디 ──────────────────────────────── */
+    .lesson-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── 좌측: 목차 트리 ─────────────────────────── */
+    .toc-panel {
+      width: 230px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--color-border);
+      overflow-y: auto;
+      background: var(--color-white);
+      padding-bottom: var(--space-xl);
+    }
+
+    .toc-header {
+      padding: var(--space-md) var(--space-md) var(--space-sm);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toc-unit {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .toc-unit-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 9px var(--space-md);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .toc-unit-toggle:hover { background: var(--color-light); }
+
+    .toc-unit-toggle.current { color: var(--color-mid); }
+
+    .toc-caret {
+      font-size: 10px;
+      width: 14px;
+      text-align: center;
+      color: var(--color-gray);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toc-caret.open { transform: rotate(90deg); }
+
+    .toc-children {
+      display: none;
+      flex-direction: column;
+    }
+
+    .toc-children.open { display: flex; }
+
+    .toc-lesson {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 7px var(--space-md) 7px 32px;
+      font-size: 12.5px;
+      color: var(--color-gray);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+
+    .toc-lesson:hover {
+      background: var(--color-light);
+      color: var(--color-ink);
+    }
+
+    .toc-lesson.active {
+      background: rgba(6,90,130,0.07);
+      color: var(--color-mid);
+      font-weight: 600;
+      border-left-color: var(--color-mid);
+    }
+
+    .toc-lesson-icon { font-size: 11px; flex-shrink: 0; }
+
+    /* ── 중앙: 에디터 ────────────────────────────── */
+    .editor-panel {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--color-light);
+      padding: var(--space-xl);
+    }
+
+    .editor-section {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      margin-bottom: var(--space-md);
+      overflow: hidden;
+    }
+
+    .editor-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px var(--space-lg);
+      background: var(--color-light);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .editor-section-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-ink);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .editor-section-body { padding: var(--space-lg); }
+
+    /* 학습 목표 리스트 */
+    .objective-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .objective-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+
+    .objective-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--color-mid);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .objective-text {
+      flex: 1;
+      font-size: 13px;
+      color: var(--color-ink);
+      line-height: 1.6;
+    }
+
+    /* 설명 에디터 영역 */
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-light);
+      flex-wrap: wrap;
+    }
+
+    .editor-tool-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: none;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--color-gray);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .editor-tool-btn:hover { background: var(--color-border); color: var(--color-ink); }
+
+    .editor-tool-divider {
+      width: 1px;
+      height: 18px;
+      background: var(--color-border);
+      margin: 0 4px;
+    }
+
+    .editor-textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: var(--space-md);
+      border: none;
+      font-size: 13px;
+      color: var(--color-ink);
+      line-height: 1.7;
+      resize: vertical;
+      background: var(--color-white);
+    }
+
+    .editor-textarea:focus { outline: none; }
+
+    /* 코드 블록 */
+    .code-block {
+      background: var(--color-dark);
+      border-radius: 6px;
+      padding: var(--space-md);
+      margin: var(--space-sm) 0;
+      font-family: 'Courier New', 'D2Coding', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    .code-keyword { color: #C792EA; }
+    .code-string  { color: #C3E88D; }
+    .code-comment { color: #546E7A; font-style: italic; }
+    .code-var     { color: #82AAFF; }
+    .code-num     { color: #F78C6C; }
+
+    /* 미디어 업로드 영역 */
+    .media-upload-area {
+      border: 2px dashed var(--color-border);
+      border-radius: 8px;
+      padding: var(--space-xl) var(--space-lg);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .media-upload-area:hover {
+      border-color: var(--color-mid);
+      background: rgba(6,90,130,0.03);
+    }
+
+    .media-upload-icon { font-size: 32px; margin-bottom: var(--space-sm); }
+
+    .media-upload-text {
+      font-size: 13px;
+      color: var(--color-gray);
+    }
+
+    .media-upload-sub {
+      font-size: 11px;
+      color: var(--color-gray);
+      margin-top: 4px;
+    }
+
+    /* 업로드된 미디어 썸네일 */
+    .media-grid {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-sm);
+    }
+
+    .media-thumb {
+      position: relative;
+      width: 100px;
+      height: 68px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+
+    .media-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .media-thumb-label {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      background: rgba(0,0,0,0.55);
+      color: white;
+      font-size: 10px;
+      padding: 2px 4px;
+      text-align: center;
+    }
+
+    .media-thumb-del {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* 지시사항 */
+    .instruction-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .instruction-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      background: rgba(6,90,130,0.04);
+      border: 1px solid rgba(6,90,130,0.12);
+      border-radius: 6px;
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .instruction-step {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      background: var(--color-mid);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .instruction-text {
+      flex: 1;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* 퀴즈 섹션 */
+    .quiz-item {
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: var(--space-md);
+      margin-bottom: var(--space-sm);
+    }
+
+    .quiz-q {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      gap: var(--space-xs);
+    }
+
+    .quiz-q-num {
+      color: var(--color-mid);
+      flex-shrink: 0;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding-left: var(--space-md);
+    }
+
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 12.5px;
+      color: var(--color-gray);
+    }
+
+    .quiz-option input[type="radio"] { accent-color: var(--color-mid); }
+
+    /* ── 우측: 배포 패널 ─────────────────────────── */
+    .deploy-panel {
+      width: 270px;
+      flex-shrink: 0;
+      border-left: 1px solid var(--color-border);
+      overflow-y: auto;
+      background: var(--color-white);
+      padding-bottom: var(--space-xl);
+    }
+
+    .deploy-panel-header {
+      padding: var(--space-md) var(--space-md) var(--space-sm);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .deploy-status-bar {
+      margin: var(--space-md) var(--space-md) 0;
+    }
+
+    .deploy-status-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-xs);
+    }
+
+    .deploy-group {
+      margin: var(--space-sm) var(--space-md) 0;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .deploy-group-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 10px var(--space-md);
+      background: var(--color-light);
+      border-bottom: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .deploy-group-header:hover { background: #e8eef5; }
+
+    .group-level-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .group-high   { background: rgba(30,39,97,0.12); color: var(--color-post); }
+    .group-mid-bg { background: rgba(6,90,130,0.12); color: var(--color-mid); }
+    .group-low    { background: rgba(13,148,136,0.12); color: var(--color-ok); }
+
+    .group-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+
+    .group-count {
+      font-size: 12px;
+      color: var(--color-gray);
+    }
+
+    .deploy-group-body {
+      padding: var(--space-sm) var(--space-md) var(--space-md);
+    }
+
+    .deploy-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 5px 0;
+      font-size: 12.5px;
+      color: var(--color-ink);
+    }
+
+    .deploy-option input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--color-mid);
+      cursor: pointer;
+    }
+
+    .deploy-option-extra {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: rgba(13,148,136,0.12);
+      color: var(--color-ok);
+      font-weight: 600;
+    }
+
+    .deploy-extra-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 5px 0;
+      font-size: 12px;
+      color: var(--color-gray);
+      border-top: 1px dashed var(--color-border);
+      margin-top: var(--space-xs);
+    }
+
+    .deploy-actions {
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .deploy-history {
+      padding: 0 var(--space-md);
+    }
+
+    .deploy-history-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .deploy-history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 12px;
+    }
+
+    .deploy-history-item:last-child { border-bottom: none; }
+
+    .deploy-history-label { color: var(--color-ink); }
+    .deploy-history-date  { color: var(--color-gray); }
+
+    /* ── AI 퀴즈 모달 ────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--color-white);
+      border-radius: 12px;
+      width: 560px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      transform: translateY(12px);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-ink);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--color-light);
+      font-size: 14px;
+      color: var(--color-gray);
+      cursor: pointer;
+    }
+
+    .modal-close:hover { background: var(--color-border); }
+
+    .modal-body {
+      padding: var(--space-lg);
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: flex-end;
+    }
+
+    /* AI 로딩 애니메이션 */
+    .ai-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-xl);
+      gap: var(--space-md);
+    }
+
+    .ai-spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--color-light);
+      border-top-color: var(--color-mid);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .ai-loading-text {
+      font-size: 14px;
+      color: var(--color-gray);
+    }
+
+    .ai-loading-dots::after {
+      content: '';
+      animation: dots 1.2s infinite;
+    }
+
+    @keyframes dots {
+      0%   { content: ''; }
+      33%  { content: '.'; }
+      66%  { content: '..'; }
+      100% { content: '...'; }
+    }
+
+    /* 생성된 퀴즈 */
+    .quiz-gen-item {
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: var(--space-md);
+      margin-bottom: var(--space-sm);
+    }
+
+    .quiz-gen-q {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-bottom: var(--space-sm);
+      line-height: 1.5;
+    }
+
+    .quiz-gen-opts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xs);
+    }
+
+    .quiz-gen-opt {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-size: 12.5px;
+      color: var(--color-gray);
+      padding: 4px 0;
+    }
+
+    .quiz-gen-opt input { accent-color: var(--color-mid); }
+
+    .quiz-gen-opt.correct { color: var(--color-ok); font-weight: 600; }
+
+    .quiz-gen-answer {
+      margin-top: var(--space-sm);
+      padding: var(--space-xs) var(--space-sm);
+      background: rgba(13,148,136,0.08);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--color-ok);
+    }
+
+    /* ── 저장 토스트 ─────────────────────────────── */
+    .toast {
+      position: fixed;
+      top: calc(var(--nav-height) + var(--gnb-height) + 16px);
+      right: var(--space-xl);
+      background: var(--color-ink);
+      color: white;
+      padding: 10px var(--space-md);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transform: translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 화면 간 이동 -->
+<nav class="wf-nav">
+  <a href="wf01_dashboard.html">WF-01 홈</a>
+  <a href="wf02_lesson.html" class="active">WF-02 수업설계</a>
+  <a href="wf03_monitoring.html">WF-03 모니터링</a>
+  <a href="wf04_scoring.html">WF-04 AI채점</a>
+  <a href="wf05_result.html">WF-05 결과</a>
+  <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
+  <a href="wfs03a_entry.html">S03a 엔트리실습</a>
+  <a href="wfs03b_python.html">S03b 파이썬실습</a>
+</nav>
+
+<!-- GNB -->
+<header class="gnb">
+  <div class="gnb-logo">
+    <span class="logo-badge">AI</span>
+    정보 코스웨어
+  </div>
+
+  <select class="gnb-class-select input select" style="width:auto;" aria-label="학급 선택">
+    <option>1학년 3반</option>
+    <option>1학년 4반</option>
+    <option>2학년 1반</option>
+  </select>
+
+  <div class="gnb-actions">
+    <button class="gnb-icon-btn" aria-label="알림">🔔<span class="gnb-badge"></span></button>
+    <button class="gnb-icon-btn" aria-label="설정">⚙️</button>
+    <div class="gnb-avatar" title="김지현 선생님">김</div>
+  </div>
+</header>
+
+<!-- 앱 레이아웃 -->
+<div class="app-layout">
+
+  <!-- 좌측 사이드바 (공통) -->
+  <aside class="sidebar">
+    <nav class="sidebar-menu">
+      <div class="sidebar-section-label">메뉴</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf01_dashboard.html'">
+        <span class="menu-icon">🏠</span>홈
+      </div>
+      <div class="sidebar-menu-item active">
+        <span class="menu-icon">📚</span>교과서
+      </div>
+      <div class="sidebar-menu-item" onclick="location.href='wf05_result.html'">
+        <span class="menu-icon">📊</span>대시보드
+      </div>
+      <div class="sidebar-menu-item" onclick="location.href='wf04_scoring.html'">
+        <span class="menu-icon">✅</span>평가
+      </div>
+      <div class="sidebar-menu-item">
+        <span class="menu-icon">📋</span>게시판
+      </div>
+    </nav>
+  </aside>
+
+  <!-- 메인 (3분할) -->
+  <main class="main-content">
+
+    <!-- 툴바 -->
+    <div class="lesson-toolbar">
+      <button class="btn btn-ghost btn-sm" onclick="location.href='wf01_dashboard.html'" aria-label="홈으로 돌아가기">
+        ← 홈
+      </button>
+      <div class="toolbar-divider"></div>
+
+      <div class="lesson-breadcrumb">
+        <div class="lesson-breadcrumb-path">Ⅲ-2. 파이썬 프로그래밍 &rsaquo; Ⅲ-2-01 프로그래밍 시작하기</div>
+        <div class="lesson-breadcrumb-title">3차시: 변수와 자료형 이해하기</div>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <button class="btn btn-ghost btn-sm" id="btn-quiz" onclick="openQuizModal()" aria-label="AI 퀴즈 자동 생성">
+        ✨ AI 퀴즈 생성
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="saveLesson()" aria-label="수정 내용 저장">
+        💾 수정 저장
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="deployLesson()" aria-label="학생에게 배포">
+        🚀 배포
+      </button>
+    </div>
+
+    <!-- 3분할 바디 -->
+    <div class="lesson-body">
+
+      <!-- ━━━ 좌측: 목차 트리 ━━━ -->
+      <aside class="toc-panel">
+        <div class="toc-header">
+          목차
+          <span class="text-sm" style="font-weight:400;text-transform:none;letter-spacing:0">3학년 1학기</span>
+        </div>
+
+        <!-- Ⅲ-1 (접힘) -->
+        <div class="toc-unit">
+          <div class="toc-unit-toggle" onclick="toggleUnit(this)">
+            <span class="toc-caret">▶</span>
+            <span>Ⅲ-1. 알고리즘과 문제해결</span>
+          </div>
+          <div class="toc-children">
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-1-1')">
+              <span class="toc-lesson-icon">📄</span>Ⅲ-1-01 문제 분해와 알고리즘
+            </div>
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-1-2')">
+              <span class="toc-lesson-icon">📄</span>Ⅲ-1-02 순서도로 표현하기
+            </div>
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-1-3')">
+              <span class="toc-lesson-icon">💻</span>Ⅲ-1-03 실습: 일상 알고리즘
+            </div>
+          </div>
+        </div>
+
+        <!-- Ⅲ-2 (펼침, 현재 단원) -->
+        <div class="toc-unit">
+          <div class="toc-unit-toggle current" onclick="toggleUnit(this)">
+            <span class="toc-caret open">▶</span>
+            <span>Ⅲ-2. 파이썬 프로그래밍</span>
+          </div>
+          <div class="toc-children open">
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-1')">
+              <span class="toc-lesson-icon">📄</span>Ⅲ-2-01 프로그래밍 시작하기
+            </div>
+            <div class="toc-lesson active" id="toc-2-1a" onclick="selectLesson(this, 'toc-2-1a')">
+              <span class="toc-lesson-icon">✏️</span>↳ 3차시: 변수와 자료형
+            </div>
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-2')">
+              <span class="toc-lesson-icon">💻</span>Ⅲ-2-02 두 수 사칙연산
+            </div>
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-3')">
+              <span class="toc-lesson-icon">📄</span>Ⅲ-2-03 조건문과 반복문
+            </div>
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-4')">
+              <span class="toc-lesson-icon">📄</span>Ⅲ-2-04 함수와 모듈
+            </div>
+          </div>
+        </div>
+
+        <!-- Ⅳ-1 (접힘) -->
+        <div class="toc-unit">
+          <div class="toc-unit-toggle" onclick="toggleUnit(this)">
+            <span class="toc-caret">▶</span>
+            <span>Ⅳ-1. 데이터 수집·분석</span>
+          </div>
+          <div class="toc-children">
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-4-1')">
+              <span class="toc-lesson-icon">📄</span>Ⅳ-1-01 데이터의 종류
+            </div>
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-4-2')">
+              <span class="toc-lesson-icon">💻</span>Ⅳ-1-02 데이터 시각화
+            </div>
+          </div>
+        </div>
+
+        <!-- Ⅳ-2 (접힘) -->
+        <div class="toc-unit">
+          <div class="toc-unit-toggle" onclick="toggleUnit(this)">
+            <span class="toc-caret">▶</span>
+            <span>Ⅳ-2. 인공지능과 미래</span>
+          </div>
+          <div class="toc-children">
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-5-1')">
+              <span class="toc-lesson-icon">📄</span>Ⅳ-2-01 머신러닝 개념
+            </div>
+            <div class="toc-lesson" onclick="selectLesson(this, 'toc-5-2')">
+              <span class="toc-lesson-icon">💻</span>Ⅳ-2-02 AI 모델 실습
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ━━━ 중앙: 에디터 ━━━ -->
+      <section class="editor-panel">
+
+        <!-- 학습 목표 -->
+        <div class="editor-section">
+          <div class="editor-section-header">
+            <div class="editor-section-label">🎯 학습 목표</div>
+            <button class="btn btn-ghost btn-sm">편집</button>
+          </div>
+          <div class="editor-section-body">
+            <div class="objective-list">
+              <div class="objective-item">
+                <div class="objective-num">1</div>
+                <div class="objective-text">변수의 개념을 설명하고, 파이썬에서 변수를 선언하고 값을 할당할 수 있다.</div>
+              </div>
+              <div class="objective-item">
+                <div class="objective-num">2</div>
+                <div class="objective-text">정수(int), 실수(float), 문자열(str) 자료형을 구분하고 type() 함수로 확인할 수 있다.</div>
+              </div>
+              <div class="objective-item">
+                <div class="objective-num">3</div>
+                <div class="objective-text">변수를 활용한 간단한 계산 프로그램을 작성할 수 있다.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 설명 -->
+        <div class="editor-section">
+          <div class="editor-section-header">
+            <div class="editor-section-label">📝 설명</div>
+            <div class="flex gap-xs">
+              <span class="badge badge-mid">수업 전 단계</span>
+              <button class="btn btn-ghost btn-sm">미리보기</button>
+            </div>
+          </div>
+
+          <!-- 서식 도구 모음 -->
+          <div class="editor-toolbar">
+            <button class="editor-tool-btn" title="굵게"><b>B</b></button>
+            <button class="editor-tool-btn" title="기울임"><i>I</i></button>
+            <button class="editor-tool-btn" title="밑줄"><u>U</u></button>
+            <div class="editor-tool-divider"></div>
+            <button class="editor-tool-btn" title="글머리">≡</button>
+            <button class="editor-tool-btn" title="번호목록">①</button>
+            <div class="editor-tool-divider"></div>
+            <button class="editor-tool-btn" title="코드">〈/〉</button>
+            <button class="editor-tool-btn" title="링크">🔗</button>
+            <button class="editor-tool-btn" title="표">⊞</button>
+            <div class="editor-tool-divider"></div>
+            <button class="editor-tool-btn" title="실행취소">↩</button>
+            <button class="editor-tool-btn" title="재실행">↪</button>
+          </div>
+
+          <div class="editor-section-body">
+            <p style="font-size:13px; line-height:1.8; color:var(--color-ink); margin-bottom: 12px;">
+              <strong>변수(Variable)</strong>는 프로그램에서 데이터를 저장하는 공간입니다.
+              파이썬에서는 <code style="background:var(--color-light); padding:1px 5px; border-radius:3px; font-family:monospace; font-size:12px;">=</code>
+              기호를 사용해 변수를 선언하고 값을 할당합니다.
+              변수 이름은 영문자, 숫자, 밑줄(_)로 구성하며 숫자로 시작할 수 없습니다.
+            </p>
+
+            <p style="font-size:13px; line-height:1.8; color:var(--color-ink); margin-bottom: 12px;">
+              파이썬의 주요 <strong>자료형(Data Type)</strong>은 아래 코드 예시와 같습니다.
+              <code style="background:var(--color-light); padding:1px 5px; border-radius:3px; font-family:monospace; font-size:12px;">type()</code>
+              함수로 변수의 자료형을 확인할 수 있습니다.
+            </p>
+
+            <div class="code-block">
+              <span class="code-var">name</span> = <span class="code-string">"김민준"</span>    <span class="code-comment"># str (문자열)</span><br>
+              <span class="code-var">age</span>  = <span class="code-num">15</span>              <span class="code-comment"># int (정수)</span><br>
+              <span class="code-var">height</span> = <span class="code-num">165.5</span>         <span class="code-comment"># float (실수)</span><br>
+              <span class="code-var">is_student</span> = <span class="code-keyword">True</span>  <span class="code-comment"># bool (논리)</span><br>
+              <br>
+              <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">name</span>))    <span class="code-comment"># &lt;class 'str'&gt;</span><br>
+              <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">age</span>))     <span class="code-comment"># &lt;class 'int'&gt;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 미디어 업로드 -->
+        <div class="editor-section">
+          <div class="editor-section-header">
+            <div class="editor-section-label">🖼 이미지 · 영상 자료</div>
+            <button class="btn btn-ghost btn-sm">자료 추가 +</button>
+          </div>
+          <div class="editor-section-body">
+            <!-- 기존 업로드된 미디어 -->
+            <div class="media-grid">
+              <div class="media-thumb">
+                <div class="media-thumb-img">📊</div>
+                <div class="media-thumb-label">자료형 분류도</div>
+                <button class="media-thumb-del" aria-label="삭제">✕</button>
+              </div>
+              <div class="media-thumb">
+                <div class="media-thumb-img" style="background: linear-gradient(135deg, #fce7f3, #fbcfe8);">▶️</div>
+                <div class="media-thumb-label">변수 개념 영상</div>
+                <button class="media-thumb-del" aria-label="삭제">✕</button>
+              </div>
+            </div>
+
+            <!-- 업로드 드래그 영역 -->
+            <div class="media-upload-area" onclick="alert('파일 선택 다이얼로그 (목업)')">
+              <div class="media-upload-icon">📎</div>
+              <div class="media-upload-text">이미지 또는 영상을 여기에 드래그하거나 클릭하여 업로드</div>
+              <div class="media-upload-sub">지원 형식: JPG, PNG, GIF, MP4, YouTube URL · 최대 50MB</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 지시사항 -->
+        <div class="editor-section">
+          <div class="editor-section-header">
+            <div class="editor-section-label">📋 실습 지시사항</div>
+            <span class="badge badge-solid-ok" style="font-size:11px;">실습 과제</span>
+          </div>
+          <div class="editor-section-body">
+            <div class="instruction-list">
+              <div class="instruction-item">
+                <div class="instruction-step">1</div>
+                <div class="instruction-text">파이썬 에디터에서 자신의 <strong>이름, 나이, 키</strong>를 각각 변수에 저장하세요.</div>
+              </div>
+              <div class="instruction-item">
+                <div class="instruction-step">2</div>
+                <div class="instruction-text"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">print()</code> 함수를 사용해 각 변수의 값을 출력하는 코드를 작성하세요.</div>
+              </div>
+              <div class="instruction-item">
+                <div class="instruction-step">3</div>
+                <div class="instruction-text"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">type()</code> 함수로 각 변수의 자료형을 확인하고, 결과를 주석(#)으로 기록하세요.</div>
+              </div>
+              <div class="instruction-item">
+                <div class="instruction-step">4</div>
+                <div class="instruction-text">코드를 실행한 결과 화면을 캡처하거나, 에디터에서 직접 <strong>제출</strong> 버튼을 눌러 과제를 완료하세요.</div>
+              </div>
+            </div>
+            <textarea class="input editor-textarea" placeholder="추가 지시사항이나 유의사항을 입력하세요..." style="min-height: 72px; border-top: 1px solid var(--color-border); border-radius: 0 0 6px 6px; margin-top: var(--space-sm);">※ 변수 이름은 의미 있게 지어야 합니다. a, b, c 같은 이름 대신 name, age, height처럼 내용을 알 수 있는 이름을 사용하세요.</textarea>
+          </div>
+        </div>
+
+        <!-- 퀴즈 섹션 -->
+        <div class="editor-section">
+          <div class="editor-section-header">
+            <div class="editor-section-label">❓ 퀴즈 (AI 생성)</div>
+            <div class="flex gap-xs items-center">
+              <span class="badge badge-gray">3문항</span>
+              <button class="btn btn-ghost btn-sm" onclick="openQuizModal()">✨ 재생성</button>
+            </div>
+          </div>
+          <div class="editor-section-body">
+            <div class="quiz-item">
+              <div class="quiz-q"><span class="quiz-q-num">Q1.</span> 파이썬에서 변수에 값을 할당할 때 사용하는 연산자는?</div>
+              <div class="quiz-options">
+                <label class="quiz-option"><input type="radio" name="q1" value="a"> == (같음 비교)</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="b" checked> = (할당)</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="c"> := (바다코끼리)</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="d"> ← (화살표)</label>
+              </div>
+            </div>
+            <div class="quiz-item">
+              <div class="quiz-q"><span class="quiz-q-num">Q2.</span> <code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">x = 3.14</code> 에서 변수 x의 자료형은?</div>
+              <div class="quiz-options">
+                <label class="quiz-option"><input type="radio" name="q2" value="a"> int</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="b" checked> float</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="c"> str</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="d"> bool</label>
+              </div>
+            </div>
+            <div class="quiz-item">
+              <div class="quiz-q"><span class="quiz-q-num">Q3.</span> 다음 중 올바른 변수 이름은?</div>
+              <div class="quiz-options">
+                <label class="quiz-option"><input type="radio" name="q3" value="a"> 1score</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="b"> my score</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="c" checked> my_score</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="d"> my-score</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section><!-- /editor-panel -->
+
+      <!-- ━━━ 우측: 배포 패널 ━━━ -->
+      <aside class="deploy-panel">
+        <div class="deploy-panel-header">
+          수준별 배포
+          <span class="badge badge-ok">수정됨</span>
+        </div>
+
+        <!-- 배포 진행 상태 -->
+        <div class="deploy-status-bar">
+          <div class="deploy-status-info">
+            <span class="text-sm text-gray">마지막 배포</span>
+            <span class="text-sm font-semibold">6/12 09:20</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill progress-fill-ok" style="width:73%"></div>
+          </div>
+          <div class="deploy-status-info mt-sm">
+            <span class="text-sm text-gray">열람 학생</span>
+            <span class="text-sm font-semibold" style="color:var(--color-ok)">19 / 26명</span>
+          </div>
+        </div>
+
+        <!-- 상 그룹 -->
+        <div class="deploy-group">
+          <div class="deploy-group-header" onclick="toggleGroup(this)">
+            <div class="group-level-badge group-high">상</div>
+            <div class="group-name">고급 학습자</div>
+            <div class="group-count">6명</div>
+            <span style="font-size:10px;color:var(--color-gray);">▼</span>
+          </div>
+          <div class="deploy-group-body">
+            <label class="deploy-option">
+              <input type="checkbox" checked aria-label="기본 설명 자료">
+              기본 설명 자료
+            </label>
+            <label class="deploy-option">
+              <input type="checkbox" checked aria-label="실습 과제">
+              실습 과제
+              <span class="deploy-option-extra">필수</span>
+            </label>
+            <label class="deploy-option">
+              <input type="checkbox" checked aria-label="심화 문제">
+              심화 문제 (+)
+            </label>
+            <label class="deploy-extra-option">
+              <input type="checkbox" aria-label="힌트 제공">
+              힌트 제공 (숨김)
+            </label>
+          </div>
+        </div>
+
+        <!-- 중 그룹 -->
+        <div class="deploy-group">
+          <div class="deploy-group-header" onclick="toggleGroup(this)">
+            <div class="group-level-badge group-mid-bg">중</div>
+            <div class="group-name">기본 학습자</div>
+            <div class="group-count">14명</div>
+            <span style="font-size:10px;color:var(--color-gray);">▼</span>
+          </div>
+          <div class="deploy-group-body">
+            <label class="deploy-option">
+              <input type="checkbox" checked aria-label="기본 설명 자료">
+              기본 설명 자료
+            </label>
+            <label class="deploy-option">
+              <input type="checkbox" checked aria-label="실습 과제">
+              실습 과제
+              <span class="deploy-option-extra">필수</span>
+            </label>
+            <label class="deploy-option">
+              <input type="checkbox" aria-label="심화 문제">
+              심화 문제 (+)
+            </label>
+            <label class="deploy-extra-option">
+              <input type="checkbox" checked aria-label="힌트 제공">
+              힌트 제공 (표시)
+            </label>
+          </div>
+        </div>
+
+        <!-- 하 그룹 -->
+        <div class="deploy-group">
+          <div class="deploy-group-header" onclick="toggleGroup(this)">
+            <div class="group-level-badge group-low">하</div>
+            <div class="group-name">기초 학습자</div>
+            <div class="group-count">6명</div>
+            <span style="font-size:10px;color:var(--color-gray);">▼</span>
+          </div>
+          <div class="deploy-group-body">
+            <label class="deploy-option">
+              <input type="checkbox" checked aria-label="기본 설명 자료">
+              기본 설명 자료
+            </label>
+            <label class="deploy-option">
+              <input type="checkbox" checked aria-label="실습 과제">
+              실습 과제
+              <span class="deploy-option-extra">필수</span>
+            </label>
+            <label class="deploy-option">
+              <input type="checkbox" aria-label="심화 문제">
+              심화 문제 (+)
+            </label>
+            <label class="deploy-extra-option">
+              <input type="checkbox" checked aria-label="힌트 제공">
+              힌트 제공 (표시)
+            </label>
+            <label class="deploy-extra-option">
+              <input type="checkbox" checked aria-label="보충 자료">
+              보충 자료 추가 배포
+            </label>
+          </div>
+        </div>
+
+        <!-- 배포 버튼 -->
+        <div class="deploy-actions">
+          <button class="btn btn-primary" onclick="deployLesson()" aria-label="그룹별 배포 실행">
+            🚀 그룹별 배포 실행
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="alert('배포 이력 (목업)')">
+            📋 배포 이력 확인
+          </button>
+        </div>
+
+        <!-- 배포 이력 -->
+        <div class="deploy-history">
+          <div class="deploy-history-title">최근 배포 이력</div>
+          <div class="deploy-history-item">
+            <span class="deploy-history-label">전체 배포 (상/중/하)</span>
+            <span class="deploy-history-date">6/12</span>
+          </div>
+          <div class="deploy-history-item">
+            <span class="deploy-history-label">하 그룹 보충 추가</span>
+            <span class="deploy-history-date">6/11</span>
+          </div>
+          <div class="deploy-history-item">
+            <span class="deploy-history-label">퀴즈 3문항 추가</span>
+            <span class="deploy-history-date">6/10</span>
+          </div>
+        </div>
+
+      </aside><!-- /deploy-panel -->
+
+    </div><!-- /lesson-body -->
+  </main>
+</div><!-- /app-layout -->
+
+<!-- ━━━ AI 퀴즈 생성 모달 ━━━ -->
+<div class="modal-overlay" id="quiz-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">
+        <span>✨</span> AI 퀴즈 생성
+        <span class="badge badge-mid" style="font-size:11px;">3차시: 변수와 자료형</span>
+      </div>
+      <button class="modal-close" onclick="closeQuizModal()" aria-label="모달 닫기">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- 로딩 상태 -->
+      <div class="ai-loading" id="quiz-loading">
+        <div class="ai-spinner"></div>
+        <div class="ai-loading-text">AI가 퀴즈를 생성하고 있습니다<span class="ai-loading-dots"></span></div>
+        <div class="text-sm text-gray">학습 목표와 설명 내용을 분석 중</div>
+      </div>
+
+      <!-- 생성 결과 -->
+      <div id="quiz-result" style="display:none">
+        <div class="alert alert-info mb-md">
+          <span>💡</span>
+          <span>학습 내용 기반으로 <strong>4문항</strong>을 생성했습니다. 원하는 문항을 선택해 추가하세요.</span>
+        </div>
+
+        <div class="quiz-gen-item">
+          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;">
+            <input type="checkbox" checked style="margin-top:2px;accent-color:var(--color-mid);" aria-label="문항 1 선택">
+            <div style="flex:1">
+              <div class="quiz-gen-q">변수(Variable)에 대한 설명으로 올바른 것은?</div>
+              <div class="quiz-gen-opts">
+                <label class="quiz-gen-opt"><input type="radio" name="gq1"> 한 번 저장하면 값을 바꿀 수 없다</label>
+                <label class="quiz-gen-opt correct"><input type="radio" name="gq1" checked> 데이터를 저장하는 메모리 공간이다</label>
+                <label class="quiz-gen-opt"><input type="radio" name="gq1"> 반드시 숫자형 데이터만 저장한다</label>
+                <label class="quiz-gen-opt"><input type="radio" name="gq1"> 파이썬에서만 사용되는 개념이다</label>
+              </div>
+              <div class="quiz-gen-answer">✅ 정답: ② — 변수는 데이터를 저장하는 메모리 공간입니다</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="quiz-gen-item">
+          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;">
+            <input type="checkbox" checked style="margin-top:2px;accent-color:var(--color-mid);" aria-label="문항 2 선택">
+            <div style="flex:1">
+              <div class="quiz-gen-q"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">score = "100"</code>에서 score의 자료형은?</div>
+              <div class="quiz-gen-opts">
+                <label class="quiz-gen-opt"><input type="radio" name="gq2"> int</label>
+                <label class="quiz-gen-opt"><input type="radio" name="gq2"> float</label>
+                <label class="quiz-gen-opt correct"><input type="radio" name="gq2" checked> str</label>
+                <label class="quiz-gen-opt"><input type="radio" name="gq2"> bool</label>
+              </div>
+              <div class="quiz-gen-answer">✅ 정답: ③ — 따옴표로 감싸면 숫자도 문자열(str)입니다</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="quiz-gen-item">
+          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;">
+            <input type="checkbox" checked style="margin-top:2px;accent-color:var(--color-mid);" aria-label="문항 3 선택">
+            <div style="flex:1">
+              <div class="quiz-gen-q">다음 코드의 실행 결과로 올바른 것은? <code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">x = 5; x = x + 3; print(x)</code></div>
+              <div class="quiz-gen-opts">
+                <label class="quiz-gen-opt"><input type="radio" name="gq3"> 5</label>
+                <label class="quiz-gen-opt"><input type="radio" name="gq3"> x + 3</label>
+                <label class="quiz-gen-opt correct"><input type="radio" name="gq3" checked> 8</label>
+                <label class="quiz-gen-opt"><input type="radio" name="gq3"> 오류 발생</label>
+              </div>
+              <div class="quiz-gen-answer">✅ 정답: ③ — 변수 x에 5를 저장 후 3을 더해 8이 됩니다</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="quiz-gen-item">
+          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;">
+            <input type="checkbox" style="margin-top:2px;accent-color:var(--color-mid);" aria-label="문항 4 선택">
+            <div style="flex:1">
+              <div class="quiz-gen-q">변수 이름으로 사용할 수 없는 것을 모두 고르시오. (복수 선택)</div>
+              <div class="quiz-gen-opts">
+                <label class="quiz-gen-opt correct"><input type="checkbox" checked> 2nd_name</label>
+                <label class="quiz-gen-opt"><input type="checkbox"> student_name</label>
+                <label class="quiz-gen-opt correct"><input type="checkbox" checked> my score</label>
+                <label class="quiz-gen-opt"><input type="checkbox"> _private</label>
+              </div>
+              <div class="quiz-gen-answer">✅ 정답: ①③ — 숫자 시작, 공백 포함 불가</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeQuizModal()">취소</button>
+      <button class="btn btn-secondary" onclick="regenerateQuiz()">🔄 재생성</button>
+      <button class="btn btn-primary" id="btn-add-quiz" style="display:none" onclick="addQuiz()">선택 문항 추가 (3)</button>
+    </div>
+  </div>
+</div>
+
+<!-- 저장 토스트 -->
+<div class="toast" id="save-toast">✅ 수정 사항이 저장되었습니다</div>
+
+<script>
+  /* ── 목차 아코디언 ───────────────────────────── */
+  function toggleUnit(btn) {
+    var caret    = btn.querySelector('.toc-caret');
+    var children = btn.nextElementSibling;
+    var isOpen   = caret.classList.contains('open');
+
+    caret.classList.toggle('open', !isOpen);
+    children.classList.toggle('open', !isOpen);
+    btn.classList.toggle('current', !isOpen);
+  }
+
+  /* ── 목차 항목 선택 ─────────────────────────── */
+  function selectLesson(el, id) {
+    document.querySelectorAll('.toc-lesson').forEach(function (item) {
+      item.classList.remove('active');
+    });
+    el.classList.add('active');
+  }
+
+  /* ── 배포 그룹 토글 ─────────────────────────── */
+  function toggleGroup(header) {
+    var body  = header.nextElementSibling;
+    var arrow = header.querySelector('span:last-child');
+    var open  = body.style.display !== 'none';
+    body.style.display  = open ? 'none' : 'block';
+    arrow.textContent   = open ? '▶' : '▼';
+  }
+
+  /* ── AI 퀴즈 모달 ───────────────────────────── */
+  function openQuizModal() {
+    var modal   = document.getElementById('quiz-modal');
+    var loading = document.getElementById('quiz-loading');
+    var result  = document.getElementById('quiz-result');
+    var addBtn  = document.getElementById('btn-add-quiz');
+
+    loading.style.display = 'flex';
+    result.style.display  = 'none';
+    addBtn.style.display  = 'none';
+
+    modal.classList.add('open');
+
+    setTimeout(function () {
+      loading.style.display = 'none';
+      result.style.display  = 'block';
+      addBtn.style.display  = 'inline-flex';
+    }, 1800);
+  }
+
+  function closeQuizModal() {
+    document.getElementById('quiz-modal').classList.remove('open');
+  }
+
+  function regenerateQuiz() {
+    var loading = document.getElementById('quiz-loading');
+    var result  = document.getElementById('quiz-result');
+    var addBtn  = document.getElementById('btn-add-quiz');
+
+    loading.style.display = 'flex';
+    result.style.display  = 'none';
+    addBtn.style.display  = 'none';
+
+    setTimeout(function () {
+      loading.style.display = 'none';
+      result.style.display  = 'block';
+      addBtn.style.display  = 'inline-flex';
+    }, 1500);
+  }
+
+  function addQuiz() {
+    closeQuizModal();
+    showToast('✅ 퀴즈 3문항이 수업 자료에 추가되었습니다');
+  }
+
+  /* ── 모달 외부 클릭으로 닫기 ────────────────── */
+  document.getElementById('quiz-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeQuizModal();
+  });
+
+  /* ── 저장 / 배포 ────────────────────────────── */
+  function saveLesson() {
+    showToast('💾 수정 사항이 저장되었습니다');
+  }
+
+  function deployLesson() {
+    showToast('🚀 3개 그룹에 배포가 완료되었습니다 (상 6명 · 중 14명 · 하 6명)');
+  }
+
+  /* ── 토스트 ────────────────────────────────── */
+  var toastTimer;
+  function showToast(msg) {
+    var toast = document.getElementById('save-toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove('show');
+    }, 2800);
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WF-04 AI 채점·루브릭 — 정보 AI 학습 플랫폼</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .main-content { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* ── 상단 툴바 ──────────────────────────────── */
+    .scoring-toolbar {
+      display: flex; align-items: center; gap: var(--space-md);
+      padding: 0 var(--space-lg); height: 52px;
+      background: var(--color-white); border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .toolbar-divider { width:1px; height:24px; background:var(--color-border); }
+
+    /* 활동 유형 탭 */
+    .activity-tabs { display: flex; gap: 2px; }
+
+    .activity-tab {
+      padding: 5px 14px; border-radius: 6px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      border: 1px solid transparent; transition: all 0.15s;
+      color: var(--color-gray);
+    }
+
+    .activity-tab:hover { background: var(--color-light); color: var(--color-ink); }
+
+    .activity-tab.active {
+      background: var(--color-mid); color: white;
+      border-color: var(--color-mid); font-weight: 600;
+    }
+
+    .activity-tab.active-practice { background: var(--color-ok); border-color: var(--color-ok); }
+
+    .toolbar-label { font-size: 13px; font-weight: 600; color: var(--color-ink); }
+
+    /* ── 바디 ───────────────────────────────────── */
+    .scoring-body { flex: 1; display: flex; overflow: hidden; }
+
+    /* ━━━ 좌측: 루브릭 패널 ━━━ */
+    .rubric-panel {
+      width: 400px; flex-shrink: 0;
+      border-right: 1px solid var(--color-border);
+      display: flex; flex-direction: column; overflow: hidden;
+      background: var(--color-white);
+    }
+
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 13px; font-weight: 700; color: var(--color-ink);
+      display: flex; align-items: center; gap: var(--space-xs);
+    }
+
+    .rubric-table-wrap { flex: 1; overflow-y: auto; }
+
+    .rubric-table { width: 100%; border-collapse: collapse; }
+
+    .rubric-table th {
+      padding: 8px 10px; font-size: 11px; font-weight: 700;
+      color: var(--color-gray); background: var(--color-light);
+      border-bottom: 1px solid var(--color-border);
+      text-align: left; white-space: nowrap;
+    }
+
+    .rubric-table td {
+      padding: 0; border-bottom: 1px solid var(--color-border);
+      vertical-align: top;
+    }
+
+    .rubric-row { display: flex; flex-direction: column; }
+
+    .rubric-row-main {
+      display: flex; align-items: center;
+      padding: 10px; gap: 8px; cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .rubric-row-main:hover { background: rgba(6,90,130,0.03); }
+
+    .rubric-caret { font-size: 10px; color: var(--color-gray); transition: transform 0.2s; flex-shrink: 0; }
+    .rubric-caret.open { transform: rotate(90deg); }
+
+    .rubric-name { flex: 1; font-size: 13px; color: var(--color-ink); font-weight: 500; }
+
+    .rubric-score-badge {
+      width: 36px; text-align: center;
+      font-size: 12px; font-weight: 700;
+      color: var(--color-mid); flex-shrink: 0;
+    }
+
+    .rubric-avg {
+      font-size: 12px; color: var(--color-gray); flex-shrink: 0; width: 36px; text-align: right;
+    }
+
+    /* 루브릭 기준 상세 */
+    .rubric-detail {
+      display: none; padding: 0 10px 10px;
+      border-top: 1px dashed var(--color-border);
+    }
+
+    .rubric-detail.open { display: block; }
+
+    .rubric-level-row {
+      display: grid; grid-template-columns: 28px 1fr;
+      gap: 6px; padding: 5px 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 12px;
+    }
+
+    .rubric-level-row:last-child { border-bottom: none; }
+
+    .level-badge-sm {
+      width: 22px; height: 22px; border-radius: 4px;
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .lv-a { background: rgba(30,39,97,0.12);  color: var(--color-post); }
+    .lv-b { background: rgba(6,90,130,0.12);  color: var(--color-mid); }
+    .lv-c { background: rgba(13,148,136,0.12); color: var(--color-ok); }
+
+    .rubric-level-desc { color: var(--color-gray); line-height: 1.4; }
+
+    /* 루브릭 합계 행 */
+    .rubric-total {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 10px;
+      background: rgba(6,90,130,0.05);
+      border-top: 2px solid var(--color-mid);
+      font-weight: 700; font-size: 13px;
+    }
+
+    .rubric-actions {
+      display: flex; gap: var(--space-sm);
+      padding: var(--space-md);
+      border-top: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    /* ━━━ 우측: 학생 채점 영역 ━━━ */
+    .student-scoring-panel {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    /* 상단: 학생 목록 */
+    .student-list-panel {
+      flex: 0 0 44%;
+      border-bottom: 1px solid var(--color-border);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    .student-scoring-table { width: 100%; border-collapse: collapse; }
+
+    .student-scoring-table th {
+      position: sticky; top: 0; z-index: 1;
+      padding: 8px 12px; font-size: 11px; font-weight: 700;
+      color: var(--color-gray); background: var(--color-light);
+      border-bottom: 1px solid var(--color-border);
+      text-align: left; white-space: nowrap;
+    }
+
+    .student-scoring-table td {
+      padding: 9px 12px; font-size: 13px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .student-scoring-table tbody tr {
+      cursor: pointer; transition: background 0.1s;
+    }
+
+    .student-scoring-table tbody tr:hover { background: rgba(6,90,130,0.04); }
+
+    .student-scoring-table tbody tr.selected {
+      background: rgba(6,90,130,0.08);
+    }
+
+    .score-bar-cell { display: flex; align-items: center; gap: 8px; }
+
+    .score-mini-bar {
+      width: 64px; height: 5px;
+      background: var(--color-light); border-radius: 3px; overflow: hidden; flex-shrink: 0;
+    }
+
+    .score-mini-fill { height: 100%; border-radius: 3px; }
+
+    .score-num { font-size: 13px; font-weight: 700; width: 32px; }
+
+    /* 하단: AI 피드백 패널 */
+    .feedback-panel {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    .feedback-body { flex: 1; overflow-y: auto; padding: var(--space-lg); }
+
+    /* 점수 요약 바 */
+    .score-summary-bar {
+      display: flex; align-items: stretch; gap: 0;
+      border: 1px solid var(--color-border); border-radius: 8px;
+      overflow: hidden; margin-bottom: var(--space-md);
+    }
+
+    .score-cell {
+      flex: 1; padding: 10px 8px; text-align: center;
+      border-right: 1px solid var(--color-border);
+      background: var(--color-white);
+    }
+
+    .score-cell:last-child { border-right: none; }
+
+    .score-cell-label { font-size: 10px; color: var(--color-gray); margin-bottom: 2px; }
+
+    .score-cell-val { font-size: 16px; font-weight: 700; }
+
+    .score-cell-max { font-size: 10px; color: var(--color-gray); font-weight: 400; }
+
+    /* AI 분석 블록 */
+    .ai-analysis-block {
+      background: rgba(6,90,130,0.04);
+      border: 1px solid rgba(6,90,130,0.15);
+      border-radius: 8px; padding: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .ai-analysis-header {
+      display: flex; align-items: center; gap: var(--space-xs);
+      font-size: 12px; font-weight: 700; color: var(--color-mid);
+      margin-bottom: var(--space-sm);
+    }
+
+    .ai-analysis-text { font-size: 13px; line-height: 1.7; color: var(--color-ink); }
+
+    .feedback-tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: 10px; }
+
+    .tag-good { background: rgba(13,148,136,0.1); color: var(--color-ok); padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+    .tag-bad  { background: rgba(239,68,68,0.1);  color: var(--color-danger); padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+
+    /* 코드 오류 하이라이트 */
+    .code-issue {
+      background: var(--color-dark); border-radius: 6px;
+      padding: var(--space-sm) var(--space-md);
+      font-family: 'Courier New', monospace; font-size: 12px;
+      line-height: 1.6; color: #cdd9e5; margin-bottom: var(--space-md);
+    }
+    .code-issue .err { color: #EF4444; border-bottom: 1px dashed #EF4444; }
+    .code-issue .cm  { color: #D97706; font-style: italic; }
+    .code-issue .vr  { color: #82AAFF; }
+    .code-issue .st  { color: #C3E88D; }
+    .code-issue .nm  { color: #F78C6C; }
+
+    /* 점수 확정 영역 */
+    .score-confirm {
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid var(--color-border);
+      background: var(--color-white);
+      flex-shrink: 0;
+    }
+
+    .score-input-wrap {
+      display: flex; align-items: center; gap: var(--space-sm);
+      background: var(--color-light); border-radius: 6px;
+      padding: 6px var(--space-sm);
+    }
+
+    .score-input {
+      width: 56px; padding: 4px 8px;
+      border: 1px solid var(--color-border); border-radius: 4px;
+      font-size: 16px; font-weight: 700; text-align: center;
+      color: var(--color-ink);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="wf-nav">
+  <a href="wf01_dashboard.html">WF-01 홈</a>
+  <a href="wf02_lesson.html">WF-02 수업설계</a>
+  <a href="wf03_monitoring.html">WF-03 모니터링</a>
+  <a href="wf04_scoring.html" class="active">WF-04 AI채점</a>
+  <a href="wf05_result.html">WF-05 결과</a>
+  <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
+  <a href="wfs03a_entry.html">S03a 엔트리실습</a>
+  <a href="wfs03b_python.html">S03b 파이썬실습</a>
+</nav>
+
+<header class="gnb">
+  <div class="gnb-logo"><span class="logo-badge">AI</span>정보 코스웨어</div>
+  <select class="gnb-class-select input select" style="width:auto;" aria-label="학급 선택">
+    <option>1학년 3반</option><option>1학년 4반</option>
+  </select>
+  <div class="gnb-actions">
+    <button class="gnb-icon-btn" aria-label="알림">🔔<span class="gnb-badge"></span></button>
+    <button class="gnb-icon-btn" aria-label="설정">⚙️</button>
+    <div class="gnb-avatar" title="김지현 선생님">김</div>
+  </div>
+</header>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <nav class="sidebar-menu">
+      <div class="sidebar-section-label">메뉴</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf01_dashboard.html'"><span class="menu-icon">🏠</span>홈</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf02_lesson.html'"><span class="menu-icon">📚</span>교과서</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf05_result.html'"><span class="menu-icon">📊</span>대시보드</div>
+      <div class="sidebar-menu-item active"><span class="menu-icon">✅</span>평가</div>
+      <div class="sidebar-menu-item"><span class="menu-icon">📋</span>게시판</div>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <!-- 툴바 -->
+    <div class="scoring-toolbar">
+      <span class="toolbar-label">AI 채점</span>
+      <div class="toolbar-divider"></div>
+
+      <select class="input select" style="width:220px;" id="activity-select" onchange="changeActivity(this.value)" aria-label="활동 선택">
+        <option value="practice">Ⅲ-2-01 · 실습과제: 변수와 자료형</option>
+        <option value="essay">Ⅲ-2-01 · 서술형: 자료형 설명하기</option>
+        <option value="quiz">Ⅲ-2-01 · 객관식 퀴즈 (3문항)</option>
+      </select>
+
+      <div class="activity-tabs">
+        <div class="activity-tab active-practice active" id="tab-practice" onclick="switchTab('practice')">💻 실습 코드</div>
+        <div class="activity-tab" id="tab-essay" onclick="switchTab('essay')">📝 서술형</div>
+        <div class="activity-tab" id="tab-quiz" onclick="switchTab('quiz')">❓ 객관식</div>
+      </div>
+
+      <div style="flex:1"></div>
+
+      <span class="text-sm text-gray">채점 완료 <strong id="scored-count">18</strong> / 26명</span>
+      <div class="toolbar-divider"></div>
+      <button class="btn btn-ghost btn-sm" onclick="location.href='wf03_monitoring.html'">← 모니터링</button>
+      <button class="btn btn-primary" onclick="autoScoreAll()" aria-label="전체 AI 자동 채점 실행">
+        ✨ 전체 자동 채점
+      </button>
+    </div>
+
+    <div class="scoring-body">
+
+      <!-- ━━━ 좌측: 루브릭 기준표 ━━━ -->
+      <div class="rubric-panel">
+        <div class="panel-header">
+          <div class="panel-title">📋 루브릭 기준표</div>
+          <span class="badge badge-solid-ok" style="font-size:11px;">실습 코드 채점</span>
+        </div>
+
+        <div class="rubric-table-wrap">
+          <table class="rubric-table">
+            <thead>
+              <tr>
+                <th style="width:16px;"></th>
+                <th>평가 기준</th>
+                <th style="width:46px;text-align:center;">만점</th>
+                <th style="width:46px;text-align:right;">평균</th>
+              </tr>
+            </thead>
+            <tbody id="rubric-tbody">
+              <!-- JS로 렌더 -->
+            </tbody>
+          </table>
+
+          <div class="rubric-total">
+            <span>합계</span>
+            <span style="color:var(--color-mid);">100점</span>
+            <span style="color:var(--color-gray); font-size:13px;">학급 평균 <strong>75.8점</strong></span>
+          </div>
+        </div>
+
+        <div class="rubric-actions">
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="addCriteria()" aria-label="루브릭 기준 추가">
+            + 기준 추가
+          </button>
+          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="saveRubric()" aria-label="루브릭 기준표 저장">
+            💾 기준표 저장
+          </button>
+        </div>
+      </div>
+
+      <!-- ━━━ 우측: 학생 채점 영역 ━━━ -->
+      <div class="student-scoring-panel">
+
+        <!-- 상단: 학생 목록 -->
+        <div class="student-list-panel">
+          <div class="panel-header" style="flex-shrink:0;">
+            <div class="panel-title">👨‍🎓 학생별 채점 결과</div>
+            <div class="flex gap-sm">
+              <select class="input select" style="width:100px;font-size:12px;padding:4px 8px;" aria-label="정렬 기준">
+                <option>이름순</option>
+                <option>점수 낮은 순</option>
+                <option>상태순</option>
+              </select>
+            </div>
+          </div>
+          <div style="flex:1;overflow-y:auto;">
+            <table class="student-scoring-table">
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>수준</th>
+                  <th>채점 점수</th>
+                  <th style="width:100px;">점수 분포</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody id="student-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 하단: AI 피드백 패널 -->
+        <div class="feedback-panel">
+          <div class="panel-header" style="flex-shrink:0;">
+            <div class="panel-title" id="feedback-title">🤖 AI 피드백 — <span id="fb-name">박지호</span></div>
+            <div class="flex gap-xs items-center">
+              <span class="badge badge-warn" id="fb-status-badge">검토 중</span>
+              <span class="text-sm text-gray" id="fb-time">AI 채점 완료</span>
+            </div>
+          </div>
+
+          <div class="feedback-body" id="feedback-body">
+            <!-- JS로 렌더 -->
+          </div>
+
+          <div class="score-confirm">
+            <span class="text-sm font-semibold">최종 점수:</span>
+            <div class="score-input-wrap">
+              <input type="number" class="score-input" id="final-score-input" value="62" min="0" max="100" aria-label="최종 점수 입력">
+              <span class="text-sm text-gray">/ 100</span>
+            </div>
+            <span class="text-sm text-gray" id="score-diff"></span>
+            <div style="flex:1"></div>
+            <button class="btn btn-ghost btn-sm" onclick="requestReview()" aria-label="재검토 요청">🔄 재검토</button>
+            <button class="btn btn-primary" onclick="confirmScore()" aria-label="채점 결과 확정">✔ 확정</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast">저장 완료</div>
+
+<style>
+  .toast { position:fixed;top:calc(var(--nav-height) + var(--gnb-height) + 16px);right:var(--space-xl);background:var(--color-ink);color:white;padding:10px var(--space-md);border-radius:8px;font-size:13px;font-weight:500;z-index:900;display:flex;align-items:center;gap:var(--space-sm);box-shadow:0 4px 20px rgba(0,0,0,0.2);transform:translateY(-8px);opacity:0;pointer-events:none;transition:all 0.25s; }
+  .toast.show { transform:translateY(0);opacity:1; }
+</style>
+
+<script>
+/* ── 루브릭 데이터 ──────────────────────────────────── */
+var rubric = [
+  { id:'r1', name:'변수 선언 정확성',  max:20, avg:15.2,
+    levels: [
+      { lv:'A', pts:20, desc:'변수명·할당 연산자 모두 올바름, 의미 있는 변수명 사용' },
+      { lv:'B', pts:12, desc:'변수 선언은 됐으나 변수명 또는 할당 방식 일부 오류' },
+      { lv:'C', pts:6,  desc:'변수 개념 이해 부족, 선언·할당 오류 다수' }
+    ]
+  },
+  { id:'r2', name:'자료형 정확성',     max:20, avg:12.8,
+    levels: [
+      { lv:'A', pts:20, desc:'int·float·str 모두 올바른 자료형으로 저장' },
+      { lv:'B', pts:12, desc:'1~2개 자료형 혼동, 숫자를 문자열로 저장하는 오류' },
+      { lv:'C', pts:5,  desc:'자료형 구분 없이 모두 문자열로 저장' }
+    ]
+  },
+  { id:'r3', name:'print() 출력',      max:15, avg:12.5,
+    levels: [
+      { lv:'A', pts:15, desc:'모든 변수 정상 출력, f-string 또는 포맷 활용' },
+      { lv:'B', pts:9,  desc:'일부 변수만 출력하거나 출력 형식 단순' },
+      { lv:'C', pts:3,  desc:'print() 미사용 또는 오류 발생' }
+    ]
+  },
+  { id:'r4', name:'type() 함수 활용',  max:15, avg:10.1,
+    levels: [
+      { lv:'A', pts:15, desc:'모든 변수에 type() 사용, 결과를 주석으로 명시' },
+      { lv:'B', pts:8,  desc:'type() 사용했으나 일부 누락 또는 주석 없음' },
+      { lv:'C', pts:3,  desc:'type() 미사용' }
+    ]
+  },
+  { id:'r5', name:'코드 가독성',       max:15, avg:11.4,
+    levels: [
+      { lv:'A', pts:15, desc:'의미 있는 변수명, 일관된 스타일, 주석 적절히 사용' },
+      { lv:'B', pts:9,  desc:'변수명 단순하거나 주석 부족' },
+      { lv:'C', pts:4,  desc:'변수명 의미 없음(a,b,c), 주석 없음' }
+    ]
+  },
+  { id:'r6', name:'실행 결과 정확성',  max:15, avg:13.8,
+    levels: [
+      { lv:'A', pts:15, desc:'오류 없이 정상 실행, 모든 출력 결과 올바름' },
+      { lv:'B', pts:9,  desc:'대부분 실행되나 일부 출력 누락 또는 타입 오류' },
+      { lv:'C', pts:3,  desc:'실행 오류 발생 또는 미실행' }
+    ]
+  }
+];
+
+/* ── 학생 데이터 ────────────────────────────────────── */
+var students = [
+  { id:1,  name:'김민준', level:'상', score:95, aiScore:95, status:'confirmed',
+    breakdown:[20,20,15,15,13,12], feedback:'모든 기준을 훌륭하게 충족했습니다. 변수명을 의미 있게 사용하고 type() 함수 결과를 주석으로 명시한 점이 특히 우수합니다. 심화 과제로 딕셔너리와 리스트 자료형 탐구를 권장합니다.',
+    goods:['변수명 명명 우수','자료형 완벽','주석 상세'], bads:[] },
+  { id:2,  name:'이서연', level:'중', score:88, aiScore:88, status:'confirmed',
+    breakdown:[17,18,15,12,15,11], feedback:'전반적으로 잘 구현했습니다. type() 함수 사용에서 float 자료형 결과 주석이 누락되었습니다. 나머지 기준은 기대치 이상입니다.',
+    goods:['print() 완벽','코드 가독성'], bads:['type() 주석 일부 누락'] },
+  { id:3,  name:'박지호', level:'하', score:62, aiScore:62, status:'review',
+    breakdown:[15,8,15,5,10,9],   feedback:'변수 선언과 print() 함수는 잘 구현했습니다. height 변수를 문자열("165")로 잘못 저장하여 자료형 기준에서 감점이 발생했습니다. type() 함수를 미사용한 부분도 보완이 필요합니다.',
+    goods:['변수 선언 기본 OK','print() 활용'], bads:['height: str로 잘못 저장','type() 미사용'] },
+  { id:4,  name:'정다은', level:'하', score:71, aiScore:71, status:'review',
+    breakdown:[14,14,12,8,13,10], feedback:'변수 선언과 자료형 구분은 양호합니다. type() 함수를 일부 변수에만 적용했고 코드 실행 시 들여쓰기 오류가 1건 발생했습니다.',
+    goods:['자료형 이해 양호','코드 구조'], bads:['type() 일부 미적용','들여쓰기 오류'] },
+  { id:5,  name:'최우진', level:'상', score:90, aiScore:90, status:'confirmed',
+    breakdown:[20,18,15,15,12,10], feedback:'자료형 구분과 type() 활용이 훌륭합니다. 실행 결과에서 height 출력 시 소수점 자릿수 포맷 처리가 없어 소폭 감점되었습니다.',
+    goods:['자료형 완벽','type() 완벽'], bads:['출력 포맷 미처리'] },
+  { id:6,  name:'한수아', level:'중', score:85, aiScore:85, status:'confirmed',
+    breakdown:[18,16,14,12,14,11], feedback:'전체적으로 안정적인 코드입니다. 변수명을 더 의미 있게 개선하면 가독성 점수가 향상될 것입니다.',
+    goods:['자료형 구분','실행 정상'], bads:['변수명 단순'] },
+  { id:7,  name:'오준서', level:'중', score:78, aiScore:78, status:'pending',
+    breakdown:[16,14,12,10,15,11], feedback:'코드 가독성은 우수합니다. 자료형 활용에서 bool 자료형 사용 오류가 발견되었습니다.',
+    goods:['가독성 우수','변수명 명확'], bads:['bool 자료형 오류'] },
+  { id:8,  name:'강지민', level:'상', score:88, aiScore:88, status:'confirmed',
+    breakdown:[18,18,14,13,14,11], feedback:'for 반복문을 활용한 창의적인 type() 출력 방식이 인상적입니다. 실행 결과의 일부 출력이 누락되었습니다.',
+    goods:['창의적 코드 구현','자료형 정확'], bads:['출력 누락 1건'] },
+  { id:9,  name:'윤서현', level:'중', score:74, aiScore:74, status:'pending',
+    breakdown:[14,14,13,9,12,12], feedback:'기본 기준은 충족했습니다. type() 함수 주석이 부분적으로만 작성되었습니다.',
+    goods:['기본 구현 완료'], bads:['type() 주석 미완성'] },
+  { id:10, name:'임채원', level:'중', score:69, aiScore:69, status:'pending',
+    breakdown:[13,12,14,8,12,10], feedback:'print() 출력은 완벽합니다. 자료형 구분과 type() 활용에서 보완이 필요합니다.',
+    goods:['print() 정확'], bads:['자료형 혼동','type() 부족'] },
+  { id:11, name:'신민재', level:'상', score:92, aiScore:92, status:'confirmed',
+    breakdown:[19,20,14,15,13,11], feedback:'반복문을 활용한 type() 출력이 매우 인상적입니다. 전체적으로 우수한 코드입니다.',
+    goods:['for문 활용','자료형 완벽','type() 전체'], bads:[] }
+];
+
+var selectedStudentId = 3;
+
+/* ── 루브릭 렌더 ─────────────────────────────────── */
+function renderRubric() {
+  var tbody = document.getElementById('rubric-tbody');
+  tbody.innerHTML = '';
+  rubric.forEach(function(r) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><div class="rubric-row">' +
+        '<div class="rubric-row-main" onclick="toggleRubric(\'' + r.id + '\')">' +
+          '<span class="rubric-caret" id="caret-' + r.id + '">▶</span>' +
+          '<span class="rubric-name">' + r.name + '</span>' +
+          '<span class="rubric-score-badge">' + r.max + '점</span>' +
+          '<span class="rubric-avg">' + r.avg.toFixed(1) + '</span>' +
+        '</div>' +
+        '<div class="rubric-detail" id="detail-' + r.id + '">' +
+          r.levels.map(function(lv) {
+            return '<div class="rubric-level-row">' +
+              '<div class="level-badge-sm lv-' + lv.lv.toLowerCase() + '">' + lv.lv + '</div>' +
+              '<div class="rubric-level-desc"><strong>' + lv.pts + '점</strong> — ' + lv.desc + '</div>' +
+              '</div>';
+          }).join('') +
+        '</div>' +
+      '</div></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleRubric(id) {
+  var detail = document.getElementById('detail-' + id);
+  var caret  = document.getElementById('caret-' + id);
+  var open = detail.classList.toggle('open');
+  caret.classList.toggle('open', open);
+}
+
+/* ── 학생 목록 렌더 ─────────────────────────────── */
+function renderStudents() {
+  var tbody = document.getElementById('student-tbody');
+  tbody.innerHTML = '';
+  students.forEach(function(s) {
+    var statusLabel, statusClass;
+    if (s.status === 'confirmed') { statusLabel = '✔ 확정'; statusClass = 'badge-ok'; }
+    else if (s.status === 'review') { statusLabel = '⚠ 검토 중'; statusClass = 'badge-warn'; }
+    else { statusLabel = '⏳ 대기 중'; statusClass = 'badge-gray'; }
+
+    var levelClass = s.level === '상' ? 'badge-solid-mid' : s.level === '중' ? 'badge-mid' : 'badge-ok';
+    var scoreColor = s.score >= 90 ? 'var(--color-ok)' : s.score >= 70 ? 'var(--color-mid)' : 'var(--color-warn)';
+    var fillPct = s.score;
+
+    var tr = document.createElement('tr');
+    tr.dataset.id = s.id;
+    if (s.id === selectedStudentId) tr.classList.add('selected');
+    tr.innerHTML =
+      '<td style="font-weight:600;">' + s.name + '</td>' +
+      '<td><span class="badge ' + levelClass + '">' + s.level + '</span></td>' +
+      '<td><div class="score-bar-cell">' +
+        '<div class="score-mini-bar"><div class="score-mini-fill" style="width:' + fillPct + '%;background:' + scoreColor + '"></div></div>' +
+        '<span class="score-num" style="color:' + scoreColor + '">' + s.score + '</span>' +
+      '</div></td>' +
+      '<td><div class="progress-bar" style="height:5px;">' +
+        '<div class="progress-fill" style="width:' + fillPct + '%;background:' + scoreColor + ';border-radius:3px;"></div>' +
+      '</div></td>' +
+      '<td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>';
+    tr.addEventListener('click', function() { selectStudent(s.id); });
+    tbody.appendChild(tr);
+  });
+}
+
+/* ── 학생 피드백 렌더 ───────────────────────────── */
+function selectStudent(id) {
+  selectedStudentId = id;
+  document.querySelectorAll('#student-tbody tr').forEach(function(tr) {
+    tr.classList.toggle('selected', parseInt(tr.dataset.id) === id);
+  });
+
+  var s = students.find(function(st) { return st.id === id; });
+  if (!s) return;
+
+  document.getElementById('fb-name').textContent = s.name;
+
+  var badge = document.getElementById('fb-status-badge');
+  if (s.status === 'confirmed') { badge.className = 'badge badge-ok'; badge.textContent = '확정'; }
+  else if (s.status === 'review') { badge.className = 'badge badge-warn'; badge.textContent = '검토 중'; }
+  else { badge.className = 'badge badge-gray'; badge.textContent = '대기 중'; }
+
+  document.getElementById('fb-time').textContent = 'AI 채점 완료';
+  document.getElementById('final-score-input').value = s.score;
+  document.getElementById('score-diff').textContent =
+    s.score !== s.aiScore ? '(AI 원점수: ' + s.aiScore + '점)' : '';
+
+  /* 점수 요약 바 */
+  var summaryHtml = '<div class="score-summary-bar">';
+  rubric.forEach(function(r, i) {
+    var pts = s.breakdown[i];
+    var color = pts >= r.max * 0.8 ? 'var(--color-ok)' : pts >= r.max * 0.5 ? 'var(--color-mid)' : 'var(--color-warn)';
+    summaryHtml +=
+      '<div class="score-cell">' +
+        '<div class="score-cell-label">' + r.name.replace(' ', '<br>') + '</div>' +
+        '<div class="score-cell-val" style="color:' + color + '">' + pts + '<span class="score-cell-max">/' + r.max + '</span></div>' +
+      '</div>';
+  });
+  summaryHtml += '</div>';
+
+  /* AI 분석 */
+  var goodTags = s.goods.map(function(g) { return '<span class="tag-good">✓ ' + g + '</span>'; }).join('');
+  var badTags  = s.bads.map(function(b)  { return '<span class="tag-bad">✗ ' + b + '</span>'; }).join('');
+
+  /* 코드 이슈 (박지호, 정다은만) */
+  var codeHtml = '';
+  if (id === 3) {
+    codeHtml = '<div style="margin-bottom:var(--space-md);">' +
+      '<div class="text-sm font-semibold mb-sm">⚠ 감지된 코드 문제</div>' +
+      '<div class="code-issue">' +
+        '<span class="vr">height</span> = <span class="err"><span class="st">"165"</span></span>  ' +
+        '<span class="cm">← str으로 저장됨 (float으로 수정 필요)</span><br>' +
+        '<span class="cm"># type() 함수 미사용 (3기준 -10점)</span>' +
+      '</div>' +
+    '</div>';
+  }
+
+  document.getElementById('feedback-body').innerHTML =
+    summaryHtml +
+    '<div class="ai-analysis-block">' +
+      '<div class="ai-analysis-header"><span>🤖</span> AI 종합 분석</div>' +
+      '<div class="ai-analysis-text">' + s.feedback + '</div>' +
+      '<div class="feedback-tags">' + goodTags + badTags + '</div>' +
+    '</div>' +
+    codeHtml;
+}
+
+/* ── 탭 전환 ────────────────────────────────────── */
+function switchTab(tab) {
+  ['practice','essay','quiz'].forEach(function(t) {
+    var el = document.getElementById('tab-' + t);
+    el.classList.toggle('active', t === tab);
+    if (t === tab) el.classList.add('active-practice');
+    else el.classList.remove('active-practice');
+  });
+  var counts = { practice:18, essay:12, quiz:26 };
+  document.getElementById('scored-count').textContent = counts[tab] || 18;
+  showToast('활동 유형 전환: ' + document.getElementById('tab-' + tab).textContent.trim());
+}
+
+function changeActivity(val) { showToast('활동 변경 완료 (목업)'); }
+
+/* ── 버튼 핸들러 ────────────────────────────────── */
+function autoScoreAll() {
+  showToast('✨ AI 자동 채점 실행 중... 26명 처리 완료 (목업)');
+  document.getElementById('scored-count').textContent = '26';
+  students.forEach(function(s) { s.status = s.status === 'pending' ? 'review' : s.status; });
+  renderStudents();
+}
+
+function addCriteria() { showToast('루브릭 기준 추가 (목업)'); }
+
+function saveRubric() { showToast('💾 기준표가 저장되었습니다'); }
+
+function requestReview() { showToast('🔄 AI 재검토 요청됨'); }
+
+function confirmScore() {
+  var s = students.find(function(st) { return st.id === selectedStudentId; });
+  if (!s) return;
+  var newScore = parseInt(document.getElementById('final-score-input').value);
+  s.score = newScore;
+  s.status = 'confirmed';
+  renderStudents();
+  selectStudent(selectedStudentId);
+  showToast('✔ ' + s.name + ' 학생 점수 확정 (' + newScore + '점)');
+}
+
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2600);
+}
+
+renderRubric();
+renderStudents();
+selectStudent(3);
+</script>
+</body>
+</html>

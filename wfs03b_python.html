@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WF-S03b 파이썬 실습 — 정보 AI 학습 플랫폼</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+  <style>
+    body { overflow: hidden; }
+
+    .practice-wrap {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - var(--nav-height) - var(--gnb-height));
+    }
+
+    .practice-main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── 좌측 단계 패널 ─────────────────────────── */
+    .step-panel {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--color-white);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .step-panel-header {
+      padding: var(--space-md);
+      background: var(--color-python);
+      color: white;
+      flex-shrink: 0;
+    }
+    .step-panel-header .unit-label { font-size: 11px; opacity: 0.8; margin-bottom: 4px; }
+    .step-panel-header .mission-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
+
+    .step-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .mission-desc {
+      background: rgba(55,118,171,0.06);
+      border: 1px solid rgba(55,118,171,0.2);
+      border-radius: 8px;
+      padding: var(--space-md);
+    }
+    .mission-desc .desc-title {
+      font-size: 11px; font-weight: 700;
+      color: var(--color-python); margin-bottom: var(--space-sm);
+    }
+    .mission-desc .desc-body { font-size: 12px; line-height: 1.7; color: var(--color-ink); }
+
+    .io-example {
+      background: #1a1a2e; border-radius: 6px;
+      padding: 8px 10px; margin-top: 8px;
+      font-family: 'Consolas','Monaco',monospace;
+      font-size: 11px; line-height: 1.7;
+    }
+    .io-example .io-label { color: rgba(255,255,255,0.4); font-size: 10px; margin-bottom: 2px; }
+    .io-example .io-in  { color: #fc9867; }
+    .io-example .io-out { color: #a9dc76; }
+
+    .steps-section .steps-title {
+      font-size: 11px; font-weight: 700; color: var(--color-gray);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: var(--space-sm);
+    }
+
+    .step-item {
+      border-radius: 8px; border: 1px solid var(--color-border);
+      overflow: hidden; margin-bottom: 6px;
+    }
+    .step-item.done   { border-color: rgba(13,148,136,0.3); background: rgba(13,148,136,0.03); }
+    .step-item.active { border-color: var(--color-python);  background: rgba(55,118,171,0.04); }
+    .step-item.locked { background: var(--color-light); }
+
+    .step-header {
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: 9px 12px; cursor: pointer; user-select: none;
+    }
+    .step-item.locked .step-header { cursor: default; }
+
+    .step-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; flex-shrink: 0; font-weight: 700;
+    }
+    .step-item.done   .step-dot { background: var(--color-ok);     border-color: var(--color-ok);    color: white; }
+    .step-item.active .step-dot { background: var(--color-python);  border-color: var(--color-python); color: white; }
+    .step-item.locked .step-dot { color: var(--color-gray); }
+
+    .step-label { flex: 1; font-size: 12px; font-weight: 600; color: var(--color-ink); }
+    .step-item.locked .step-label { color: var(--color-gray); }
+    .step-item.done   .step-label { color: var(--color-ok); }
+
+    .step-arrow { font-size: 10px; color: var(--color-gray); transition: transform 0.2s; }
+    .step-arrow.open { transform: rotate(90deg); }
+
+    .current-badge {
+      font-size: 9px; font-weight: 700;
+      background: var(--color-python); color: white;
+      padding: 1px 6px; border-radius: 10px; flex-shrink: 0;
+    }
+
+    .step-content { display: none; padding: 0 12px 12px; border-top: 1px solid var(--color-border); }
+    .step-content.open { display: block; }
+    .step-content p { font-size: 11px; line-height: 1.7; color: var(--color-ink); margin-bottom: 6px; }
+
+    .hint-box {
+      background: rgba(55,118,171,0.07);
+      border-left: 3px solid var(--color-python);
+      border-radius: 0 4px 4px 0;
+      padding: 8px 10px; margin-top: 8px;
+    }
+    .hint-box .hint-title { font-size: 10px; font-weight: 700; color: var(--color-python); margin-bottom: 4px; }
+    .hint-box .code-hint {
+      font-family: 'Consolas','Monaco',monospace;
+      font-size: 11px; background: #1a1a2e; color: #a9dc76;
+      padding: 4px 8px; border-radius: 3px; margin-top: 4px;
+    }
+    .hint-box ol { list-style: decimal; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
+    .hint-box ol li { font-size: 11px; line-height: 1.6; color: var(--color-ink); }
+
+    /* ── IDE 영역 ──────────────────────────────── */
+    .ide-area {
+      flex: 1; display: flex; flex-direction: column;
+      overflow: hidden; min-width: 0; background: #1a1a2e;
+    }
+
+    .ide-toolbar {
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: 8px 14px; background: #2d2d44;
+      border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+    }
+
+    .file-tab {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 12px; background: #1a1a2e;
+      border-radius: 4px 4px 0 0;
+      font-size: 12px; color: rgba(255,255,255,0.85);
+      font-family: 'Consolas','Monaco',monospace;
+    }
+    .file-tab-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-python); }
+
+    .btn-run {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 14px; border: none; border-radius: 6px;
+      font-size: 12px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background 0.15s; white-space: nowrap;
+    }
+    .btn-run-primary { background: var(--color-python); color: white; }
+    .btn-run-primary:hover:not(:disabled) { background: #2a6099; }
+    .btn-run-primary:disabled { background: #555; cursor: not-allowed; }
+    .btn-run-ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+    .btn-run-ghost:hover { background: rgba(255,255,255,0.14); color: white; }
+
+    .ide-body { flex: 1; display: flex; overflow: hidden; }
+
+    .editor-wrap { flex: 1; overflow: hidden; position: relative; }
+
+    .CodeMirror {
+      height: 100% !important;
+      font-size: 14px;
+      font-family: 'Consolas','Monaco','Courier New',monospace;
+      line-height: 1.65;
+    }
+    .editor-wrap .CodeMirror-scroll { height: 100%; }
+
+    /* 출력 패널 */
+    .output-panel {
+      width: 320px; flex-shrink: 0;
+      border-left: 1px solid rgba(255,255,255,0.07);
+      background: #12121f; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    .output-header {
+      display: flex; align-items: center; gap: 5px;
+      padding: 7px 14px; background: #1e1e35;
+      border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
+    }
+    .traffic-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .output-title {
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-left: 4px;
+    }
+
+    .output-body {
+      flex: 1; padding: var(--space-md); overflow-y: auto;
+      font-family: 'Consolas','Monaco',monospace;
+      font-size: 13px; line-height: 1.7;
+    }
+    .out-system { color: rgba(255,255,255,0.3); }
+    .out-prompt { color: #64ffda; }
+    .out-input  { color: #fc9867; }
+    .out-result { color: #a9dc76; }
+    .out-error  { color: #ff6b6b; }
+    .out-time   { color: rgba(255,255,255,0.25); font-size: 11px; }
+
+    .output-cursor {
+      display: inline-block; width: 7px; height: 13px;
+      background: rgba(255,255,255,0.45);
+      animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .ai-feedback {
+      display: none; margin: 8px;
+      padding: 8px 10px;
+      background: rgba(55,118,171,0.18);
+      border: 1px solid rgba(55,118,171,0.35);
+      border-radius: 6px; font-size: 12px;
+      color: rgba(255,255,255,0.8); line-height: 1.5;
+    }
+
+    /* ── 하단 채점 바 ──────────────────────────── */
+    .grade-bar {
+      height: 60px;
+      background: var(--color-white);
+      border-top: 1px solid var(--color-border);
+      display: flex; align-items: center;
+      padding: 0 var(--space-lg); gap: var(--space-md);
+      flex-shrink: 0;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+    }
+
+    .grade-bar .editor-status {
+      display: flex; align-items: center;
+      gap: var(--space-sm); font-size: 12px; color: var(--color-gray);
+    }
+
+    .grade-result-area { flex: 1; display: flex; align-items: center; gap: var(--space-md); }
+
+    .score-display { display: none; align-items: center; gap: var(--space-sm); }
+    .score-display.show { display: flex; }
+    .score-num { font-size: 24px; font-weight: 800; color: var(--color-python); line-height: 1; }
+    .score-label { font-size: 11px; color: var(--color-gray); line-height: 1.3; }
+
+    .score-feedback {
+      font-size: 12px; color: var(--color-ink);
+      padding: 4px 10px;
+      background: rgba(55,118,171,0.1); border-radius: 6px; display: none;
+    }
+    .score-feedback.show { display: block; }
+
+    .grade-btn-group { display: flex; gap: var(--space-sm); margin-left: auto; }
+
+    /* ── 플로팅 AI 챗봇 ────────────────────────── */
+    .ai-float {
+      position: fixed; bottom: 80px; right: 24px;
+      z-index: 100; display: flex; flex-direction: column;
+      align-items: flex-end; gap: 8px;
+    }
+
+    .ai-float-panel {
+      width: 280px; background: var(--color-white);
+      border: 1px solid var(--color-border); border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      overflow: hidden; display: none; flex-direction: column;
+    }
+    .ai-float-panel.open { display: flex; }
+
+    .ai-float-header {
+      padding: 10px 14px; background: var(--color-python);
+      color: white; font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; gap: 6px; justify-content: space-between;
+    }
+    .ai-float-close {
+      background: none; border: none; color: white;
+      font-size: 16px; cursor: pointer; opacity: 0.7;
+    }
+    .ai-float-close:hover { opacity: 1; }
+
+    .ai-chat-area {
+      height: 200px; overflow-y: auto;
+      padding: var(--space-md); display: flex;
+      flex-direction: column; gap: 8px; background: var(--color-light);
+    }
+    .chat-msg {
+      font-size: 12px; line-height: 1.5;
+      padding: 8px 10px; border-radius: 8px; max-width: 90%;
+    }
+    .chat-msg.ai  { background: var(--color-white); border: 1px solid var(--color-border); align-self: flex-start; }
+    .chat-msg.user { background: var(--color-python); color: white; align-self: flex-end; }
+
+    .ai-chat-input {
+      display: flex; gap: 6px; padding: 10px 12px;
+      border-top: 1px solid var(--color-border);
+    }
+    .ai-chat-input input {
+      flex: 1; border: 1px solid var(--color-border);
+      border-radius: 6px; padding: 6px 10px; font-size: 12px;
+    }
+    .ai-chat-input input:focus { outline: 1px solid var(--color-python); }
+
+    .ai-float-btn {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--color-python); color: white; border: none;
+      font-size: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .ai-float-btn:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+  </style>
+</head>
+<body>
+
+  <!-- WF 네비게이션 -->
+  <nav class="wf-nav">
+    <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-right:2px;">교사 ▸</span>
+    <a href="wf01_dashboard.html">WF-01 홈</a>
+    <a href="wf02_lesson.html">WF-02 수업설계</a>
+    <a href="wf03_monitoring.html">WF-03 모니터링</a>
+    <a href="wf04_scoring.html">WF-04 AI채점</a>
+    <a href="wf05_result.html">WF-05 결과</a>
+    <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
+    <a href="wfs03a_entry.html">S03a 엔트리실습</a>
+    <a href="wfs03b_python.html" class="active">S03b 파이썬실습</a>
+  </nav>
+
+  <!-- GNB (학생용) -->
+  <header class="gnb">
+    <div class="gnb-logo">
+      <span class="logo-badge" style="background:var(--color-python);">AI</span>
+      정보 AI 학습플랫폼
+      <span class="badge badge-mid" style="font-size:10px;margin-left:4px;">학생</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--space-sm);font-size:13px;color:var(--color-gray);margin-left:var(--space-lg);">
+      <span>🐍</span>
+      <span><strong style="color:var(--color-ink);">Ⅲ-2-02</strong> 두 수 사칙연산</span>
+      <span class="badge badge-mid">파이썬 실습</span>
+    </div>
+    <div class="gnb-actions" style="margin-left:auto;">
+      <div style="display:flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--color-warn);">
+        ⏱ <span id="timer">18:30</span>
+      </div>
+      <div class="gnb-avatar" style="background:var(--color-python);">서</div>
+      <span style="font-size:13px;font-weight:600;">이서연</span>
+    </div>
+  </header>
+
+  <!-- 전체 래퍼 -->
+  <div class="practice-wrap">
+
+    <div class="practice-main">
+
+      <!-- ── 좌측 단계 패널 ── -->
+      <aside class="step-panel">
+        <div class="step-panel-header">
+          <div class="unit-label">Ⅲ-2-02 · 파이썬 실습</div>
+          <div class="mission-title">🐍 두 수 사칙연산</div>
+        </div>
+
+        <div class="step-panel-body">
+
+          <!-- 미션 설명 -->
+          <div class="mission-desc">
+            <div class="desc-title">📋 해결할 과제</div>
+            <div class="desc-body">
+              두 정수를 입력받아 <strong>사칙연산(+, −, ×, ÷)</strong> 결과를 모두 출력하는 프로그램을 작성하세요.
+              <div class="io-example" style="margin-top:8px;">
+                <div class="io-label">입력 예시</div>
+                <div class="io-in">3<br>5</div>
+                <div class="io-label" style="margin-top:6px;">출력 예시</div>
+                <div class="io-out">3 + 5 = 8<br>3 - 5 = -2<br>3 * 5 = 15<br>3 / 5 = 0.6</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 단계별 가이드 -->
+          <div class="steps-section">
+            <div class="steps-title">단계별 가이드</div>
+
+            <!-- 1단계 완료 -->
+            <div class="step-item done">
+              <div class="step-header" onclick="toggleStep(1)">
+                <div class="step-dot">✓</div>
+                <span class="step-label">변수와 입력</span>
+                <span class="step-arrow" id="arrow-1">▶</span>
+              </div>
+              <div class="step-content" id="content-1">
+                <p><code>input()</code>으로 두 수를 입력받습니다.</p>
+                <div class="hint-box">
+                  <div class="hint-title">✅ 완료</div>
+                  <div class="code-hint">a = int(input())<br>b = int(input())</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2단계 완료 -->
+            <div class="step-item done">
+              <div class="step-header" onclick="toggleStep(2)">
+                <div class="step-dot">✓</div>
+                <span class="step-label">정수 변환</span>
+                <span class="step-arrow" id="arrow-2">▶</span>
+              </div>
+              <div class="step-content" id="content-2">
+                <p><code>int()</code>로 문자열을 정수로 변환합니다.</p>
+                <div class="hint-box">
+                  <div class="hint-title">✅ 완료</div>
+                  <div class="code-hint">a = int(input())  # "3" → 3</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3단계 현재 -->
+            <div class="step-item active">
+              <div class="step-header" onclick="toggleStep(3)">
+                <div class="step-dot">3</div>
+                <span class="step-label">사칙연산 출력</span>
+                <span class="current-badge">현재</span>
+                <span class="step-arrow open" id="arrow-3">▶</span>
+              </div>
+              <div class="step-content open" id="content-3">
+                <p>덧셈, 뺄셈, 곱셈, 나눗셈 4가지 결과를 모두 출력하세요.</p>
+                <div class="hint-box">
+                  <div class="hint-title">💡 힌트</div>
+                  <ol>
+                    <li><code>print(f"{a} + {b} = {a + b}")</code></li>
+                    <li>나머지 3가지도 같은 방식으로 작성</li>
+                    <li>나눗셈: <code>a / b</code> (float 결과)</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4단계 잠김 -->
+            <div class="step-item locked">
+              <div class="step-header" onclick="toggleStep(4)">
+                <div class="step-dot">4</div>
+                <span class="step-label">출력 형식 맞추기</span>
+                <span class="step-arrow" id="arrow-4">▶</span>
+              </div>
+              <div class="step-content" id="content-4">
+                <p>출력 형식이 예시와 정확히 일치하는지 확인하세요.</p>
+                <div class="hint-box">
+                  <div class="hint-title">💡 힌트</div>
+                  <div class="code-hint">print(f"{a} + {b} = {a+b}")<br>print(f"{a} - {b} = {a-b}")<br>print(f"{a} * {b} = {a*b}")<br>print(f"{a} / {b} = {a/b}")</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5단계 잠김 -->
+            <div class="step-item locked">
+              <div class="step-header" onclick="toggleStep(5)">
+                <div class="step-dot">5</div>
+                <span class="step-label">실행 확인 &amp; 제출</span>
+                <span class="step-arrow" id="arrow-5">▶</span>
+              </div>
+              <div class="step-content" id="content-5">
+                <p><strong>▶ 실행</strong> 버튼으로 결과를 확인한 뒤, 하단 <strong>채점하기</strong>를 클릭하세요.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </aside>
+
+      <!-- ── IDE 영역 ── -->
+      <div class="ide-area">
+
+        <!-- 툴바 -->
+        <div class="ide-toolbar">
+          <div class="file-tab">
+            <div class="file-tab-dot"></div>
+            solution.py
+          </div>
+          <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+            <span style="font-size:11px;color:rgba(255,255,255,0.35);">Ctrl+Enter로 실행</span>
+            <button class="btn-run btn-run-ghost" onclick="clearOutput()">🗑 지우기</button>
+            <button class="btn-run btn-run-primary" id="runBtn" onclick="runCode()">▶ 실행</button>
+          </div>
+        </div>
+
+        <!-- 에디터 + 출력 -->
+        <div class="ide-body">
+          <div class="editor-wrap">
+            <textarea id="codeEditor"></textarea>
+          </div>
+
+          <div class="output-panel">
+            <div class="output-header">
+              <div class="traffic-dot" style="background:#ff6b6b;"></div>
+              <div class="traffic-dot" style="background:#ffd93d;"></div>
+              <div class="traffic-dot" style="background:#6bcb77;"></div>
+              <span class="output-title">출력 콘솔</span>
+              <span id="runStatus" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.3);"></span>
+            </div>
+            <div class="output-body" id="outputBody">
+              <div class="out-system">Python 3.11 — 정보 AI 실습 환경</div>
+              <div class="out-system">────────────────────────</div>
+              <div class="out-system" style="margin-top:6px;">&gt; 실행 버튼을 눌러 코드를 실행하세요.</div>
+              <div class="out-system"><span class="output-cursor"></span></div>
+            </div>
+            <div class="ai-feedback" id="aiFeedback">
+              🤖 <strong>AI 피드백:</strong> <span id="aiFeedbackText"></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /.practice-main -->
+
+    <!-- ── 하단 채점 바 ── -->
+    <div class="grade-bar">
+      <div class="editor-status">
+        실행 상태
+        <span id="runStatusBadge" class="badge badge-warn">대기 중</span>
+      </div>
+
+      <div class="grade-result-area">
+        <div class="score-display" id="scoreDisplay">
+          <div class="score-num" id="scoreNum">--</div>
+          <div class="score-label">점<br><span style="color:var(--color-gray);font-size:10px;">/100</span></div>
+        </div>
+        <div class="score-feedback" id="scoreFeedback"></div>
+      </div>
+
+      <div class="grade-btn-group">
+        <button class="btn btn-ghost btn-sm" onclick="clearOutput()">🗑 초기화</button>
+        <button class="btn btn-primary" id="submitBtn"
+          style="background:var(--color-python);border-color:var(--color-python);padding:8px 20px;"
+          onclick="submitCode()">
+          📤 채점하기
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /.practice-wrap -->
+
+  <!-- ── 플로팅 AI 챗봇 ── -->
+  <div class="ai-float">
+    <div class="ai-float-panel" id="aiPanel">
+      <div class="ai-float-header">
+        💬 AI 도우미
+        <button class="ai-float-close" onclick="toggleAI()">✕</button>
+      </div>
+      <div class="ai-chat-area" id="chatArea">
+        <div class="chat-msg ai">🤖 안녕, 이서연! 사칙연산 4가지를 모두 출력해봐. f-string을 활용해봐!</div>
+      </div>
+      <div class="ai-chat-input">
+        <input id="chatInput" placeholder="질문 입력..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary btn-sm"
+          style="background:var(--color-python);border-color:var(--color-python);"
+          onclick="sendChat()">전송</button>
+      </div>
+    </div>
+    <button class="ai-float-btn" onclick="toggleAI()" aria-label="AI 도우미 열기">💬</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script>
+    // ── CodeMirror 초기화 ──────────────────
+    const editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+      mode: 'python', theme: 'dracula',
+      lineNumbers: true, indentUnit: 4, tabSize: 4,
+      indentWithTabs: false, autofocus: true,
+      extraKeys: {
+        'Tab': (cm) => cm.replaceSelection('    '),
+        'Ctrl-Enter': () => runCode(),
+      },
+    });
+    editor.setSize('100%', '100%');
+    editor.setValue(
+`# Ⅲ-2-02 두 수 사칙연산
+# 두 정수를 입력받아 사칙연산 결과를 모두 출력하세요
+
+a = int(input())
+b = int(input())
+
+print(f"{a} + {b} = {a + b}")
+# 나머지 3가지를 완성하세요
+`);
+
+    // ── 실행 시나리오 ──────────────────────
+    const scenarios = [
+      {
+        lines: [
+          { cls:'out-prompt', html:'&gt; 실행 중...' },
+          { cls:'out-input',  html:'<span style="opacity:.5;">입력 &gt; </span>3' },
+          { cls:'out-input',  html:'<span style="opacity:.5;">입력 &gt; </span>5' },
+          { cls:'out-result', text:'3 + 5 = 8' },
+          { cls:'out-result', text:'3 - 5 = -2' },
+          { cls:'out-result', text:'3 * 5 = 15' },
+          { cls:'out-result', text:'3 / 5 = 0.6' },
+          { cls:'out-time',   text:'> 실행 완료  (0.08초)' },
+        ],
+        feedback: '사칙연산이 모두 올바르게 출력됐어요! f-string 사용이 깔끔해요 🎉',
+        score: 95,
+      },
+      {
+        lines: [
+          { cls:'out-prompt', html:'&gt; 실행 중...' },
+          { cls:'out-input',  html:'<span style="opacity:.5;">입력 &gt; </span>10' },
+          { cls:'out-input',  html:'<span style="opacity:.5;">입력 &gt; </span>4' },
+          { cls:'out-result', text:'10 + 4 = 14' },
+          { cls:'out-result', text:'10 - 4 = 6' },
+          { cls:'out-result', text:'10 * 4 = 40' },
+          { cls:'out-result', text:'10 / 4 = 2.5' },
+          { cls:'out-time',   text:'> 실행 완료  (0.07초)' },
+        ],
+        feedback: '완벽해요! 모든 조건을 만족했어요 👍',
+        score: 100,
+      },
+      {
+        lines: [
+          { cls:'out-prompt', html:'&gt; 실행 중...' },
+          { cls:'out-input',  html:'<span style="opacity:.5;">입력 &gt; </span>7' },
+          { cls:'out-input',  html:'<span style="opacity:.5;">입력 &gt; </span>2' },
+          { cls:'out-result', text:'7 + 2 = 9' },
+          { cls:'out-error',  text:"NameError: name 'b' is not defined" },
+          { cls:'out-time',   text:'> 오류 발생  (0.03초)' },
+        ],
+        feedback: '변수 b가 정의되지 않았어요. input()으로 두 번째 값도 받아야 해요!',
+        score: 40,
+      },
+    ];
+
+    let scenarioIdx = 0;
+    let lastScore = null;
+
+    function runCode() {
+      const code = editor.getValue().trim();
+      if (!code) return;
+
+      const runBtn = document.getElementById('runBtn');
+      const aiFeedback = document.getElementById('aiFeedback');
+      runBtn.disabled = true;
+      runBtn.textContent = '실행 중...';
+      aiFeedback.style.display = 'none';
+      document.getElementById('outputBody').innerHTML = '';
+
+      const sc = scenarios[scenarioIdx % scenarios.length];
+      scenarioIdx++;
+      lastScore = sc.score;
+
+      let delay = 0;
+      sc.lines.forEach(function(line, i) {
+        setTimeout(function() {
+          const div = document.createElement('div');
+          div.className = line.cls;
+          if (line.html) div.innerHTML = line.html;
+          else div.textContent = line.text;
+          document.getElementById('outputBody').appendChild(div);
+          document.getElementById('outputBody').scrollTop = 9999;
+
+          if (i === sc.lines.length - 1) {
+            runBtn.disabled = false;
+            runBtn.textContent = '▶ 실행';
+            document.getElementById('runStatusBadge').className = 'badge badge-ok';
+            document.getElementById('runStatusBadge').textContent = '실행됨';
+
+            setTimeout(function() {
+              document.getElementById('aiFeedbackText').textContent = sc.feedback;
+              aiFeedback.style.display = 'block';
+            }, 400);
+          }
+        }, delay);
+        delay += 130;
+      });
+    }
+
+    function clearOutput() {
+      document.getElementById('outputBody').innerHTML =
+        '<div class="out-system">&gt; 출력이 지워졌습니다.</div><div class="out-system"><span class="output-cursor"></span></div>';
+      document.getElementById('aiFeedback').style.display = 'none';
+      document.getElementById('runStatusBadge').className = 'badge badge-warn';
+      document.getElementById('runStatusBadge').textContent = '대기 중';
+    }
+
+    function submitCode() {
+      const score = lastScore ?? 70;
+      const btn = document.getElementById('submitBtn');
+      btn.textContent = '채점 중...';
+      btn.disabled = true;
+
+      setTimeout(function() {
+        // 점수 표시
+        const scoreEl = document.getElementById('scoreNum');
+        const display = document.getElementById('scoreDisplay');
+        const feedback = document.getElementById('scoreFeedback');
+        scoreEl.textContent = score;
+        display.classList.add('show');
+        feedback.textContent = score >= 90 ? '🎉 완벽해요! 미션 성공!' :
+                               score >= 70 ? '👍 잘 했어요! 조금만 더 다듬어봐요.' :
+                                             '💪 다시 한 번 도전해봐요!';
+        feedback.classList.add('show');
+        btn.textContent = '📤 채점하기';
+        btn.disabled = false;
+
+        // localStorage 저장
+        const data = JSON.parse(localStorage.getItem('lms_scores') || '{}');
+        data.python = {
+          score: score,
+          student: '이서연',
+          mission: '두 수 사칙연산',
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('lms_scores', JSON.stringify(data));
+      }, 900);
+    }
+
+    // 단계 토글
+    function toggleStep(n) {
+      const content = document.getElementById('content-' + n);
+      const arrow   = document.getElementById('arrow-' + n);
+      const isOpen  = content.classList.contains('open');
+      content.classList.toggle('open', !isOpen);
+      arrow.classList.toggle('open', !isOpen);
+    }
+
+    // AI 챗봇
+    function toggleAI() {
+      document.getElementById('aiPanel').classList.toggle('open');
+    }
+
+    const aiReplies = [
+      'f-string을 사용하면 print(f"{a} + {b} = {a+b}") 이렇게 쓸 수 있어!',
+      '사칙연산 4가지(+, -, *, /) 모두 출력해야 해. 하나씩 print 추가해봐.',
+      '나눗셈은 / 연산자를 쓰면 자동으로 소수점이 나와.',
+      '출력 형식이 예시와 같은지 꼭 확인해봐! 공백 위치도 중요해.',
+      '잘 하고 있어! 완성되면 채점하기 버튼을 눌러줘.',
+    ];
+    let aiIdx = 0;
+
+    function sendChat() {
+      const input = document.getElementById('chatInput');
+      if (!input.value.trim()) return;
+      const area = document.getElementById('chatArea');
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-msg user';
+      userMsg.textContent = input.value;
+      area.appendChild(userMsg);
+      input.value = '';
+      setTimeout(function() {
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'chat-msg ai';
+        aiMsg.textContent = '🤖 ' + aiReplies[aiIdx % aiReplies.length];
+        area.appendChild(aiMsg);
+        area.scrollTop = area.scrollHeight;
+        aiIdx++;
+      }, 400);
+    }
+
+    // 타이머
+    let secs = 18 * 60 + 30;
+    setInterval(function() {
+      if (secs > 0) secs--;
+      const m = String(Math.floor(secs / 60)).padStart(2, '0');
+      const s = String(secs % 60).padStart(2, '0');
+      const el = document.getElementById('timer');
+      el.textContent = m + ':' + s;
+      el.style.color = secs < 300 ? 'var(--color-danger)' : 'var(--color-warn)';
+    }, 1000);
+  </script>
+</body>
+</html>

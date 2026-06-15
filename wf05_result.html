@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WF-05 학습 결과 대시보드 — 정보 AI 학습 플랫폼</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── 필터 바 ───────────────────────────────── */
+    .filter-bar {
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: var(--space-md) 0 var(--space-lg);
+    }
+
+    .filter-bar-label { font-size: 13px; font-weight: 600; color: var(--color-gray); white-space: nowrap; }
+
+    /* ── 상단 2분할 ─────────────────────────────── */
+    .top-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg); margin-bottom: var(--space-lg);
+    }
+
+    /* AI 분석 카드 */
+    .ai-card { border-left: 4px solid var(--color-post); }
+
+    .ai-summary-text {
+      font-size: 13.5px; line-height: 1.8; color: var(--color-ink);
+      margin-bottom: var(--space-md);
+    }
+
+    .ai-summary-text strong { color: var(--color-mid); }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+
+    .tag-row-label { font-size: 11px; font-weight: 700; color: var(--color-gray); margin-bottom: 4px; }
+
+    .strength-tag {
+      background: rgba(13,148,136,0.1); color: var(--color-ok);
+      padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      border: 1px solid rgba(13,148,136,0.25);
+    }
+
+    .weakness-tag {
+      background: rgba(217,119,6,0.1); color: var(--color-warn);
+      padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      border: 1px solid rgba(217,119,6,0.25);
+    }
+
+    /* 학급 현황 카드 */
+    .stats-card { border-left: 4px solid var(--color-mid); }
+
+    .class-metrics {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: var(--space-sm); margin-bottom: var(--space-lg);
+    }
+
+    .metric-cell {
+      background: var(--color-light); border-radius: 8px;
+      padding: 12px var(--space-md); text-align: center;
+    }
+
+    .metric-val {
+      font-size: 26px; font-weight: 800; line-height: 1;
+    }
+
+    .metric-label { font-size: 11px; color: var(--color-gray); margin-top: 3px; }
+
+    /* 단원별 진도 막대 차트 */
+    .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+
+    .bar-row {
+      display: grid; grid-template-columns: 120px 1fr 40px;
+      align-items: center; gap: var(--space-sm);
+    }
+
+    .bar-row-label { font-size: 12px; color: var(--color-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .bar-track {
+      height: 12px; background: var(--color-light); border-radius: 6px; overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%; border-radius: 6px;
+      transition: width 0.6s ease;
+    }
+
+    .bar-pct { font-size: 12px; font-weight: 700; text-align: right; }
+
+    /* ── 학생 성취도 테이블 ─────────────────────── */
+    .result-table-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .result-table { width: 100%; border-collapse: collapse; }
+
+    .result-table th {
+      padding: 10px 14px; font-size: 11px; font-weight: 700;
+      color: var(--color-gray); background: var(--color-light);
+      border-bottom: 1px solid var(--color-border);
+      text-align: left; white-space: nowrap;
+    }
+
+    .result-table th.sortable { cursor: pointer; }
+    .result-table th.sortable:hover { color: var(--color-mid); }
+
+    .result-table td {
+      padding: 10px 14px; font-size: 13px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .result-table tbody tr:hover { background: rgba(6,90,130,0.03); }
+    .result-table tbody tr:last-child td { border-bottom: none; }
+
+    /* 인라인 진도 바 */
+    .inline-bar {
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .inline-track {
+      width: 72px; height: 5px; background: var(--color-light); border-radius: 3px; overflow: hidden;
+    }
+
+    .inline-fill { height: 100%; border-radius: 3px; }
+
+    /* 점수 셀 */
+    .score-pill {
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 700; min-width: 44px; text-align: center;
+    }
+
+    /* AI 추천 칩 */
+    .rec-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+    }
+
+    .rec-deepen {
+      background: rgba(30,39,97,0.1); color: var(--color-post);
+      border: 1px solid rgba(30,39,97,0.2);
+    }
+
+    .rec-maintain {
+      background: rgba(6,90,130,0.08); color: var(--color-mid);
+      border: 1px solid rgba(6,90,130,0.2);
+    }
+
+    .rec-supplement {
+      background: rgba(217,119,6,0.1); color: var(--color-warn);
+      border: 1px solid rgba(217,119,6,0.25);
+    }
+
+    /* 전체 배포 버튼 */
+    .deploy-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-md) 0; margin-top: var(--space-sm);
+    }
+
+    /* 분포 히트맵 (대신 그룹 요약) */
+    .group-summary {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: var(--space-sm); margin-top: var(--space-md);
+    }
+
+    .group-cell {
+      border: 1px solid var(--color-border); border-radius: 8px;
+      padding: var(--space-sm) var(--space-md); text-align: center;
+    }
+
+    .group-cell-label { font-size: 11px; color: var(--color-gray); margin-bottom: 4px; }
+    .group-cell-count { font-size: 20px; font-weight: 800; }
+    .group-cell-sub   { font-size: 11px; color: var(--color-gray); margin-top: 2px; }
+
+    /* 체크박스 열 */
+    .result-table td:first-child { width: 36px; }
+    .result-table input[type="checkbox"] { accent-color: var(--color-mid); }
+
+    /* 행 선택 강조 */
+    .result-table tbody tr.row-selected { background: rgba(6,90,130,0.06); }
+  </style>
+</head>
+<body>
+
+<nav class="wf-nav">
+  <a href="wf01_dashboard.html">WF-01 홈</a>
+  <a href="wf02_lesson.html">WF-02 수업설계</a>
+  <a href="wf03_monitoring.html">WF-03 모니터링</a>
+  <a href="wf04_scoring.html">WF-04 AI채점</a>
+  <a href="wf05_result.html" class="active">WF-05 결과</a>
+  <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
+  <a href="wfs03a_entry.html">S03a 엔트리실습</a>
+  <a href="wfs03b_python.html">S03b 파이썬실습</a>
+</nav>
+
+<header class="gnb">
+  <div class="gnb-logo"><span class="logo-badge">AI</span>정보 코스웨어</div>
+  <select class="gnb-class-select input select" style="width:auto;" aria-label="학급 선택">
+    <option>1학년 3반</option><option>1학년 4반</option>
+  </select>
+  <div class="gnb-actions">
+    <button class="gnb-icon-btn" aria-label="알림">🔔<span class="gnb-badge"></span></button>
+    <button class="gnb-icon-btn" aria-label="설정">⚙️</button>
+    <div class="gnb-avatar" title="김지현 선생님">김</div>
+  </div>
+</header>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <nav class="sidebar-menu">
+      <div class="sidebar-section-label">메뉴</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf01_dashboard.html'"><span class="menu-icon">🏠</span>홈</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf02_lesson.html'"><span class="menu-icon">📚</span>교과서</div>
+      <div class="sidebar-menu-item active"><span class="menu-icon">📊</span>대시보드</div>
+      <div class="sidebar-menu-item" onclick="location.href='wf04_scoring.html'"><span class="menu-icon">✅</span>평가</div>
+      <div class="sidebar-menu-item"><span class="menu-icon">📋</span>게시판</div>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- 필터 바 -->
+    <div class="filter-bar">
+      <span class="filter-bar-label">조회 범위:</span>
+      <select class="input select" style="width:110px;" id="filter-subject" onchange="applyFilter()" aria-label="과목 선택">
+        <option>정보</option>
+        <option>AI 기초</option>
+      </select>
+      <select class="input select" style="width:200px;" id="filter-unit" onchange="applyFilter()" aria-label="단원 선택">
+        <option>Ⅲ-2. 파이썬 프로그래밍</option>
+        <option>Ⅲ-1. 알고리즘과 문제해결</option>
+        <option>전체 단원</option>
+      </select>
+      <select class="input select" style="width:130px;" id="filter-student" onchange="applyFilter()" aria-label="학생 범위">
+        <option>전체 학생</option>
+        <option>상 그룹 (6명)</option>
+        <option>중 그룹 (14명)</option>
+        <option>하 그룹 (6명)</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="applyFilter()">🔍 조회</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" onclick="exportReport()" aria-label="리포트 다운로드">⬇ 리포트 저장</button>
+      <button class="btn btn-primary btn-sm" onclick="location.href='wf04_scoring.html'" aria-label="AI 채점 화면으로 이동">✅ 채점 관리</button>
+    </div>
+
+    <!-- 상단 2분할 -->
+    <div class="top-grid">
+
+      <!-- AI 분석 결과 -->
+      <div class="card ai-card">
+        <div class="card-header">
+          <div class="card-title">🤖 AI 학급 분석</div>
+          <span class="text-sm text-gray">Ⅲ-2 파이썬 프로그래밍 기준</span>
+        </div>
+
+        <div class="ai-summary-text" id="ai-summary">
+          전반적으로 파이썬 기본 문법 이해도는 <strong>양호(평균 75.8점)</strong>입니다.
+          변수 선언과 print() 활용은 학급 대부분이 잘 수행하고 있으나,
+          <strong>자료형 구분(float/str 혼동)</strong>과 <strong>type() 함수 활용</strong>에서
+          하위 그룹의 취약점이 뚜렷이 나타납니다.
+          박지호·정다은·허지원 학생은 추가 보충 지도가 필요합니다.
+        </div>
+
+        <div class="tag-row-label">✅ 학급 강점</div>
+        <div class="tag-row">
+          <span class="strength-tag">기본 문법 이해</span>
+          <span class="strength-tag">print() 활용</span>
+          <span class="strength-tag">변수 선언</span>
+          <span class="strength-tag">코드 실행 완료율</span>
+        </div>
+        <div class="tag-row-label" style="margin-top:8px;">⚠ 보완 필요</div>
+        <div class="tag-row">
+          <span class="weakness-tag">자료형 구분 (float/str)</span>
+          <span class="weakness-tag">type() 활용</span>
+          <span class="weakness-tag">실수형 변수 처리</span>
+        </div>
+
+        <div class="group-summary">
+          <div class="group-cell">
+            <div class="group-cell-label">🏆 심화 추천</div>
+            <div class="group-cell-count" style="color:var(--color-post)">6명</div>
+            <div class="group-cell-sub">평균 91.2점</div>
+          </div>
+          <div class="group-cell">
+            <div class="group-cell-label">📚 현행 유지</div>
+            <div class="group-cell-count" style="color:var(--color-mid)">14명</div>
+            <div class="group-cell-sub">평균 78.1점</div>
+          </div>
+          <div class="group-cell">
+            <div class="group-cell-label">📖 보충 지도</div>
+            <div class="group-cell-count" style="color:var(--color-warn)">6명</div>
+            <div class="group-cell-sub">평균 64.5점</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 학급 학습 현황 -->
+      <div class="card stats-card">
+        <div class="card-header">
+          <div class="card-title">📊 학급 학습 현황</div>
+          <span class="text-sm text-gray">26명 기준</span>
+        </div>
+
+        <div class="class-metrics">
+          <div class="metric-cell">
+            <div class="metric-val" style="color:var(--color-mid)">68<span style="font-size:14px;font-weight:400">%</span></div>
+            <div class="metric-label">평균 진행률</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-val" style="color:var(--color-ok)">75.8<span style="font-size:14px;font-weight:400">점</span></div>
+            <div class="metric-label">실습 평균</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-val" style="color:var(--color-post)">71.3<span style="font-size:14px;font-weight:400">점</span></div>
+            <div class="metric-label">테스트 평균</div>
+          </div>
+        </div>
+
+        <div class="card-title mb-sm" style="font-size:12px;margin-bottom:8px;">단원별 진도율</div>
+        <div class="bar-chart" id="bar-chart">
+          <!-- JS 렌더 -->
+        </div>
+
+        <div class="alert alert-info mt-md" style="font-size:12px;">
+          <span>💡</span>
+          <span>Ⅲ-2-02 사칙연산 단원부터 실습 과제 난도가 상승합니다. 하위 그룹 사전 보충 권장.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 학생별 성취도 테이블 -->
+    <div class="card">
+      <div class="result-table-header">
+        <div class="card-title">
+          👨‍🎓 학생별 성취도
+          <span class="badge badge-gray" style="margin-left:4px;" id="student-count">26명</span>
+        </div>
+        <div class="flex gap-sm items-center">
+          <span class="text-sm text-gray"><span id="selected-count">0</span>명 선택됨</span>
+          <button class="btn btn-ghost btn-sm" onclick="toggleSelectAll()" id="select-all-btn">전체 선택</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="result-table" id="result-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="check-all" onchange="toggleSelectAll()" aria-label="전체 선택"></th>
+              <th>이름</th>
+              <th>수준</th>
+              <th class="sortable" onclick="sortBy('progress')">진행률 ↕</th>
+              <th class="sortable" onclick="sortBy('practice')">실습 ↕</th>
+              <th class="sortable" onclick="sortBy('test')">테스트 ↕</th>
+              <th>달성도</th>
+              <th>AI 추천</th>
+            </tr>
+          </thead>
+          <tbody id="result-tbody">
+            <!-- JS 렌더 -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="deploy-row">
+        <div class="text-sm text-gray">
+          선택한 학생에게 AI 추천 학습 자료를 일괄 배포합니다.
+        </div>
+        <button class="btn btn-primary" onclick="deployRecommended()" aria-label="추천 학습 일괄 배포">
+          🚀 추천 학습 일괄 배포
+        </button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast">완료</div>
+
+<style>
+  .toast { position:fixed;top:calc(var(--nav-height) + var(--gnb-height) + 16px);right:var(--space-xl);background:var(--color-ink);color:white;padding:10px var(--space-md);border-radius:8px;font-size:13px;font-weight:500;z-index:900;display:flex;align-items:center;gap:var(--space-sm);box-shadow:0 4px 20px rgba(0,0,0,0.2);transform:translateY(-8px);opacity:0;pointer-events:none;transition:all 0.25s; }
+  .toast.show { transform:translateY(0);opacity:1; }
+</style>
+
+<script>
+/* ── 차트 데이터 ─────────────────────────────── */
+var chartData = [
+  { label:'Ⅲ-1 알고리즘',  pct:95,  color:'var(--color-ok)' },
+  { label:'Ⅲ-2-01 프로그래밍', pct:68, color:'var(--color-mid)' },
+  { label:'Ⅲ-2-02 사칙연산',  pct:12, color:'var(--color-warn)' },
+  { label:'Ⅲ-2-03 조건문',    pct:0,  color:'var(--color-border)' },
+  { label:'Ⅳ-1 데이터분석',   pct:0,  color:'var(--color-border)' }
+];
+
+function renderBarChart() {
+  var chart = document.getElementById('bar-chart');
+  chart.innerHTML = '';
+  chartData.forEach(function(d) {
+    var row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML =
+      '<div class="bar-row-label">' + d.label + '</div>' +
+      '<div class="bar-track">' +
+        '<div class="bar-fill" id="bf-' + d.label + '" style="width:0%;background:' + d.color + '"></div>' +
+      '</div>' +
+      '<div class="bar-pct" style="color:' + d.color + '">' + d.pct + '%</div>';
+    chart.appendChild(row);
+  });
+  setTimeout(function() {
+    chartData.forEach(function(d) {
+      var el = document.getElementById('bf-' + d.label);
+      if (el) el.style.width = d.pct + '%';
+    });
+  }, 200);
+}
+
+/* ── 학생 데이터 ─────────────────────────────── */
+var students = [
+  { id:1,  name:'김민준', level:'상', progress:100, practice:95, test:92, rec:'deepen',     checked:false },
+  { id:5,  name:'최우진', level:'상', progress:100, practice:90, test:88, rec:'deepen',     checked:false },
+  { id:8,  name:'강지민', level:'상', progress:100, practice:88, test:91, rec:'deepen',     checked:false },
+  { id:11, name:'신민재', level:'상', progress:100, practice:92, test:87, rec:'deepen',     checked:false },
+  { id:14, name:'배나영', level:'상', progress:100, practice:85, test:83, rec:'deepen',     checked:false },
+  { id:20, name:'남서준', level:'상', progress:100, practice:95, test:90, rec:'deepen',     checked:false },
+  { id:2,  name:'이서연', level:'중', progress:72,  practice:88, test:85, rec:'maintain',   checked:false },
+  { id:6,  name:'한수아', level:'중', progress:65,  practice:85, test:79, rec:'maintain',   checked:false },
+  { id:7,  name:'오준서', level:'중', progress:80,  practice:78, test:72, rec:'maintain',   checked:false },
+  { id:9,  name:'윤서현', level:'중', progress:55,  practice:74, test:68, rec:'maintain',   checked:false },
+  { id:10, name:'임채원', level:'중', progress:48,  practice:69, test:63, rec:'maintain',   checked:false },
+  { id:12, name:'류하은', level:'중', progress:60,  practice:74, test:71, rec:'maintain',   checked:false },
+  { id:13, name:'조현준', level:'중', progress:70,  practice:77, test:69, rec:'maintain',   checked:false },
+  { id:17, name:'송유진', level:'중', progress:100, practice:78, test:74, rec:'maintain',   checked:false },
+  { id:18, name:'전민서', level:'중', progress:100, practice:80, test:77, rec:'maintain',   checked:false },
+  { id:21, name:'노아름', level:'중', progress:67,  practice:72, test:68, rec:'maintain',   checked:false },
+  { id:22, name:'마준혁', level:'중', progress:52,  practice:68, test:64, rec:'maintain',   checked:false },
+  { id:24, name:'방현우', level:'중', progress:74,  practice:75, test:70, rec:'maintain',   checked:false },
+  { id:25, name:'서예은', level:'중', progress:45,  practice:70, test:65, rec:'maintain',   checked:false },
+  { id:26, name:'양지훈', level:'중', progress:61,  practice:73, test:69, rec:'maintain',   checked:false },
+  { id:3,  name:'박지호', level:'하', progress:38,  practice:62, test:58, rec:'supplement', checked:false },
+  { id:4,  name:'정다은', level:'하', progress:25,  practice:71, test:65, rec:'supplement', checked:false },
+  { id:15, name:'허지원', level:'하', progress:43,  practice:65, test:60, rec:'supplement', checked:false },
+  { id:16, name:'안도현', level:'하', progress:58,  practice:68, test:63, rec:'supplement', checked:false },
+  { id:19, name:'구태양', level:'하', progress:32,  practice:60, test:55, rec:'supplement', checked:false },
+  { id:23, name:'문지아', level:'하', progress:100, practice:82, test:78, rec:'maintain',   checked:false }
+];
+
+var sortKey = null, sortAsc = true;
+
+function scoreColor(v) {
+  return v >= 90 ? 'var(--color-ok)' : v >= 70 ? 'var(--color-mid)' : 'var(--color-warn)';
+}
+
+function levelBadge(l) {
+  var cls = l === '상' ? 'badge-solid-mid' : l === '중' ? 'badge-mid' : 'badge-ok';
+  return '<span class="badge ' + cls + '">' + l + '</span>';
+}
+
+function recChip(rec) {
+  var map = { deepen:['rec-deepen','🏆 심화 학습'], maintain:['rec-maintain','📚 현행 유지'], supplement:['rec-supplement','📖 보충 학습'] };
+  var info = map[rec] || map.maintain;
+  return '<span class="rec-chip ' + info[0] + '" onclick="alert(\'추천 자료 상세 (목업)\')">' + info[1] + '</span>';
+}
+
+function achieveBar(s) {
+  var avg = Math.round((s.progress + s.practice + s.test) / 3);
+  var color = avg >= 85 ? 'var(--color-ok)' : avg >= 70 ? 'var(--color-mid)' : 'var(--color-warn)';
+  return '<div class="inline-bar"><div class="inline-track"><div class="inline-fill" style="width:' + avg + '%;background:' + color + '"></div></div><span style="font-size:12px;font-weight:700;color:' + color + '">' + avg + '%</span></div>';
+}
+
+function renderTable() {
+  var data = students.slice();
+  if (sortKey) {
+    data.sort(function(a,b) {
+      return sortAsc ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey];
+    });
+  }
+  var tbody = document.getElementById('result-tbody');
+  tbody.innerHTML = '';
+  data.forEach(function(s) {
+    var tr = document.createElement('tr');
+    if (s.checked) tr.classList.add('row-selected');
+    tr.innerHTML =
+      '<td><input type="checkbox" ' + (s.checked ? 'checked' : '') + ' onchange="toggleRow(' + s.id + ', this.checked)" aria-label="' + s.name + ' 선택"></td>' +
+      '<td style="font-weight:600;">' + s.name + '</td>' +
+      '<td>' + levelBadge(s.level) + '</td>' +
+      '<td><div class="inline-bar"><div class="inline-track"><div class="inline-fill" style="width:' + s.progress + '%;background:var(--color-mid)"></div></div><span style="font-size:12px;color:var(--color-mid);font-weight:600">' + s.progress + '%</span></div></td>' +
+      '<td><span class="score-pill" style="background:' + scoreColor(s.practice) + '20;color:' + scoreColor(s.practice) + '">' + s.practice + '점</span></td>' +
+      '<td><span class="score-pill" style="background:' + scoreColor(s.test) + '20;color:' + scoreColor(s.test) + '">' + s.test + '점</span></td>' +
+      '<td>' + achieveBar(s) + '</td>' +
+      '<td>' + recChip(s.rec) + '</td>';
+    tbody.appendChild(tr);
+  });
+  updateSelectedCount();
+}
+
+function toggleRow(id, checked) {
+  var s = students.find(function(st) { return st.id === id; });
+  if (s) { s.checked = checked; }
+  updateSelectedCount();
+  var tbody = document.getElementById('result-tbody');
+  tbody.querySelectorAll('tr').forEach(function(tr) {
+    var cb = tr.querySelector('input[type="checkbox"]');
+    if (cb && parseInt(tr.querySelector('[aria-label]') ? '' : '') !== id) {
+      tr.classList.toggle('row-selected', cb.checked);
+    }
+  });
+  /* simpler: just re-render */
+  students.forEach(function(s) {
+    var rows = document.querySelectorAll('#result-tbody tr');
+  });
+  updateSelectedCount();
+}
+
+function toggleSelectAll() {
+  var allChecked = students.every(function(s) { return s.checked; });
+  students.forEach(function(s) { s.checked = !allChecked; });
+  document.getElementById('check-all').checked = !allChecked;
+  document.getElementById('select-all-btn').textContent = allChecked ? '전체 선택' : '전체 해제';
+  renderTable();
+}
+
+function updateSelectedCount() {
+  var cnt = students.filter(function(s) { return s.checked; }).length;
+  document.getElementById('selected-count').textContent = cnt;
+}
+
+function sortBy(key) {
+  if (sortKey === key) { sortAsc = !sortAsc; }
+  else { sortKey = key; sortAsc = false; }
+  renderTable();
+}
+
+function applyFilter() {
+  showToast('필터 적용 완료 (목업)');
+}
+
+function deployRecommended() {
+  var cnt = students.filter(function(s) { return s.checked; }).length;
+  if (cnt === 0) { showToast('⚠ 배포할 학생을 먼저 선택하세요'); return; }
+  showToast('🚀 ' + cnt + '명 학생에게 AI 추천 학습 자료 배포 완료');
+  students.forEach(function(s) { s.checked = false; });
+  document.getElementById('check-all').checked = false;
+  document.getElementById('select-all-btn').textContent = '전체 선택';
+  renderTable();
+}
+
+function exportReport() { showToast('⬇ 학습 결과 리포트 저장 중... (목업)'); }
+
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2600);
+}
+
+renderBarChart();
+renderTable();
+</script>
+</body>
+</html>

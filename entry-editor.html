@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entry Editor</title>
+
+  <!-- Entry CSS (/dist/ 경로 — webpack public path와 일치) -->
+  <link rel="stylesheet" href="/dist/entry.min.css" />
+  <link rel="stylesheet" href="/entry-lib/entry-tool.css" />
+  <link rel="stylesheet" href="https://entry-cdn.pstatic.net/lib/codemirror/lib/codemirror.css" />
+  <link rel="stylesheet" href="https://entry-cdn.pstatic.net/lib/codemirror/addon/hint/show-hint.css" />
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #f5f7fa;
+    }
+    #workspace {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    #entry-loading {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; background: #f5f7fa;
+      font-family: 'Pretendard', sans-serif; gap: 12px; z-index: 9999;
+    }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid #dde;
+      border-top-color: #4D97FF; border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    #entry-loading p { font-size: 13px; color: #666; }
+    #entry-loading small { font-size: 11px; color: #aaa; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div id="entry-loading">
+    <div class="spinner"></div>
+    <p id="loadingText">엔트리 에디터 로딩 중...</p>
+    <small>처음 로드 시 10~20초가 걸릴 수 있습니다.</small>
+  </div>
+
+  <div id="workspace"></div>
+
+  <!-- CDN 의존성 -->
+  <script src="https://entry-cdn.pstatic.net/lib/lodash/lodash.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/js/react18/react.production.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/js/react18/react-dom.production.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/PreloadJS/lib/preloadjs-0.6.0.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/EaselJS/lib/easeljs-0.8.0.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/SoundJS/lib/soundjs-0.6.0.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/SoundJS/lib/flashaudioplugin-0.6.0.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/jquery/jquery.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/jquery-ui/ui/minified/jquery-ui.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/velocity/velocity.min.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/codemirror/lib/codemirror.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/codemirror/addon/hint/show-hint.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/codemirror/addon/edit/closebrackets.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/codemirror/mode/python/python.js"></script>
+  <script src="https://entry-cdn.pstatic.net/js/ws/jshint.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/fuzzy/lib/fuzzy.js"></script>
+  <script src="https://entry-cdn.pstatic.net/js/ws/python.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/socket.io-client/socket.io.js"></script>
+  <script src="https://entry-cdn.pstatic.net/lib/components-webfontloader/webfontloader.js"></script>
+
+  <!-- Entry 전용 파일 -->
+  <script src="/entry-lib/ko.js"></script>
+  <script src="/entry-lib/static.js"></script>
+  <script src="/entry-lib/entry-tool.js"></script>
+
+  <!-- entry.min.js 의존성 -->
+  <script src="/entry-lib/bignumber.min.js"></script>
+  <script src="/entry-lib/CanvasInput.js"></script>
+  <script src="/entry-lib/DragDropTouch.js"></script>
+  <script src="/entry-lib/filbert.js"></script>
+  <script src="/entry-lib/handle.js"></script>
+  <script src="/entry-lib/ndgmr.Collision.js"></script>
+  <script src="/entry-lib/entry-legacy-video.js"></script>
+  <script src="https://entry-cdn.pstatic.net/external/sound/sound-editor.js"></script>
+
+  <!-- entry.min.js 메인 번들 -->
+  <script src="/dist/entry.min.js"></script>
+
+  <script>
+    var loadingText = document.getElementById('loadingText');
+
+    function initEntry() {
+      try {
+        Entry.creationChangedEvent = new Entry.Event(window);
+        Entry.init(document.getElementById('workspace'), {
+          type: 'workspace',
+          libDir: '/entry-lib',
+          textCodingEnable: false,
+          backpackDisable: true,
+          exportObjectEnable: false,
+          blockSaveImageEnable: false,
+        });
+        Entry.loadProject();
+
+        document.getElementById('entry-loading').style.display = 'none';
+        window.parent.postMessage({ type: 'ENTRY_READY' }, '*');
+
+        window.addEventListener('message', function(e) {
+          if (e.data?.type === 'REQUEST_GRADE') {
+            try {
+              var project = Entry.exportProject ? Entry.exportProject() : null;
+              window.parent.postMessage({ type: 'GRADE_RESULT', project: project }, '*');
+            } catch (_) {
+              window.parent.postMessage({ type: 'GRADE_RESULT', project: null }, '*');
+            }
+          }
+        });
+      } catch (err) {
+        loadingText.textContent = '⚠ 초기화 오류: ' + err.message;
+        console.error('[Entry init error]', err);
+      }
+    }
+
+    // Entry.init이 준비될 때까지 폴링 (200ms × 100회 = 최대 20초)
+    var attempts = 0;
+    function waitForEntry() {
+      attempts++;
+      loadingText.textContent = '엔트리 에디터 로딩 중... (' + attempts + ')';
+      if (typeof Entry !== 'undefined' && typeof Entry.init === 'function') {
+        initEntry();
+        return;
+      }
+      if (attempts >= 100) {
+        loadingText.textContent = '⚠ 로딩 실패 — F12 콘솔을 확인하세요';
+        return;
+      }
+      setTimeout(waitForEntry, 200);
+    }
+
+    window.addEventListener('load', waitForEntry);
+  </script>
+</body>
+</html>

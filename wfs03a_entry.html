@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WF-S03a 엔트리 실습 — 정보 AI 학습 플랫폼</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── 전체 레이아웃 ───────────────────────────── */
+    body { overflow: hidden; }
+
+    .practice-wrap {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - var(--nav-height) - var(--gnb-height));
+    }
+
+    .practice-main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── GNB 단원·단계 내비게이션 ───────────────── */
+    .gnb-unit-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 0;
+    }
+    .gnb-unit-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      line-height: 1.4;
+      margin-right: 4px;
+    }
+    .stage-nav-btn {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 14px;
+      border: 1.5px solid var(--color-border);
+      background: var(--color-white);
+      color: var(--color-gray);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .stage-nav-btn.active {
+      background: var(--color-entry);
+      border-color: var(--color-entry);
+      color: white;
+    }
+    .stage-nav-btn:not(.active):hover {
+      border-color: var(--color-entry);
+      color: var(--color-entry);
+    }
+
+    /* 제출하기 버튼 */
+    .btn-submit {
+      background: var(--color-mid);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-submit:hover { opacity: 0.88; }
+
+    /* ── 좌측 패널 ─────────────────────────────── */
+    .step-panel {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--color-white);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .step-panel-header {
+      padding: 12px var(--space-md);
+      background: var(--color-entry);
+      color: white;
+      flex-shrink: 0;
+    }
+    .step-panel-header .unit-label {
+      font-size: 13px;
+      opacity: 0.85;
+      margin-bottom: 4px;
+    }
+    .step-panel-header .mission-title {
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .step-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ── 패널 섹션 구분 헤더 ─────────────────────── */
+    .panel-group-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    /* ── 문제이해 섹션 ────────────────────────────── */
+    .understand-section {
+      background: rgba(76,175,80,0.05);
+      border: 1px solid rgba(76,175,80,0.18);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .understand-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .understand-body {
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--color-ink);
+      margin-bottom: 10px;
+    }
+    .understand-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .preview-btn {
+      flex: 1;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 10px 4px;
+      border-radius: 6px;
+      border: 1.5px solid var(--color-entry);
+      background: white;
+      color: var(--color-entry);
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.4;
+      transition: all 0.15s;
+    }
+    .preview-btn:hover { background: var(--color-entry); color: white; }
+
+    /* ── 프로그래밍하기 단계 탭 ─────────────────── */
+    .prog-tabs {
+      display: flex;
+      gap: 4px;
+    }
+    .prog-tab-btn {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 4px;
+      border-radius: 6px;
+      border: 1.5px solid var(--color-border);
+      background: var(--color-light);
+      color: var(--color-gray);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .prog-tab-btn.active {
+      background: var(--color-entry);
+      border-color: var(--color-entry);
+      color: white;
+    }
+    .prog-tab-btn:not(.active):hover {
+      border-color: var(--color-entry);
+      color: var(--color-entry);
+    }
+
+    /* 프로그래밍 단계 패널 */
+    .prog-panel { display: none; flex-direction: column; gap: 8px; }
+    .prog-panel.p-active { display: flex; }
+
+    .prog-step-desc {
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--color-ink);
+      padding: 9px 10px;
+      background: var(--color-light);
+      border-radius: 6px;
+    }
+    .step-num { font-size: 22px; }
+
+    .prog-warn-box {
+      background: rgba(217,119,6,0.06);
+      border-left: 3px solid var(--color-warn);
+      border-radius: 0 6px 6px 0;
+      padding: 9px 10px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--color-ink);
+    }
+    .warn-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-warn);
+      margin-bottom: 4px;
+    }
+
+    .code-view-btn {
+      align-self: flex-start;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: 1.5px solid var(--color-entry);
+      background: rgba(76,175,80,0.07);
+      color: var(--color-entry);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .code-view-btn:hover { background: var(--color-entry); color: white; }
+
+    /* 코드 보기 펼침 영역 */
+    .code-expand {
+      display: none;
+      overflow: hidden;
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      margin: 0 calc(-1 * var(--space-md));
+    }
+    .code-expand.open { display: block; }
+    .code-expand img {
+      width: 100%;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    /* 프로그래밍하기 인라인 초록 바 */
+    .inline-section-header {
+      background: var(--color-entry);
+      color: white;
+      font-size: 19px;
+      font-weight: 700;
+      padding: 10px var(--space-md) 0;
+      margin: 4px calc(-1 * var(--space-md)) 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 프로그래밍하기 바 아래 단계 버튼 영역 */
+    .prog-stage-btns {
+      display: flex;
+      gap: 6px;
+      padding: 8px 0 10px;
+      margin-top: 8px;
+      border-top: 1.5px solid rgba(255,255,255,0.35);
+    }
+    .prog-gnb-btn {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 4px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .prog-gnb-btn.active {
+      background: white;
+      border-color: white;
+      color: var(--color-entry);
+    }
+    .prog-gnb-btn:not(.active):hover {
+      background: rgba(255,255,255,0.28);
+      border-color: white;
+      color: white;
+    }
+
+    /* ── 패널 리사이즈 핸들 ──────────────────────── */
+    .panel-resize-handle {
+      width: 5px;
+      flex-shrink: 0;
+      background: var(--color-border);
+      cursor: col-resize;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .panel-resize-handle:hover,
+    .panel-resize-handle.dragging {
+      background: var(--color-entry);
+    }
+
+    /* ── 에디터 컬럼 (flex col) ─────────────────── */
+    .editor-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .editor-area {
+      flex: 1;
+      position: relative;
+      background: #f5f7fa;
+      min-height: 0;
+    }
+
+    #entryIframe {
+      width: 100%; height: 100%;
+      border: none; display: block;
+    }
+
+    .entry-loading-overlay {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: #f5f7fa; z-index: 10; gap: 12px;
+    }
+    .entry-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid #dde;
+      border-top-color: var(--color-entry);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── 하단 결과 바 ───────────────────────────── */
+    .grade-bar {
+      height: 104px;
+      background: var(--color-white);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-lg);
+      gap: var(--space-md);
+      flex-shrink: 0;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+    }
+
+    .grade-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      flex-shrink: 0;
+    }
+
+    .grade-divider {
+      width: 1px;
+      height: 60px;
+      background: var(--color-border);
+      flex-shrink: 0;
+      margin: 0 var(--space-sm);
+    }
+
+    .grade-result-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .score-display {
+      display: none;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .score-display.show { display: flex; }
+
+    .score-num {
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--color-entry);
+      line-height: 1;
+    }
+    .score-label {
+      font-size: 13px;
+      color: var(--color-gray);
+      line-height: 1.4;
+    }
+
+    .score-feedback {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-ink);
+      padding: 8px 16px;
+      background: rgba(76,175,80,0.1);
+      border-radius: 8px;
+      display: none;
+    }
+    .score-feedback.show { display: block; }
+
+    .grade-empty-msg {
+      font-size: 13px;
+      color: var(--color-gray);
+    }
+
+    /* ── 이미지 팝업 모달 ─────────────────────────── */
+    .img-modal {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-modal.open { display: flex; }
+
+    .modal-box {
+      background: var(--color-white);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 540px;
+      max-height: 85vh;
+      width: 90%;
+      position: relative;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+    .modal-img {
+      width: 100%;
+      max-height: calc(85vh - 80px);
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      display: block;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: none; border: none;
+      font-size: 18px;
+      color: var(--color-gray);
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.1s;
+    }
+    .modal-close-btn:hover { color: var(--color-ink); }
+
+    /* ── 플로팅 AI 챗봇 ─────────────────────────── */
+    .ai-float {
+      position: fixed;
+      bottom: 120px; right: 24px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .ai-float-panel {
+      width: 280px;
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+    }
+    .ai-float-panel.open { display: flex; }
+    .ai-float-header {
+      padding: 10px 14px;
+      background: var(--color-mid);
+      color: white;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+      justify-content: space-between;
+    }
+    .ai-float-close {
+      background: none; border: none; color: white;
+      font-size: 16px; cursor: pointer; opacity: 0.7; line-height: 1;
+    }
+    .ai-float-close:hover { opacity: 1; }
+    .ai-chat-area {
+      height: 200px; overflow-y: auto;
+      padding: var(--space-md);
+      display: flex; flex-direction: column; gap: 8px;
+      background: var(--color-light);
+    }
+    .chat-msg {
+      font-size: 12px; line-height: 1.5;
+      padding: 8px 10px; border-radius: 8px; max-width: 90%;
+    }
+    .chat-msg.ai {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      align-self: flex-start;
+    }
+    .chat-msg.user { background: var(--color-mid); color: white; align-self: flex-end; }
+    .ai-chat-input {
+      display: flex; gap: 6px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--color-border);
+    }
+    .ai-chat-input input {
+      flex: 1; border: 1px solid var(--color-border);
+      border-radius: 6px; padding: 6px 10px; font-size: 12px;
+    }
+    .ai-chat-input input:focus { outline: 1px solid var(--color-entry); }
+    .ai-float-btn {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--color-mid); color: white; border: none;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .ai-float-btn:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+  </style>
+</head>
+<body>
+
+  <!-- WF 네비게이션 -->
+  <nav class="wf-nav">
+    <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-right:2px;">교사 ▸</span>
+    <a href="wf01_dashboard.html">WF-01 홈</a>
+    <a href="wf02_lesson.html">WF-02 수업설계</a>
+    <a href="wf03_monitoring.html">WF-03 모니터링</a>
+    <a href="wf04_scoring.html">WF-04 AI채점</a>
+    <a href="wf05_result.html">WF-05 결과</a>
+    <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
+    <a href="wfs03a_entry.html" class="active">S03a 엔트리실습</a>
+    <a href="wfs03b_python.html">S03b 파이썬실습</a>
+  </nav>
+
+  <!-- GNB (학생용) -->
+  <header class="gnb">
+    <!-- 단원명 (좌측) -->
+    <div class="gnb-unit-nav">
+      <span class="gnb-unit-text"><span style="font-size:11px;font-weight:400;opacity:0.6;">Ⅲ-2-01. 프로그래밍 시작하기</span><br><span style="font-size:13px;font-weight:700;">[실습] 이름을 입력하면 인사하는 프로그램</span></span>
+    </div>
+
+    <!-- 우측 액션 -->
+    <div class="gnb-actions" style="margin-left:auto;">
+      <button class="btn-submit" onclick="submitWork()" aria-label="제출하기">제출하기</button>
+      <div style="display:flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--color-warn);">
+        ⏱ <span id="timer">23:45</span>
+      </div>
+      <div class="gnb-avatar" style="background:var(--color-entry);">민</div>
+      <span style="font-size:13px;font-weight:600;">김민준</span>
+    </div>
+  </header>
+
+  <!-- 전체 래퍼 -->
+  <div class="practice-wrap">
+    <div class="practice-main">
+
+      <!-- ── 좌측 패널 ── -->
+      <aside class="step-panel">
+        <div class="step-panel-header">
+          <div class="mission-title">문제 이해</div>
+        </div>
+
+        <div class="step-panel-body">
+
+          <div class="understand-section">
+            <div class="understand-title">이름을 입력하면 인사하는 프로그램</div>
+            <div class="understand-body">
+              이름을 입력하면 "OOO님 안녕하세요?"라고 인사하는 프로그램으로
+              입력, 처리, 출력의 과정을 살펴보자.
+            </div>
+            <div class="understand-btns">
+              <button class="preview-btn" onclick="openPopup('run-screen')" aria-label="실행화면 보기">실행화면 보기</button>
+              <button class="preview-btn" onclick="openPopup('objects')" aria-label="필요한 오브젝트">필요한 오브젝트</button>
+            </div>
+          </div>
+
+          <!-- ── 프로그래밍하기 ── -->
+          <div class="inline-section-header">
+            <span>프로그래밍하기</span>
+            <div class="prog-stage-btns">
+              <button class="prog-gnb-btn active" data-stage="1" onclick="setProgStage(1)" aria-label="1단계">1단계</button>
+              <button class="prog-gnb-btn" data-stage="2" onclick="setProgStage(2)" aria-label="2단계">2단계</button>
+              <button class="prog-gnb-btn" data-stage="3" onclick="setProgStage(3)" aria-label="3단계">3단계</button>
+            </div>
+          </div>
+
+          <!-- 1단계 패널 -->
+          <div class="prog-panel p-active" id="prog-1">
+            <div class="prog-step-desc">
+              <span class="step-num">1️⃣</span>
+              "이름을 입력하세요."라고 이름을 묻고 <strong>대답</strong>에 저장한다.
+            </div>
+            <div class="prog-warn-box">
+              <div class="warn-label">⚠ 블록 연결 안내</div>
+              <strong>[자료]</strong> ‑ [<strong>"안녕"을(를) 묻고 대답 기다리기</strong>] 블록을
+              [<strong>시작하기 버튼을 클릭했을 때</strong>] 블록 아래에 연결한다.
+            </div>
+            <button class="code-view-btn" onclick="toggleCodeExpand('expand-1', this)" aria-label="코드 보기">💻 코드 보기 ▾</button>
+            <div class="code-expand" id="expand-1">
+              <img src="assets/img_code_step1.png" alt="1단계 코드" onclick="openPopup('code-1')">
+            </div>
+          </div>
+
+          <!-- 2단계 패널 -->
+          <div class="prog-panel" id="prog-2">
+            <div class="prog-step-desc">
+              <span class="step-num">2️⃣</span>
+              입력받은 <strong>대답</strong>에 "님 안녕하세요?" 글자를 합쳐 말한다.
+            </div>
+            <div class="prog-warn-box">
+              <div class="warn-label">⚠ 블록 연결 안내</div>
+              <strong>[계산]</strong> ‑ [<strong>"안녕"과(와) "엔트리"을(를) 합친 값</strong>] 블록을
+              사용하여 <strong>[자료]</strong> ‑ [<strong>대답</strong>] 블록과
+              "님 안녕하세요?" 글자를 입력하여 완성한다.
+            </div>
+            <button class="code-view-btn" onclick="toggleCodeExpand('expand-2', this)" aria-label="코드 보기">💻 코드 보기 ▾</button>
+            <div class="code-expand" id="expand-2">
+              <img src="assets/img_code_step2.png" alt="2단계 코드" onclick="openPopup('code-2')">
+            </div>
+          </div>
+
+          <!-- 3단계 패널 -->
+          <div class="prog-panel" id="prog-3">
+            <div class="prog-step-desc">
+              <span class="step-num">3️⃣</span>
+              오브젝트가 <strong>10만큼 이동</strong>하도록 블록을 추가하여 프로그램을 완성한다.
+            </div>
+            <div class="prog-warn-box">
+              <div class="warn-label">⚠ 블록 연결 안내</div>
+              <strong>[움직임]</strong> ‑ [<strong>10만큼 이동하기</strong>] 블록을
+              말하기 블록 <strong>아래</strong>에 연결하여 오브젝트가 인사하며 움직이도록 완성한다.
+            </div>
+            <button class="code-view-btn" onclick="toggleCodeExpand('expand-3', this)" aria-label="코드 보기">💻 코드 보기 ▾</button>
+            <div class="code-expand" id="expand-3">
+              <img src="assets/img_code_step3.png" alt="3단계 코드" onclick="openPopup('code-3')">
+            </div>
+          </div>
+
+        </div><!-- /.step-panel-body -->
+      </aside>
+
+      <!-- ── 패널 리사이즈 핸들 ── -->
+      <div class="panel-resize-handle" id="resizeHandle"></div>
+
+      <!-- ── 에디터 컬럼 ── -->
+      <div class="editor-column">
+
+        <!-- Entry iframe -->
+        <div class="editor-area">
+          <div class="entry-loading-overlay" id="loadingOverlay">
+            <div class="entry-spinner"></div>
+            <p style="font-size:13px;color:var(--color-gray);">엔트리 에디터 로딩 중...</p>
+            <p style="font-size:11px;color:var(--color-gray);">처음 로드 시 10~20초가 걸릴 수 있습니다.</p>
+          </div>
+          <iframe id="entryIframe" src="entry-editor.html"
+            title="엔트리 블록 코딩 에디터" allow="autoplay"></iframe>
+        </div>
+
+        <!-- 하단 결과 바 -->
+        <div class="grade-bar">
+          <div class="grade-btn-group">
+            <button class="btn btn-ghost btn-sm" onclick="resetEntry()" style="width:100px;">🔄 초기화</button>
+            <button class="btn btn-primary btn-sm" id="submitBtn"
+              style="background:var(--color-entry);border-color:var(--color-entry);width:100px;"
+              onclick="submitEntry()" disabled aria-label="채점하기">
+              📤 채점하기
+            </button>
+          </div>
+
+          <div class="grade-divider"></div>
+
+          <div class="grade-result-area">
+            <div class="score-display" id="scoreDisplay">
+              <div class="score-num" id="scoreNum">--</div>
+              <div class="score-label">점<br><span style="font-size:12px;">/100</span></div>
+            </div>
+            <div class="score-feedback" id="scoreFeedback"></div>
+            <span class="grade-empty-msg" id="gradeEmptyMsg">채점하기 버튼을 누르면 결과가 여기에 표시됩니다.</span>
+          </div>
+        </div>
+
+      </div><!-- /.editor-column -->
+
+    </div><!-- /.practice-main -->
+  </div><!-- /.practice-wrap -->
+
+  <!-- ── 이미지 팝업 모달 4개 ── -->
+  <div class="img-modal" id="modal-run-screen" onclick="handleModalBgClick(event,'run-screen')">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closePopup('run-screen')" aria-label="닫기">✕</button>
+      <div class="modal-title">🖥 실행화면</div>
+      <img class="modal-img" id="img-run-screen" src="" alt="홍길동님 안녕하세요? 실행화면">
+    </div>
+  </div>
+
+  <div class="img-modal" id="modal-objects" onclick="handleModalBgClick(event,'objects')">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closePopup('objects')" aria-label="닫기">✕</button>
+      <div class="modal-title">🐻 필요한 오브젝트</div>
+      <img class="modal-img" id="img-objects" src="" alt="파란 곰 캐릭터 오브젝트">
+    </div>
+  </div>
+
+  <div class="img-modal" id="modal-code-1" onclick="handleModalBgClick(event,'code-1')">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closePopup('code-1')" aria-label="닫기">✕</button>
+      <div class="modal-title">💻 1단계 코드</div>
+      <img class="modal-img" id="img-code-1" src="" alt="1단계: 시작하기 + 이름입력 블록">
+    </div>
+  </div>
+
+  <div class="img-modal" id="modal-code-2" onclick="handleModalBgClick(event,'code-2')">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closePopup('code-2')" aria-label="닫기">✕</button>
+      <div class="modal-title">💻 2단계 코드</div>
+      <img class="modal-img" id="img-code-2" src="" alt="2단계: 3줄 블록 완성 코드">
+    </div>
+  </div>
+
+  <div class="img-modal" id="modal-code-3" onclick="handleModalBgClick(event,'code-3')">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closePopup('code-3')" aria-label="닫기">✕</button>
+      <div class="modal-title">💻 3단계 코드</div>
+      <img class="modal-img" id="img-code-3" src="" alt="3단계: 10만큼 이동하기 블록 완성 코드">
+    </div>
+  </div>
+
+  <!-- ── 플로팅 AI 챗봇 ── -->
+  <div class="ai-float">
+    <div class="ai-float-panel" id="aiPanel">
+      <div class="ai-float-header">
+        💬 AI 도우미
+        <button class="ai-float-close" onclick="toggleAI()">✕</button>
+      </div>
+      <div class="ai-chat-area" id="chatArea">
+        <div class="chat-msg ai">🤖 안녕, 김민준! 이름을 입력하면 인사하는 프로그램을 만들어봐. 모르면 언제든 질문해!</div>
+      </div>
+      <div class="ai-chat-input">
+        <input id="chatInput" placeholder="질문 입력..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary btn-sm"
+          style="background:var(--color-entry);border-color:var(--color-entry);"
+          onclick="sendChat()">전송</button>
+      </div>
+    </div>
+    <button class="ai-float-btn" onclick="toggleAI()" aria-label="AI 도우미 열기" title="AI 도우미">💬</button>
+  </div>
+
+  <script>
+    /* ────────────────────────────────────────────
+       이미지 경로 설정
+       실제 이미지 파일을 assets/ 폴더에 저장한 후
+       아래 경로를 수정하면 됩니다.
+    ──────────────────────────────────────────── */
+    const IMG_PATHS = {
+      'run-screen': 'assets/img_run_screen.png',
+      'objects':    'assets/img_objects.png',
+      'code-1':     'assets/img_code_step1.png',
+      'code-2':     'assets/img_code_step2.png',
+      'code-3':     'assets/img_code_step3.png',
+    };
+
+    function makeSVGPlaceholder(line1, line2) {
+      const s = [
+        '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="300">',
+        '<rect width="480" height="300" fill="#f1f5f9" rx="8"/>',
+        '<rect x="140" y="100" width="200" height="100" fill="#e2e8f0" rx="8"/>',
+        '<text x="240" y="145" text-anchor="middle" font-family="sans-serif" ',
+        'font-size="13" font-weight="bold" fill="#475569">' + line1 + '</text>',
+        '<text x="240" y="168" text-anchor="middle" font-family="sans-serif" ',
+        'font-size="11" fill="#94a3b8">' + line2 + '</text>',
+        '<text x="240" y="270" text-anchor="middle" font-family="sans-serif" ',
+        'font-size="10" fill="#cbd5e1">assets/ 폴더에 이미지 파일 추가 후 교체</text>',
+        '</svg>'
+      ].join('');
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+    }
+
+    const PLACEHOLDERS = {
+      'run-screen': makeSVGPlaceholder('실행화면', '홍길동님 안녕하세요?'),
+      'objects':    makeSVGPlaceholder('필요한 오브젝트', '파란 곰 캐릭터'),
+      'code-1':     makeSVGPlaceholder('1단계 코드', '시작하기 + 이름입력 블록'),
+      'code-2':     makeSVGPlaceholder('2단계 코드', '3줄 블록 완성'),
+      'code-3':     makeSVGPlaceholder('3단계 코드', '10만큼 이동하기 블록'),
+    };
+
+    /* 실제 이미지 로드 시도 → 실패 시 플레이스홀더 */
+    ['run-screen', 'objects', 'code-1', 'code-2', 'code-3'].forEach(function(key) {
+      var img = document.getElementById('img-' + key);
+      img.src = IMG_PATHS[key];
+      img.onerror = function() { this.src = PLACEHOLDERS[key]; this.onerror = null; };
+    });
+
+    /* ── 코드 펼침 토글 ── */
+    function toggleCodeExpand(id, btn) {
+      var el   = document.getElementById(id);
+      var open = el.classList.toggle('open');
+      btn.textContent = open ? '💻 코드 닫기 ▴' : '💻 코드 보기 ▾';
+    }
+
+    /* ── 팝업 제어 ── */
+    function openPopup(id)  { document.getElementById('modal-' + id).classList.add('open'); }
+    function closePopup(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+    function handleModalBgClick(e, id) {
+      if (e.target.classList.contains('img-modal')) closePopup(id);
+    }
+
+    /* ── 단계 전환 ── */
+    function setProgStage(n) {
+      document.querySelectorAll('.prog-gnb-btn').forEach(function(btn) {
+        btn.classList.toggle('active', parseInt(btn.dataset.stage) === n);
+      });
+      document.querySelectorAll('.prog-panel').forEach(function(p) {
+        p.classList.remove('p-active');
+      });
+      document.getElementById('prog-' + n).classList.add('p-active');
+    }
+
+    /* ── 제출 ── */
+    function submitWork() {
+      if (confirm('학습을 제출하시겠습니까?')) {
+        alert('제출 완료! 선생님께 전달되었습니다.');
+      }
+    }
+
+    /* ── 페이지 내비게이션 ── */
+    var currentPage = 1;
+    var totalPages  = 8;
+
+    function goToPage(n) {
+      currentPage = n;
+      document.querySelectorAll('.page-dot').forEach(function(dot, i) {
+        dot.classList.toggle('active', i === n - 1);
+      });
+    }
+    function changePage(dir) {
+      goToPage(Math.max(1, Math.min(totalPages, currentPage + dir)));
+    }
+
+    /* ── Entry iframe 통신 ── */
+    var iframe    = document.getElementById('entryIframe');
+    var overlay   = document.getElementById('loadingOverlay');
+    var submitBtn = document.getElementById('submitBtn');
+
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'ENTRY_READY') {
+        overlay.style.display = 'none';
+        submitBtn.disabled = false;
+      }
+      if (e.data && e.data.type === 'GRADE_RESULT') {
+        var score = e.data.score != null ? e.data.score : 85;
+        showScore(score);
+        submitBtn.textContent = '📤 채점하기';
+        submitBtn.disabled = false;
+        saveScore(score);
+      }
+    });
+
+    function showScore(score) {
+      var display  = document.getElementById('scoreDisplay');
+      var numEl    = document.getElementById('scoreNum');
+      var feedback = document.getElementById('scoreFeedback');
+      var emptyMsg = document.getElementById('gradeEmptyMsg');
+      numEl.textContent = score;
+      display.classList.add('show');
+      var msg = score >= 90 ? '🎉 완벽해요! 미션 성공!' :
+                score >= 75 ? '👍 잘 했어요! 조금만 더 다듬어봐요.' :
+                              '💪 다시 한 번 도전해봐요!';
+      feedback.textContent = msg;
+      feedback.classList.add('show');
+      if (emptyMsg) emptyMsg.style.display = 'none';
+    }
+
+    function saveScore(score) {
+      var data = JSON.parse(localStorage.getItem('lms_scores') || '{}');
+      data.entry = {
+        score: score,
+        student: '김민준',
+        mission: '이름을 입력하면 인사하는 프로그램',
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('lms_scores', JSON.stringify(data));
+    }
+
+    function submitEntry() {
+      iframe.contentWindow && iframe.contentWindow.postMessage({ type: 'REQUEST_GRADE' }, '*');
+      submitBtn.textContent = '채점 중...';
+      submitBtn.disabled = true;
+    }
+
+    function resetEntry() {
+      if (!confirm('작업 내용이 초기화됩니다. 계속하시겠습니까?')) return;
+      iframe.src = iframe.src;
+      overlay.style.display = 'flex';
+      submitBtn.disabled = true;
+      submitBtn.textContent = '📤 채점하기';
+      document.getElementById('scoreDisplay').classList.remove('show');
+      document.getElementById('scoreFeedback').classList.remove('show');
+    }
+
+    /* ── AI 챗봇 ── */
+    function toggleAI() { document.getElementById('aiPanel').classList.toggle('open'); }
+
+    var aiReplies = [
+      '묻고 대답 기다리기 블록은 [자료] 카테고리에 있어!',
+      '대답 블록과 글자를 합치려면 [계산] - 합치기 블록을 써봐.',
+      '시작하기 블록 아래에 묻기 블록을 연결해봐!',
+      '완성되면 ▶ 버튼으로 실행해서 확인해봐.',
+      '잘 하고 있어! 코드 보기 버튼으로 힌트를 봐도 돼.',
+    ];
+    var aiIdx = 0;
+
+    function sendChat() {
+      var input = document.getElementById('chatInput');
+      if (!input.value.trim()) return;
+      var area = document.getElementById('chatArea');
+      var userMsg = document.createElement('div');
+      userMsg.className = 'chat-msg user';
+      userMsg.textContent = input.value;
+      area.appendChild(userMsg);
+      input.value = '';
+      setTimeout(function() {
+        var aiMsg = document.createElement('div');
+        aiMsg.className = 'chat-msg ai';
+        aiMsg.textContent = '🤖 ' + aiReplies[aiIdx % aiReplies.length];
+        area.appendChild(aiMsg);
+        area.scrollTop = area.scrollHeight;
+        aiIdx++;
+      }, 400);
+    }
+
+    /* ── 좌측 패널 리사이즈 ── */
+    (function() {
+      var handle  = document.getElementById('resizeHandle');
+      var panel   = document.querySelector('.step-panel');
+      var isDragging = false;
+      var startX, startW;
+
+      handle.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startW = panel.offsetWidth;
+        handle.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        var newW = startW + (e.clientX - startX);
+        newW = Math.max(200, Math.min(520, newW));
+        panel.style.width = newW + 'px';
+      });
+
+      document.addEventListener('mouseup', function() {
+        if (!isDragging) return;
+        isDragging = false;
+        handle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      });
+    })();
+
+    /* ── 카운트다운 타이머 ── */
+    var secs = 23 * 60 + 45;
+    setInterval(function() {
+      if (secs > 0) secs--;
+      var m  = String(Math.floor(secs / 60)).padStart(2, '0');
+      var s  = String(secs % 60).padStart(2, '0');
+      var el = document.getElementById('timer');
+      el.textContent = m + ':' + s;
+      el.style.color = secs < 300 ? 'var(--color-danger)' : 'var(--color-warn)';
+    }, 1000);
+  </script>
+</body>
+</html>
