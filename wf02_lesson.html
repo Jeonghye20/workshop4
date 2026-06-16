@@ -147,6 +147,82 @@
 
     .toc-lesson-icon { font-size: 11px; flex-shrink: 0; }
 
+    /* 목차 레이블 */
+    .toc-unit-label, .toc-lesson-label, .toc-sub-label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* 목차 액션 버튼 */
+    .toc-actions {
+      display: none;
+      align-items: center;
+      gap: 1px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .toc-unit-toggle:hover .toc-actions,
+    .toc-lesson:hover .toc-actions,
+    .toc-sub-lesson:hover .toc-actions { display: flex; }
+
+    .toc-action-btn {
+      width: 18px; height: 18px;
+      border-radius: 3px;
+      border: none;
+      background: transparent;
+      color: var(--color-gray);
+      font-size: 11px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0; line-height: 1;
+      transition: background 0.12s, color 0.12s;
+      font-family: inherit;
+    }
+    .toc-action-btn:hover { background: rgba(0,0,0,0.07); color: var(--color-ink); }
+    .toc-action-btn.danger:hover { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+
+    /* 차시 그룹 */
+    .toc-lesson-group { display: flex; flex-direction: column; }
+
+    /* 서브 학습자료 */
+    .toc-sub-children { display: flex; flex-direction: column; }
+
+    .toc-sub-lesson {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 6px var(--space-md) 6px 44px;
+      font-size: 12px;
+      color: var(--color-gray);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      user-select: none;
+    }
+    .toc-sub-lesson:hover { background: var(--color-light); color: var(--color-ink); }
+    .toc-sub-lesson.active {
+      background: rgba(6,90,130,0.07);
+      color: var(--color-mid);
+      font-weight: 600;
+      border-left-color: var(--color-mid);
+    }
+
+    /* 인라인 편집 입력 */
+    .toc-inline-input {
+      border: 1px solid var(--color-mid);
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 12px;
+      font-family: inherit;
+      color: var(--color-ink);
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
     /* ── 중앙: 에디터 ────────────────────────────── */
     .editor-panel {
       flex: 1;
@@ -995,6 +1071,45 @@
       color: var(--color-mid);
     }
 
+    /* 빈 학습자료 모드 — 탭 숨기기 */
+    .editor-tabs-row.empty-mode .editor-tab { display: none; }
+    .editor-tabs-row.empty-mode .tab-scroll-btn { display: none !important; }
+
+    /* 빈 학습자료 상태 */
+    .lesson-empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-light);
+      padding: var(--space-xl);
+      text-align: center;
+    }
+    .empty-state-icon { font-size: 52px; margin-bottom: var(--space-md); }
+    .empty-state-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: var(--space-sm);
+    }
+    .empty-state-desc {
+      font-size: 13px;
+      color: var(--color-gray);
+      line-height: 1.8;
+      margin-bottom: var(--space-xl);
+    }
+    .empty-state-card {
+      background: var(--color-white);
+      border: 2px dashed var(--color-border);
+      border-radius: 12px;
+      padding: 40px 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
     .editor-tab-body {
       flex: 1;
       overflow-y: auto;
@@ -1411,24 +1526,59 @@
       <aside class="toc-panel">
         <div class="toc-header">
           목차
-          <span class="text-sm" style="font-weight:400;text-transform:none;letter-spacing:0">3학년 1학기</span>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span class="text-sm" style="font-weight:400;text-transform:none;letter-spacing:0">3학년 1학기</span>
+            <button class="toc-action-btn" onclick="addUnit()" title="대단원 추가" style="font-size:14px;width:20px;height:20px;background:var(--color-light);border-radius:4px;">＋</button>
+          </div>
         </div>
 
-        <!-- Ⅲ-1 (접힘) -->
+        <!-- Ⅲ-1 -->
         <div class="toc-unit">
           <div class="toc-unit-toggle" onclick="toggleUnit(this)">
             <span class="toc-caret">▶</span>
-            <span>Ⅲ-1. 알고리즘과 문제해결</span>
+            <span class="toc-unit-label">Ⅲ-1. 알고리즘과 문제해결</span>
+            <div class="toc-actions" onclick="event.stopPropagation()">
+              <button class="toc-action-btn" onclick="addLesson(this)" title="차시 추가">＋</button>
+              <button class="toc-action-btn" onclick="renameUnit(this)" title="단원명 수정">✏</button>
+              <button class="toc-action-btn danger" onclick="deleteUnit(this)" title="단원 삭제">✕</button>
+            </div>
           </div>
           <div class="toc-children">
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-1-1')">
-              <span class="toc-lesson-icon">📄</span>Ⅲ-1-01 문제 분해와 알고리즘
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">📄</span>
+                <span class="toc-lesson-label">Ⅲ-1-01 문제 분해와 알고리즘</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-1-2')">
-              <span class="toc-lesson-icon">📄</span>Ⅲ-1-02 순서도로 표현하기
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">📄</span>
+                <span class="toc-lesson-label">Ⅲ-1-02 순서도로 표현하기</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-1-3')">
-              <span class="toc-lesson-icon">💻</span>Ⅲ-1-03 실습: 일상 알고리즘
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">💻</span>
+                <span class="toc-lesson-label">Ⅲ-1-03 실습: 일상 알고리즘</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
           </div>
         </div>
@@ -1437,55 +1587,148 @@
         <div class="toc-unit">
           <div class="toc-unit-toggle current" onclick="toggleUnit(this)">
             <span class="toc-caret open">▶</span>
-            <span>Ⅲ-2. 프로그래밍하기</span>
+            <span class="toc-unit-label">Ⅲ-2. 프로그래밍하기</span>
+            <div class="toc-actions" onclick="event.stopPropagation()">
+              <button class="toc-action-btn" onclick="addLesson(this)" title="차시 추가">＋</button>
+              <button class="toc-action-btn" onclick="renameUnit(this)" title="단원명 수정">✏</button>
+              <button class="toc-action-btn danger" onclick="deleteUnit(this)" title="단원 삭제">✕</button>
+            </div>
           </div>
           <div class="toc-children open">
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-1')">
-              <span class="toc-lesson-icon">📄</span>Ⅲ-2-01 프로그래밍 시작하기
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">📄</span>
+                <span class="toc-lesson-label">Ⅲ-2-01 프로그래밍 시작하기</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children">
+                <div class="toc-sub-lesson active" onclick="selectLesson(this)">
+                  <span class="toc-lesson-icon">✏️</span>
+                  <span class="toc-sub-label">↳ 변수와 자료형</span>
+                  <div class="toc-actions" onclick="event.stopPropagation()">
+                    <button class="toc-action-btn" onclick="renameSubLesson(this)" title="이름 수정">✏</button>
+                    <button class="toc-action-btn danger" onclick="deleteSubLesson(this)" title="삭제">✕</button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="toc-lesson active" id="toc-2-1a" onclick="selectLesson(this, 'toc-2-1a')">
-              <span class="toc-lesson-icon">✏️</span>↳ 변수와 자료형
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">💻</span>
+                <span class="toc-lesson-label">Ⅲ-2-02 두 수 사칙연산</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-2')">
-              <span class="toc-lesson-icon">💻</span>Ⅲ-2-02 두 수 사칙연산
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">📄</span>
+                <span class="toc-lesson-label">Ⅲ-2-03 조건문과 반복문</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-3')">
-              <span class="toc-lesson-icon">📄</span>Ⅲ-2-03 조건문과 반복문
-            </div>
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-4')">
-              <span class="toc-lesson-icon">📄</span>Ⅲ-2-04 함수와 모듈
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">📄</span>
+                <span class="toc-lesson-label">Ⅲ-2-04 함수와 모듈</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
           </div>
         </div>
 
-        <!-- Ⅳ-1 (접힘) -->
+        <!-- Ⅳ-1 -->
         <div class="toc-unit">
           <div class="toc-unit-toggle" onclick="toggleUnit(this)">
             <span class="toc-caret">▶</span>
-            <span>Ⅳ-1. 데이터 수집·분석</span>
+            <span class="toc-unit-label">Ⅳ-1. 데이터 수집·분석</span>
+            <div class="toc-actions" onclick="event.stopPropagation()">
+              <button class="toc-action-btn" onclick="addLesson(this)" title="차시 추가">＋</button>
+              <button class="toc-action-btn" onclick="renameUnit(this)" title="단원명 수정">✏</button>
+              <button class="toc-action-btn danger" onclick="deleteUnit(this)" title="단원 삭제">✕</button>
+            </div>
           </div>
           <div class="toc-children">
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-4-1')">
-              <span class="toc-lesson-icon">📄</span>Ⅳ-1-01 데이터의 종류
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">📄</span>
+                <span class="toc-lesson-label">Ⅳ-1-01 데이터의 종류</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-4-2')">
-              <span class="toc-lesson-icon">💻</span>Ⅳ-1-02 데이터 시각화
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">💻</span>
+                <span class="toc-lesson-label">Ⅳ-1-02 데이터 시각화</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
           </div>
         </div>
 
-        <!-- Ⅳ-2 (접힘) -->
+        <!-- Ⅳ-2 -->
         <div class="toc-unit">
           <div class="toc-unit-toggle" onclick="toggleUnit(this)">
             <span class="toc-caret">▶</span>
-            <span>Ⅳ-2. 인공지능과 미래</span>
+            <span class="toc-unit-label">Ⅳ-2. 인공지능과 미래</span>
+            <div class="toc-actions" onclick="event.stopPropagation()">
+              <button class="toc-action-btn" onclick="addLesson(this)" title="차시 추가">＋</button>
+              <button class="toc-action-btn" onclick="renameUnit(this)" title="단원명 수정">✏</button>
+              <button class="toc-action-btn danger" onclick="deleteUnit(this)" title="단원 삭제">✕</button>
+            </div>
           </div>
           <div class="toc-children">
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-5-1')">
-              <span class="toc-lesson-icon">📄</span>Ⅳ-2-01 머신러닝 개념
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">📄</span>
+                <span class="toc-lesson-label">Ⅳ-2-01 머신러닝 개념</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
-            <div class="toc-lesson" onclick="selectLesson(this, 'toc-5-2')">
-              <span class="toc-lesson-icon">💻</span>Ⅳ-2-02 AI 모델 실습
+            <div class="toc-lesson-group">
+              <div class="toc-lesson" onclick="selectLesson(this)">
+                <span class="toc-lesson-icon">💻</span>
+                <span class="toc-lesson-label">Ⅳ-2-02 AI 모델 실습</span>
+                <div class="toc-actions" onclick="event.stopPropagation()">
+                  <button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>
+                  <button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>
+                  <button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>
+                </div>
+              </div>
+              <div class="toc-sub-children"></div>
             </div>
           </div>
         </div>
@@ -1529,8 +1772,18 @@
           </div>
         </div>
 
+        <!-- 빈 학습자료 상태 -->
+        <div class="lesson-empty-state" id="lesson-empty-state" style="display:none;">
+          <div class="empty-state-card">
+            <div class="empty-state-icon">📂</div>
+            <div class="empty-state-name" id="empty-state-title">학습자료 이름</div>
+            <div class="empty-state-desc">아직 추가된 자료가 없습니다.<br>아래 버튼을 눌러 첫 번째 학습 자료를 추가해보세요.</div>
+            <button class="btn btn-primary" style="padding:10px 28px;font-size:14px;" onclick="openAddModalFromEmpty()">+ 자료 추가</button>
+          </div>
+        </div>
+
         <!-- 탭 콘텐츠 스크롤 영역 -->
-        <div class="editor-tab-body">
+        <div class="editor-tab-body" id="editor-tab-body">
 
           <!-- ══ Tab 1: 퀴즈형 문제 ══ -->
           <div class="editor-tab-content active" id="tab-quiz-pre">
@@ -2487,6 +2740,13 @@
       _setupTabDrag(tab);
       container.appendChild(tab);
     });
+    if (_currentEmptyLesson) {
+      _currentEmptyLesson.dataset.state = '';
+      _currentEmptyLesson = null;
+      document.getElementById('lesson-empty-state').style.display = 'none';
+      document.getElementById('editor-tab-body').style.display    = '';
+      document.querySelector('.editor-tabs-row').classList.remove('empty-mode');
+    }
     closeAddModal();
     updateScrollBtns();
     showToast('✅ ' + keys.length + '개 자료가 추가되었습니다');
@@ -2517,32 +2777,37 @@
   }
 
   function confirmDelete() {
-    if (!_tabToDelete) return;
-    // 새로 추가된 탭: data-tab-id로 콘텐츠 찾기
-    var tabId = _tabToDelete.dataset.tabId;
-    if (tabId) {
-      var content = document.getElementById('tab-' + tabId);
-      if (content) content.remove();
-    }
-    // 기존 탭: onclick="switchTab('id')" 에서 id 추출
-    var onclickAttr = _tabToDelete.getAttribute('onclick');
-    if (onclickAttr) {
-      var match = onclickAttr.match(/switchTab\('([^']+)'\)/);
-      if (match) {
-        var existing = document.getElementById('tab-' + match[1]);
-        if (existing) existing.remove();
+    if (_tabToDelete) {
+      // 새로 추가된 탭: data-tab-id로 콘텐츠 찾기
+      var tabId = _tabToDelete.dataset.tabId;
+      if (tabId) {
+        var content = document.getElementById('tab-' + tabId);
+        if (content) content.remove();
       }
+      // 기존 탭: onclick="switchTab('id')" 에서 id 추출
+      var onclickAttr = _tabToDelete.getAttribute('onclick');
+      if (onclickAttr) {
+        var match = onclickAttr.match(/switchTab\('([^']+)'\)/);
+        if (match) {
+          var existing = document.getElementById('tab-' + match[1]);
+          if (existing) existing.remove();
+        }
+      }
+      if (_tabToDelete.classList.contains('active')) {
+        var remaining = Array.prototype.filter.call(
+          document.querySelectorAll('.editor-tab'),
+          function(t) { return t !== _tabToDelete; }
+        );
+        if (remaining.length) remaining[0].click();
+      }
+      _tabToDelete.remove();
+      _tabToDelete = null;
+    } else if (_tocDeleteTarget) {
+      _tocDeleteTarget.remove();
+      _tocDeleteTarget = null;
     }
-    if (_tabToDelete.classList.contains('active')) {
-      var remaining = Array.prototype.filter.call(
-        document.querySelectorAll('.editor-tab'),
-        function(t) { return t !== _tabToDelete; }
-      );
-      if (remaining.length) remaining[0].click();
-    }
-    _tabToDelete.remove();
     closeDelConfirm();
-    showToast('🗑 탭이 삭제되었습니다');
+    showToast('🗑 삭제되었습니다');
   }
 
   document.getElementById('del-confirm-overlay').addEventListener('click', function(e) {
@@ -2586,11 +2851,200 @@
   }
 
   /* ── 목차 항목 선택 ─────────────────────────── */
-  function selectLesson(el, id) {
-    document.querySelectorAll('.toc-lesson').forEach(function (item) {
+  var _currentEmptyLesson = null;
+
+  function selectLesson(el) {
+    document.querySelectorAll('.toc-lesson, .toc-sub-lesson').forEach(function(item) {
       item.classList.remove('active');
     });
     el.classList.add('active');
+
+    var emptyState  = document.getElementById('lesson-empty-state');
+    var tabBody     = document.getElementById('editor-tab-body');
+
+    var tabsRow = document.querySelector('.editor-tabs-row');
+
+    if (el.dataset.state === 'empty') {
+      _currentEmptyLesson = el;
+      var label = el.querySelector('.toc-sub-label, .toc-lesson-label');
+      var name  = label ? label.textContent.replace('↳ ', '').trim() : '새 학습자료';
+      document.getElementById('empty-state-title').textContent = name;
+      emptyState.style.display = 'flex';
+      tabBody.style.display    = 'none';
+      tabsRow.classList.add('empty-mode');
+    } else {
+      _currentEmptyLesson      = null;
+      emptyState.style.display = 'none';
+      tabBody.style.display    = '';
+      tabsRow.classList.remove('empty-mode');
+    }
+  }
+
+  function openAddModalFromEmpty() {
+    openAddModal();
+  }
+
+  /* ── 목차 관리 ──────────────────────────────── */
+  var _tocDeleteTarget = null;
+
+  function _inlineRename(labelEl, className) {
+    var oldText = labelEl.textContent;
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'toc-inline-input';
+    input.value = oldText;
+    labelEl.replaceWith(input);
+    function done() {
+      var val = input.value.trim() || oldText;
+      var newLabel = document.createElement('span');
+      newLabel.className = className;
+      newLabel.textContent = val;
+      input.replaceWith(newLabel);
+    }
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') done();
+      if (e.key === 'Escape') { input.value = oldText; done(); }
+    });
+    input.addEventListener('blur', done);
+    setTimeout(function() { input.focus(); input.select(); }, 0);
+  }
+
+  function renameUnit(btn) {
+    _inlineRename(btn.closest('.toc-unit-toggle').querySelector('.toc-unit-label'), 'toc-unit-label');
+  }
+  function renameLesson(btn) {
+    _inlineRename(btn.closest('.toc-lesson').querySelector('.toc-lesson-label'), 'toc-lesson-label');
+  }
+  function renameSubLesson(btn) {
+    _inlineRename(btn.closest('.toc-sub-lesson').querySelector('.toc-sub-label'), 'toc-sub-label');
+  }
+
+  function _tocDelete(el, name) {
+    _tocDeleteTarget = el;
+    _tabToDelete = null;
+    document.getElementById('del-confirm-name').textContent = '"' + name + '"';
+    document.getElementById('del-confirm-overlay').classList.add('open');
+  }
+  function deleteUnit(btn) {
+    var unit = btn.closest('.toc-unit');
+    _tocDelete(unit, unit.querySelector('.toc-unit-label').textContent);
+  }
+  function deleteLesson(btn) {
+    var group = btn.closest('.toc-lesson-group');
+    _tocDelete(group, group.querySelector('.toc-lesson-label').textContent);
+  }
+  function deleteSubLesson(btn) {
+    var sub = btn.closest('.toc-sub-lesson');
+    _tocDelete(sub, sub.querySelector('.toc-sub-label').textContent);
+  }
+
+  function _inlineAdd(parentEl, placeholder, indent, onConfirm) {
+    var tempDiv = document.createElement('div');
+    tempDiv.style.cssText = 'padding:5px 16px 5px ' + indent + 'px;';
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'toc-inline-input';
+    input.placeholder = placeholder;
+    tempDiv.appendChild(input);
+    parentEl.appendChild(tempDiv);
+    tempDiv.scrollIntoView({ block: 'nearest' });
+    function done() {
+      var val = input.value.trim();
+      tempDiv.remove();
+      if (val) onConfirm(val);
+    }
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') done();
+      if (e.key === 'Escape') tempDiv.remove();
+    });
+    input.addEventListener('blur', done);
+    setTimeout(function() { input.focus(); }, 0);
+  }
+
+  function addUnit() {
+    var panel = document.querySelector('.toc-panel');
+    _inlineAdd(panel, '단원명 입력 (예: Ⅴ-1. 네트워크)', 16, function(val) {
+      panel.appendChild(_createUnitEl(val));
+      showToast('✅ 단원 "' + val + '"이 추가되었습니다');
+    });
+  }
+
+  function addLesson(btn) {
+    var toggle = btn.closest('.toc-unit-toggle');
+    var children = toggle.nextElementSibling;
+    if (!children.classList.contains('open')) {
+      toggle.querySelector('.toc-caret').classList.add('open');
+      children.classList.add('open');
+      toggle.classList.add('current');
+    }
+    _inlineAdd(children, '차시명 입력 (예: Ⅲ-2-05 리스트)', 32, function(val) {
+      children.appendChild(_createLessonGroup('📄', val));
+      showToast('✅ 차시 "' + val + '"이 추가되었습니다');
+    });
+  }
+
+  function addSubLesson(btn) {
+    var group = btn.closest('.toc-lesson-group');
+    var subChildren = group.querySelector('.toc-sub-children');
+    _inlineAdd(subChildren, '학습자료명 입력', 44, function(val) {
+      var sub = _createSubLessonEl('↳ ' + val);
+      subChildren.appendChild(sub);
+      sub.click();
+      showToast('✅ 학습자료 "' + val + '"이 추가되었습니다');
+    });
+  }
+
+  function _createSubLessonEl(label) {
+    var sub = document.createElement('div');
+    sub.className = 'toc-sub-lesson';
+    sub.dataset.state = 'empty';
+    sub.innerHTML =
+      '<span class="toc-lesson-icon">📝</span>' +
+      '<span class="toc-sub-label">' + label + '</span>' +
+      '<div class="toc-actions" onclick="event.stopPropagation()">' +
+        '<button class="toc-action-btn" onclick="renameSubLesson(this)" title="이름 수정">✏</button>' +
+        '<button class="toc-action-btn danger" onclick="deleteSubLesson(this)" title="삭제">✕</button>' +
+      '</div>';
+    sub.addEventListener('click', function() { selectLesson(this); });
+    return sub;
+  }
+
+  function _createLessonGroup(icon, name) {
+    var group = document.createElement('div');
+    group.className = 'toc-lesson-group';
+    var lesson = document.createElement('div');
+    lesson.className = 'toc-lesson';
+    lesson.innerHTML =
+      '<span class="toc-lesson-icon">' + icon + '</span>' +
+      '<span class="toc-lesson-label">' + name + '</span>' +
+      '<div class="toc-actions" onclick="event.stopPropagation()">' +
+        '<button class="toc-action-btn" onclick="addSubLesson(this)" title="학습자료 추가">＋</button>' +
+        '<button class="toc-action-btn" onclick="renameLesson(this)" title="차시명 수정">✏</button>' +
+        '<button class="toc-action-btn danger" onclick="deleteLesson(this)" title="차시 삭제">✕</button>' +
+      '</div>';
+    lesson.addEventListener('click', function() { selectLesson(this); });
+    var subChildren = document.createElement('div');
+    subChildren.className = 'toc-sub-children';
+    group.appendChild(lesson);
+    group.appendChild(subChildren);
+    return group;
+  }
+
+  function _createUnitEl(name) {
+    var unit = document.createElement('div');
+    unit.className = 'toc-unit';
+    unit.innerHTML =
+      '<div class="toc-unit-toggle" onclick="toggleUnit(this)">' +
+        '<span class="toc-caret">▶</span>' +
+        '<span class="toc-unit-label">' + name + '</span>' +
+        '<div class="toc-actions" onclick="event.stopPropagation()">' +
+          '<button class="toc-action-btn" onclick="addLesson(this)" title="차시 추가">＋</button>' +
+          '<button class="toc-action-btn" onclick="renameUnit(this)" title="단원명 수정">✏</button>' +
+          '<button class="toc-action-btn danger" onclick="deleteUnit(this)" title="단원 삭제">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="toc-children"></div>';
+    return unit;
   }
 
   /* ── 배포 그룹 토글 ─────────────────────────── */
