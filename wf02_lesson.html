@@ -150,9 +150,11 @@
     /* ── 중앙: 에디터 ────────────────────────────── */
     .editor-panel {
       flex: 1;
-      overflow-y: auto;
+      overflow: hidden;
       background: var(--color-light);
-      padding: var(--space-xl);
+      padding: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     .editor-section {
@@ -762,6 +764,531 @@
       color: var(--color-ok);
     }
 
+    /* ── 에디터 탭 시스템 ───────────────────────── */
+    .editor-tabs-row {
+      display: flex;
+      align-items: stretch;
+      background: var(--color-white);
+      border-bottom: 2px solid var(--color-border);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .tab-scroll-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      flex-shrink: 0;
+      background: var(--color-white);
+      border: none;
+      border-right: 1px solid var(--color-border);
+      color: var(--color-gray);
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+      z-index: 1;
+    }
+    .tab-scroll-btn:last-of-type {
+      border-right: none;
+      border-left: 1px solid var(--color-border);
+    }
+    .tab-scroll-btn:hover { color: var(--color-ink); background: var(--color-light); }
+    .tab-scroll-btn.visible { display: flex; }
+
+    .editor-tabs {
+      display: flex;
+      flex: 1;
+      min-width: 0;
+      padding: 0 var(--space-sm);
+      gap: 2px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+    .editor-tabs::-webkit-scrollbar { display: none; }
+
+    .editor-tabs-add {
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-md);
+      border-left: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .editor-tab {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-gray);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: color 0.15s;
+      user-select: none;
+    }
+    .editor-tab:hover { color: var(--color-ink); }
+    .editor-tab.active {
+      color: var(--color-mid);
+      border-bottom-color: var(--color-mid);
+    }
+
+    .editor-tab { cursor: grab; }
+    .editor-tab:active { cursor: grabbing; }
+
+    .editor-tab::before {
+      content: '⠿';
+      font-size: 10px;
+      color: transparent;
+      margin-right: 3px;
+      transition: color 0.15s;
+      line-height: 1;
+    }
+    .editor-tab:hover::before { color: var(--color-gray); }
+
+    .editor-tab.dragging {
+      opacity: 0.3;
+      cursor: grabbing;
+    }
+
+    .editor-tab.drag-over-left  { box-shadow: -3px 0 0 var(--color-mid); }
+    .editor-tab.drag-over-right { box-shadow:  3px 0 0 var(--color-mid); }
+
+    /* 탭 삭제 버튼 */
+    .tab-del {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--color-gray);
+      color: white;
+      font-size: 10px;
+      line-height: 1;
+      cursor: pointer;
+      margin-left: 2px;
+      flex-shrink: 0;
+      border: none;
+      padding: 0;
+      transition: background 0.15s;
+    }
+    .tab-del:hover { background: var(--color-danger); }
+    .editor-tab:hover .tab-del { display: inline-flex; }
+
+    /* 자료 추가 모달 */
+    .add-mat-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .add-mat-overlay.open { display: flex; }
+    .add-mat-modal {
+      background: var(--color-white);
+      border-radius: 12px;
+      padding: var(--space-xl);
+      width: 420px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    }
+    .add-mat-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: var(--space-md);
+    }
+    .mat-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      max-height: 360px;
+      overflow-y: auto;
+    }
+    .mat-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 10px 14px;
+      border: 2px solid var(--color-border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .mat-option:hover { border-color: var(--color-mid); }
+    .mat-option.selected {
+      border-color: var(--color-mid);
+      background: rgba(6,90,130,0.07);
+      color: var(--color-mid);
+    }
+    .mat-option .mat-icon { font-size: 18px; }
+    .add-mat-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+    }
+
+    /* 삭제 확인 모달 */
+    .del-confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1100;
+      align-items: center;
+      justify-content: center;
+    }
+    .del-confirm-overlay.open { display: flex; }
+    .del-confirm-modal {
+      background: var(--color-white);
+      border-radius: 12px;
+      padding: var(--space-xl);
+      width: 360px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .del-confirm-icon { font-size: 36px; margin-bottom: var(--space-sm); }
+    .del-confirm-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: var(--space-sm);
+    }
+    .del-confirm-desc {
+      font-size: 13px;
+      color: var(--color-gray);
+      margin-bottom: var(--space-lg);
+      line-height: 1.6;
+    }
+    .del-confirm-footer {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+    }
+
+    .tab-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      background: var(--color-light);
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-gray);
+    }
+    .editor-tab.active .tab-count {
+      background: rgba(6,90,130,0.1);
+      color: var(--color-mid);
+    }
+
+    .editor-tab-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-lg) var(--space-xl);
+    }
+    .editor-tab-content { display: none; }
+    .editor-tab-content.active { display: block; }
+
+    .tab-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+    .tab-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 2px;
+    }
+    .tab-desc { font-size: 12px; color: var(--color-gray); }
+
+    /* 퀴즈 편집 아이템 */
+    .quiz-edit-item {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: var(--space-md) var(--space-lg);
+      margin-bottom: var(--space-md);
+    }
+    .quiz-edit-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+    .quiz-edit-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-mid);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .quiz-edit-input {
+      flex: 1;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--color-ink);
+      border: none;
+      background: transparent;
+      padding: 0;
+    }
+    .quiz-edit-input:focus {
+      outline: none;
+      border-bottom: 1px dashed var(--color-mid);
+    }
+    .quiz-edit-actions { display: flex; gap: 4px; }
+    .quiz-edit-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--color-gray);
+      transition: background 0.1s;
+    }
+    .quiz-edit-btn:hover { background: var(--color-light); }
+    .quiz-edit-opts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding-left: 36px;
+      margin-bottom: var(--space-sm);
+    }
+    .quiz-edit-opt {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 12.5px;
+      color: var(--color-gray);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .quiz-edit-opt:hover { background: var(--color-light); }
+    .quiz-edit-opt.correct {
+      color: var(--color-ok);
+      font-weight: 600;
+      background: rgba(13,148,136,0.06);
+    }
+    .quiz-edit-opt input[type="radio"] { accent-color: var(--color-mid); }
+    .quiz-edit-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding-left: 36px;
+    }
+
+    /* 코드 블록 (소형) */
+    .code-block-sm {
+      background: var(--color-dark);
+      border-radius: 6px;
+      padding: var(--space-sm) var(--space-md);
+      font-family: 'Courier New', 'D2Coding', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    /* 영상 탭 */
+    .video-placeholder {
+      background: #0f0f0f;
+      border-radius: 10px;
+      height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .video-play-btn {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      transition: transform 0.15s;
+      margin-bottom: 12px;
+    }
+    .video-play-btn:hover { transform: scale(1.08); }
+    .video-url-row {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+    .video-url-input {
+      flex: 1;
+      padding: 8px var(--space-md);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--color-ink);
+    }
+    .video-url-input:focus { outline: none; border-color: var(--color-mid); }
+
+    /* 실습 탭 */
+    .practice-info-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: var(--space-lg);
+      margin-bottom: var(--space-md);
+    }
+    .practice-info-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: var(--space-sm);
+    }
+    .practice-editor-placeholder {
+      border: 2px solid;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+    .practice-editor-placeholder.entry { border-color: var(--color-entry); }
+    .practice-editor-placeholder.python { border-color: var(--color-python); }
+    .practice-editor-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 8px var(--space-md);
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+    }
+    .practice-editor-bar.entry { background: var(--color-entry); }
+    .practice-editor-bar.python { background: var(--color-python); }
+    .practice-editor-body {
+      background: var(--color-dark);
+      padding: var(--space-xl);
+      min-height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .practice-open-btn {
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      color: white;
+      transition: opacity 0.15s;
+    }
+    .practice-open-btn:hover { opacity: 0.85; }
+    .practice-open-btn.entry { background: var(--color-entry); }
+    .practice-open-btn.python { background: var(--color-python); }
+
+    /* 평가형 문제 */
+    .eval-item {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: var(--space-md) var(--space-lg);
+      margin-bottom: var(--space-md);
+    }
+    .eval-item-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      flex-wrap: wrap;
+    }
+    .eval-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-post);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .eval-type-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .eval-type-code  { background: rgba(55,118,171,0.12); color: var(--color-python); }
+    .eval-type-fix   { background: rgba(217,119,6,0.12);  color: var(--color-warn); }
+    .eval-type-fill  { background: rgba(30,39,97,0.10);   color: var(--color-post); }
+    .eval-question {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      flex: 1;
+      line-height: 1.5;
+    }
+    .eval-rubric {
+      background: var(--color-light);
+      border-radius: 6px;
+      padding: var(--space-sm) var(--space-md);
+    }
+    .eval-rubric-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .eval-rubric-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .eval-rubric-row:last-child { border-bottom: none; }
+    .eval-rubric-label { color: var(--color-ink); }
+    .eval-rubric-score { color: var(--color-mid); font-weight: 600; }
+    .eval-answer-area {
+      background: var(--color-dark);
+      border-radius: 6px;
+      padding: var(--space-md);
+      margin-top: var(--space-sm);
+      font-family: 'Courier New', 'D2Coding', monospace;
+      font-size: 12.5px;
+      color: #abb2bf;
+      min-height: 72px;
+    }
+
     /* ── 저장 토스트 ─────────────────────────────── */
     .toast {
       position: fixed;
@@ -830,9 +1357,9 @@
   <!-- 좌측 사이드바 (공통) -->
   <aside class="sidebar">
     <nav class="sidebar-menu">
-      <div class="sidebar-section-label">메뉴</div>
+      <div class="sidebar-section-label">학급</div>
       <div class="sidebar-menu-item" onclick="location.href='wf01_dashboard.html'">
-        <span class="menu-icon">🏠</span>홈
+        <span class="menu-icon">🏠</span>학급 홈
       </div>
       <div class="sidebar-menu-item active">
         <span class="menu-icon">📚</span>교과서
@@ -860,8 +1387,8 @@
       <div class="toolbar-divider"></div>
 
       <div class="lesson-breadcrumb">
-        <div class="lesson-breadcrumb-path">Ⅲ-2. 파이썬 프로그래밍 &rsaquo; Ⅲ-2-01 프로그래밍 시작하기</div>
-        <div class="lesson-breadcrumb-title">3차시: 변수와 자료형 이해하기</div>
+        <div class="lesson-breadcrumb-path">Ⅲ-2. 프로그래밍하기 &rsaquo; Ⅲ-2-01 프로그래밍 시작하기</div>
+        <div class="lesson-breadcrumb-title"> 변수와 자료형 이해하기</div>
       </div>
 
       <div class="toolbar-divider"></div>
@@ -910,14 +1437,14 @@
         <div class="toc-unit">
           <div class="toc-unit-toggle current" onclick="toggleUnit(this)">
             <span class="toc-caret open">▶</span>
-            <span>Ⅲ-2. 파이썬 프로그래밍</span>
+            <span>Ⅲ-2. 프로그래밍하기</span>
           </div>
           <div class="toc-children open">
             <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-1')">
               <span class="toc-lesson-icon">📄</span>Ⅲ-2-01 프로그래밍 시작하기
             </div>
             <div class="toc-lesson active" id="toc-2-1a" onclick="selectLesson(this, 'toc-2-1a')">
-              <span class="toc-lesson-icon">✏️</span>↳ 3차시: 변수와 자료형
+              <span class="toc-lesson-icon">✏️</span>↳ 변수와 자료형
             </div>
             <div class="toc-lesson" onclick="selectLesson(this, 'toc-2-2')">
               <span class="toc-lesson-icon">💻</span>Ⅲ-2-02 두 수 사칙연산
@@ -964,185 +1491,612 @@
         </div>
       </aside>
 
-      <!-- ━━━ 중앙: 에디터 ━━━ -->
+      <!-- ━━━ 중앙: 에디터 (탭) ━━━ -->
       <section class="editor-panel">
 
-        <!-- 학습 목표 -->
-        <div class="editor-section">
-          <div class="editor-section-header">
-            <div class="editor-section-label">🎯 학습 목표</div>
-            <button class="btn btn-ghost btn-sm">편집</button>
-          </div>
-          <div class="editor-section-body">
-            <div class="objective-list">
-              <div class="objective-item">
-                <div class="objective-num">1</div>
-                <div class="objective-text">변수의 개념을 설명하고, 파이썬에서 변수를 선언하고 값을 할당할 수 있다.</div>
-              </div>
-              <div class="objective-item">
-                <div class="objective-num">2</div>
-                <div class="objective-text">정수(int), 실수(float), 문자열(str) 자료형을 구분하고 type() 함수로 확인할 수 있다.</div>
-              </div>
-              <div class="objective-item">
-                <div class="objective-num">3</div>
-                <div class="objective-text">변수를 활용한 간단한 계산 프로그램을 작성할 수 있다.</div>
-              </div>
+        <!-- 탭 헤더 -->
+        <div class="editor-tabs-row">
+          <button class="tab-scroll-btn" id="tab-scroll-left" onclick="scrollTabs(-1)" aria-label="왼쪽으로 스크롤">&#8249;</button>
+          <div class="editor-tabs" id="editor-tabs-container">
+            <div class="editor-tab active" onclick="switchTab('quiz-pre')" aria-label="퀴즈형 문제 탭">
+              ❓ 퀴즈형 <span class="tab-count">5</span>
+              <button class="tab-del" onclick="event.stopPropagation(); confirmDeleteTab(this.parentElement)" aria-label="탭 삭제">✕</button>
             </div>
+            <div class="editor-tab" onclick="switchTab('concept')" aria-label="개념자료 탭">
+              📖 개념자료
+              <button class="tab-del" onclick="event.stopPropagation(); confirmDeleteTab(this.parentElement)" aria-label="탭 삭제">✕</button>
+            </div>
+            <div class="editor-tab" onclick="switchTab('video')" aria-label="영상 탭">
+              🎬 영상
+              <button class="tab-del" onclick="event.stopPropagation(); confirmDeleteTab(this.parentElement)" aria-label="탭 삭제">✕</button>
+            </div>
+            <div class="editor-tab" onclick="switchTab('entry')" aria-label="엔트리 실습 탭">
+              🟢 엔트리 실습
+              <button class="tab-del" onclick="event.stopPropagation(); confirmDeleteTab(this.parentElement)" aria-label="탭 삭제">✕</button>
+            </div>
+            <div class="editor-tab" onclick="switchTab('python')" aria-label="파이썬 실습 탭">
+              🐍 파이썬 실습
+              <button class="tab-del" onclick="event.stopPropagation(); confirmDeleteTab(this.parentElement)" aria-label="탭 삭제">✕</button>
+            </div>
+            <div class="editor-tab" onclick="switchTab('quiz-eval')" aria-label="평가형 문제 탭">
+              📝 평가형 <span class="tab-count">3</span>
+              <button class="tab-del" onclick="event.stopPropagation(); confirmDeleteTab(this.parentElement)" aria-label="탭 삭제">✕</button>
+            </div>
+          </div>
+          <button class="tab-scroll-btn" id="tab-scroll-right" onclick="scrollTabs(1)" aria-label="오른쪽으로 스크롤">&#8250;</button>
+          <div class="editor-tabs-add">
+            <button class="btn btn-primary btn-sm" onclick="openAddModal()" aria-label="자료 추가">+ 자료 추가</button>
           </div>
         </div>
 
-        <!-- 설명 -->
-        <div class="editor-section">
-          <div class="editor-section-header">
-            <div class="editor-section-label">📝 설명</div>
-            <div class="flex gap-xs">
-              <span class="badge badge-mid">수업 전 단계</span>
-              <button class="btn btn-ghost btn-sm">미리보기</button>
-            </div>
-          </div>
+        <!-- 탭 콘텐츠 스크롤 영역 -->
+        <div class="editor-tab-body">
 
-          <!-- 서식 도구 모음 -->
-          <div class="editor-toolbar">
-            <button class="editor-tool-btn" title="굵게"><b>B</b></button>
-            <button class="editor-tool-btn" title="기울임"><i>I</i></button>
-            <button class="editor-tool-btn" title="밑줄"><u>U</u></button>
-            <div class="editor-tool-divider"></div>
-            <button class="editor-tool-btn" title="글머리">≡</button>
-            <button class="editor-tool-btn" title="번호목록">①</button>
-            <div class="editor-tool-divider"></div>
-            <button class="editor-tool-btn" title="코드">〈/〉</button>
-            <button class="editor-tool-btn" title="링크">🔗</button>
-            <button class="editor-tool-btn" title="표">⊞</button>
-            <div class="editor-tool-divider"></div>
-            <button class="editor-tool-btn" title="실행취소">↩</button>
-            <button class="editor-tool-btn" title="재실행">↪</button>
-          </div>
-
-          <div class="editor-section-body">
-            <p style="font-size:13px; line-height:1.8; color:var(--color-ink); margin-bottom: 12px;">
-              <strong>변수(Variable)</strong>는 프로그램에서 데이터를 저장하는 공간입니다.
-              파이썬에서는 <code style="background:var(--color-light); padding:1px 5px; border-radius:3px; font-family:monospace; font-size:12px;">=</code>
-              기호를 사용해 변수를 선언하고 값을 할당합니다.
-              변수 이름은 영문자, 숫자, 밑줄(_)로 구성하며 숫자로 시작할 수 없습니다.
-            </p>
-
-            <p style="font-size:13px; line-height:1.8; color:var(--color-ink); margin-bottom: 12px;">
-              파이썬의 주요 <strong>자료형(Data Type)</strong>은 아래 코드 예시와 같습니다.
-              <code style="background:var(--color-light); padding:1px 5px; border-radius:3px; font-family:monospace; font-size:12px;">type()</code>
-              함수로 변수의 자료형을 확인할 수 있습니다.
-            </p>
-
-            <div class="code-block">
-              <span class="code-var">name</span> = <span class="code-string">"김민준"</span>    <span class="code-comment"># str (문자열)</span><br>
-              <span class="code-var">age</span>  = <span class="code-num">15</span>              <span class="code-comment"># int (정수)</span><br>
-              <span class="code-var">height</span> = <span class="code-num">165.5</span>         <span class="code-comment"># float (실수)</span><br>
-              <span class="code-var">is_student</span> = <span class="code-keyword">True</span>  <span class="code-comment"># bool (논리)</span><br>
-              <br>
-              <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">name</span>))    <span class="code-comment"># &lt;class 'str'&gt;</span><br>
-              <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">age</span>))     <span class="code-comment"># &lt;class 'int'&gt;</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 미디어 업로드 -->
-        <div class="editor-section">
-          <div class="editor-section-header">
-            <div class="editor-section-label">🖼 이미지 · 영상 자료</div>
-            <button class="btn btn-ghost btn-sm">자료 추가 +</button>
-          </div>
-          <div class="editor-section-body">
-            <!-- 기존 업로드된 미디어 -->
-            <div class="media-grid">
-              <div class="media-thumb">
-                <div class="media-thumb-img">📊</div>
-                <div class="media-thumb-label">자료형 분류도</div>
-                <button class="media-thumb-del" aria-label="삭제">✕</button>
+          <!-- ══ Tab 1: 퀴즈형 문제 ══ -->
+          <div class="editor-tab-content active" id="tab-quiz-pre">
+            <div class="tab-header">
+              <div>
+                <div class="tab-title">퀴즈형 문제</div>
+                <div class="tab-desc">수업 전 선행학습 확인 / 수업 중 이해도 점검 · 5문항 · 총 10점</div>
               </div>
-              <div class="media-thumb">
-                <div class="media-thumb-img" style="background: linear-gradient(135deg, #fce7f3, #fbcfe8);">▶️</div>
-                <div class="media-thumb-label">변수 개념 영상</div>
-                <button class="media-thumb-del" aria-label="삭제">✕</button>
+              <div class="flex gap-sm">
+                <button class="btn btn-ghost btn-sm" onclick="openQuizModal()">✨ AI 생성</button>
+                <button class="btn btn-ghost btn-sm">+ 문항 추가</button>
               </div>
             </div>
 
-            <!-- 업로드 드래그 영역 -->
-            <div class="media-upload-area" onclick="alert('파일 선택 다이얼로그 (목업)')">
-              <div class="media-upload-icon">📎</div>
-              <div class="media-upload-text">이미지 또는 영상을 여기에 드래그하거나 클릭하여 업로드</div>
-              <div class="media-upload-sub">지원 형식: JPG, PNG, GIF, MP4, YouTube URL · 최대 50MB</div>
+            <div class="quiz-edit-item">
+              <div class="quiz-edit-header">
+                <div class="quiz-edit-num">Q1</div>
+                <input class="quiz-edit-input" value="파이썬에서 변수에 값을 저장할 때 사용하는 기호는?" aria-label="Q1 문제" />
+                <div class="quiz-edit-actions">
+                  <button class="quiz-edit-btn" aria-label="편집">✏️</button>
+                  <button class="quiz-edit-btn" aria-label="삭제">🗑</button>
+                </div>
+              </div>
+              <div class="quiz-edit-opts">
+                <label class="quiz-edit-opt"><input type="radio" name="q1e"> ① == (같음 비교)</label>
+                <label class="quiz-edit-opt correct"><input type="radio" name="q1e" checked> ② = (할당) ✅</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q1e"> ③ := (바다코끼리)</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q1e"> ④ ← (화살표)</label>
+              </div>
+              <div class="quiz-edit-meta">
+                <span class="badge badge-ok" style="font-size:11px">정답 ②</span>
+                <span class="text-sm text-gray">배점 2점</span>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <!-- 지시사항 -->
-        <div class="editor-section">
-          <div class="editor-section-header">
-            <div class="editor-section-label">📋 실습 지시사항</div>
-            <span class="badge badge-solid-ok" style="font-size:11px;">실습 과제</span>
-          </div>
-          <div class="editor-section-body">
-            <div class="instruction-list">
-              <div class="instruction-item">
-                <div class="instruction-step">1</div>
-                <div class="instruction-text">파이썬 에디터에서 자신의 <strong>이름, 나이, 키</strong>를 각각 변수에 저장하세요.</div>
+            <div class="quiz-edit-item">
+              <div class="quiz-edit-header">
+                <div class="quiz-edit-num">Q2</div>
+                <input class="quiz-edit-input" value="x = 3.14 일 때, type(x) 의 출력 결과는?" aria-label="Q2 문제" />
+                <div class="quiz-edit-actions">
+                  <button class="quiz-edit-btn" aria-label="편집">✏️</button>
+                  <button class="quiz-edit-btn" aria-label="삭제">🗑</button>
+                </div>
               </div>
-              <div class="instruction-item">
-                <div class="instruction-step">2</div>
-                <div class="instruction-text"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">print()</code> 함수를 사용해 각 변수의 값을 출력하는 코드를 작성하세요.</div>
+              <div class="quiz-edit-opts">
+                <label class="quiz-edit-opt"><input type="radio" name="q2e"> ① &lt;class 'int'&gt;</label>
+                <label class="quiz-edit-opt correct"><input type="radio" name="q2e" checked> ② &lt;class 'float'&gt; ✅</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q2e"> ③ &lt;class 'str'&gt;</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q2e"> ④ &lt;class 'double'&gt;</label>
               </div>
-              <div class="instruction-item">
-                <div class="instruction-step">3</div>
-                <div class="instruction-text"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">type()</code> 함수로 각 변수의 자료형을 확인하고, 결과를 주석(#)으로 기록하세요.</div>
-              </div>
-              <div class="instruction-item">
-                <div class="instruction-step">4</div>
-                <div class="instruction-text">코드를 실행한 결과 화면을 캡처하거나, 에디터에서 직접 <strong>제출</strong> 버튼을 눌러 과제를 완료하세요.</div>
+              <div class="quiz-edit-meta">
+                <span class="badge badge-ok" style="font-size:11px">정답 ②</span>
+                <span class="text-sm text-gray">배점 2점</span>
               </div>
             </div>
-            <textarea class="input editor-textarea" placeholder="추가 지시사항이나 유의사항을 입력하세요..." style="min-height: 72px; border-top: 1px solid var(--color-border); border-radius: 0 0 6px 6px; margin-top: var(--space-sm);">※ 변수 이름은 의미 있게 지어야 합니다. a, b, c 같은 이름 대신 name, age, height처럼 내용을 알 수 있는 이름을 사용하세요.</textarea>
-          </div>
-        </div>
 
-        <!-- 퀴즈 섹션 -->
-        <div class="editor-section">
-          <div class="editor-section-header">
-            <div class="editor-section-label">❓ 퀴즈 (AI 생성)</div>
-            <div class="flex gap-xs items-center">
-              <span class="badge badge-gray">3문항</span>
-              <button class="btn btn-ghost btn-sm" onclick="openQuizModal()">✨ 재생성</button>
-            </div>
-          </div>
-          <div class="editor-section-body">
-            <div class="quiz-item">
-              <div class="quiz-q"><span class="quiz-q-num">Q1.</span> 파이썬에서 변수에 값을 할당할 때 사용하는 연산자는?</div>
-              <div class="quiz-options">
-                <label class="quiz-option"><input type="radio" name="q1" value="a"> == (같음 비교)</label>
-                <label class="quiz-option"><input type="radio" name="q1" value="b" checked> = (할당)</label>
-                <label class="quiz-option"><input type="radio" name="q1" value="c"> := (바다코끼리)</label>
-                <label class="quiz-option"><input type="radio" name="q1" value="d"> ← (화살표)</label>
+            <div class="quiz-edit-item">
+              <div class="quiz-edit-header">
+                <div class="quiz-edit-num">Q3</div>
+                <input class="quiz-edit-input" value="다음 중 파이썬에서 올바른 변수 이름은?" aria-label="Q3 문제" />
+                <div class="quiz-edit-actions">
+                  <button class="quiz-edit-btn" aria-label="편집">✏️</button>
+                  <button class="quiz-edit-btn" aria-label="삭제">🗑</button>
+                </div>
+              </div>
+              <div class="quiz-edit-opts">
+                <label class="quiz-edit-opt"><input type="radio" name="q3e"> ① 1score</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q3e"> ② my score</label>
+                <label class="quiz-edit-opt correct"><input type="radio" name="q3e" checked> ③ my_score ✅</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q3e"> ④ my-score</label>
+              </div>
+              <div class="quiz-edit-meta">
+                <span class="badge badge-ok" style="font-size:11px">정답 ③</span>
+                <span class="text-sm text-gray">배점 2점</span>
               </div>
             </div>
-            <div class="quiz-item">
-              <div class="quiz-q"><span class="quiz-q-num">Q2.</span> <code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">x = 3.14</code> 에서 변수 x의 자료형은?</div>
-              <div class="quiz-options">
-                <label class="quiz-option"><input type="radio" name="q2" value="a"> int</label>
-                <label class="quiz-option"><input type="radio" name="q2" value="b" checked> float</label>
-                <label class="quiz-option"><input type="radio" name="q2" value="c"> str</label>
-                <label class="quiz-option"><input type="radio" name="q2" value="d"> bool</label>
-              </div>
-            </div>
-            <div class="quiz-item">
-              <div class="quiz-q"><span class="quiz-q-num">Q3.</span> 다음 중 올바른 변수 이름은?</div>
-              <div class="quiz-options">
-                <label class="quiz-option"><input type="radio" name="q3" value="a"> 1score</label>
-                <label class="quiz-option"><input type="radio" name="q3" value="b"> my score</label>
-                <label class="quiz-option"><input type="radio" name="q3" value="c" checked> my_score</label>
-                <label class="quiz-option"><input type="radio" name="q3" value="d"> my-score</label>
-              </div>
-            </div>
-          </div>
-        </div>
 
+            <div class="quiz-edit-item">
+              <div class="quiz-edit-header">
+                <div class="quiz-edit-num">Q4</div>
+                <input class="quiz-edit-input" value="다음 코드를 실행했을 때의 결과는?" aria-label="Q4 문제" />
+                <div class="quiz-edit-actions">
+                  <button class="quiz-edit-btn" aria-label="편집">✏️</button>
+                  <button class="quiz-edit-btn" aria-label="삭제">🗑</button>
+                </div>
+              </div>
+              <div class="code-block-sm" style="margin: 0 0 8px 36px;">
+                <span class="code-var">x</span> = <span class="code-num">5</span><br>
+                <span class="code-var">x</span> = <span class="code-var">x</span> + <span class="code-num">3</span><br>
+                <span class="code-keyword">print</span>(<span class="code-var">x</span>)
+              </div>
+              <div class="quiz-edit-opts">
+                <label class="quiz-edit-opt"><input type="radio" name="q4e"> ① 5</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q4e"> ② x + 3</label>
+                <label class="quiz-edit-opt correct"><input type="radio" name="q4e" checked> ③ 8 ✅</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q4e"> ④ 오류 발생</label>
+              </div>
+              <div class="quiz-edit-meta">
+                <span class="badge badge-ok" style="font-size:11px">정답 ③</span>
+                <span class="text-sm text-gray">배점 2점</span>
+              </div>
+            </div>
+
+            <div class="quiz-edit-item">
+              <div class="quiz-edit-header">
+                <div class="quiz-edit-num">Q5</div>
+                <input class="quiz-edit-input" value='score = "100" 일 때 score 의 자료형은?' aria-label="Q5 문제" />
+                <div class="quiz-edit-actions">
+                  <button class="quiz-edit-btn" aria-label="편집">✏️</button>
+                  <button class="quiz-edit-btn" aria-label="삭제">🗑</button>
+                </div>
+              </div>
+              <div class="quiz-edit-opts">
+                <label class="quiz-edit-opt"><input type="radio" name="q5e"> ① int</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q5e"> ② float</label>
+                <label class="quiz-edit-opt correct"><input type="radio" name="q5e" checked> ③ str ✅</label>
+                <label class="quiz-edit-opt"><input type="radio" name="q5e"> ④ bool</label>
+              </div>
+              <div class="quiz-edit-meta">
+                <span class="badge badge-ok" style="font-size:11px">정답 ③</span>
+                <span class="text-sm text-gray">배점 2점</span>
+              </div>
+            </div>
+          </div><!-- /tab-quiz-pre -->
+
+
+          <!-- ══ Tab 2: 개념자료 ══ -->
+          <div class="editor-tab-content" id="tab-concept">
+            <div class="tab-header">
+              <div>
+                <div class="tab-title">개념자료</div>
+                <div class="tab-desc">학생에게 배포될 학습 내용 — 텍스트, 예시 코드, 그림 등</div>
+              </div>
+              <div class="flex gap-sm">
+                <button class="btn btn-ghost btn-sm">🪄 AI 초안</button>
+                <button class="btn btn-ghost btn-sm">미리보기</button>
+              </div>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-header">
+                <div class="editor-section-label">🎯 학습 목표</div>
+                <button class="btn btn-ghost btn-sm">편집</button>
+              </div>
+              <div class="editor-section-body">
+                <div class="objective-list">
+                  <div class="objective-item">
+                    <div class="objective-num">1</div>
+                    <div class="objective-text">변수의 개념을 설명하고, 파이썬에서 변수를 선언하고 값을 할당할 수 있다.</div>
+                  </div>
+                  <div class="objective-item">
+                    <div class="objective-num">2</div>
+                    <div class="objective-text">정수(int), 실수(float), 문자열(str) 자료형을 구분하고 type() 함수로 확인할 수 있다.</div>
+                  </div>
+                  <div class="objective-item">
+                    <div class="objective-num">3</div>
+                    <div class="objective-text">변수를 활용한 간단한 계산 프로그램을 작성할 수 있다.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-header">
+                <div class="editor-section-label">📝 설명</div>
+                <div class="flex gap-xs">
+                  <span class="badge badge-mid">수업 전 단계</span>
+                  <button class="btn btn-ghost btn-sm">미리보기</button>
+                </div>
+              </div>
+              <div class="editor-toolbar">
+                <button class="editor-tool-btn" title="굵게"><b>B</b></button>
+                <button class="editor-tool-btn" title="기울임"><i>I</i></button>
+                <button class="editor-tool-btn" title="밑줄"><u>U</u></button>
+                <div class="editor-tool-divider"></div>
+                <button class="editor-tool-btn" title="글머리">≡</button>
+                <button class="editor-tool-btn" title="번호목록">①</button>
+                <div class="editor-tool-divider"></div>
+                <button class="editor-tool-btn" title="코드">〈/〉</button>
+                <button class="editor-tool-btn" title="링크">🔗</button>
+                <button class="editor-tool-btn" title="표">⊞</button>
+                <div class="editor-tool-divider"></div>
+                <button class="editor-tool-btn" title="실행취소">↩</button>
+                <button class="editor-tool-btn" title="재실행">↪</button>
+              </div>
+              <div class="editor-section-body">
+                <p style="font-size:13px; line-height:1.8; color:var(--color-ink); margin-bottom:12px;">
+                  <strong>변수(Variable)</strong>는 프로그램에서 데이터를 저장하는 공간입니다.
+                  파이썬에서는 <code style="background:var(--color-light);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:12px;">=</code>
+                  기호를 사용해 변수를 선언하고 값을 할당합니다.
+                  변수 이름은 영문자, 숫자, 밑줄(_)로 구성하며 숫자로 시작할 수 없습니다.
+                </p>
+                <p style="font-size:13px; line-height:1.8; color:var(--color-ink); margin-bottom:12px;">
+                  파이썬의 주요 <strong>자료형(Data Type)</strong>은 아래 코드 예시와 같습니다.
+                  <code style="background:var(--color-light);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:12px;">type()</code>
+                  함수로 변수의 자료형을 확인할 수 있습니다.
+                </p>
+                <div class="code-block">
+                  <span class="code-var">name</span> = <span class="code-string">"김민준"</span>    <span class="code-comment"># str (문자열)</span><br>
+                  <span class="code-var">age</span>  = <span class="code-num">15</span>              <span class="code-comment"># int (정수)</span><br>
+                  <span class="code-var">height</span> = <span class="code-num">165.5</span>         <span class="code-comment"># float (실수)</span><br>
+                  <span class="code-var">is_student</span> = <span class="code-keyword">True</span>  <span class="code-comment"># bool (논리)</span><br>
+                  <br>
+                  <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">name</span>))    <span class="code-comment"># &lt;class 'str'&gt;</span><br>
+                  <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">age</span>))     <span class="code-comment"># &lt;class 'int'&gt;</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-header">
+                <div class="editor-section-label">💡 핵심 정리</div>
+                <button class="btn btn-ghost btn-sm">편집</button>
+              </div>
+              <div class="editor-section-body">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                  <thead>
+                    <tr style="background:var(--color-light);">
+                      <th style="padding:8px 12px;text-align:left;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);">자료형</th>
+                      <th style="padding:8px 12px;text-align:left;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);">예시</th>
+                      <th style="padding:8px 12px;text-align:left;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);">설명</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">int</code></td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-gray);">15, -3, 100</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">정수 (소수점 없음)</td></tr>
+                    <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">float</code></td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-gray);">3.14, 165.5</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">실수 (소수점 있음)</td></tr>
+                    <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">str</code></td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-gray);">"김민준", '안녕'</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">문자열 (따옴표로 감쌈)</td></tr>
+                    <tr><td style="padding:8px 12px;"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">bool</code></td><td style="padding:8px 12px;color:var(--color-gray);">True, False</td><td style="padding:8px 12px;">참/거짓 논리값</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div><!-- /tab-concept -->
+
+
+          <!-- ══ Tab 3: 영상 ══ -->
+          <div class="editor-tab-content" id="tab-video">
+            <div class="tab-header">
+              <div>
+                <div class="tab-title">영상 자료</div>
+                <div class="tab-desc">YouTube URL 또는 직접 업로드 · 학생 화면에 플레이어로 표시됨</div>
+              </div>
+              <button class="btn btn-ghost btn-sm">+ 영상 추가</button>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-header">
+                <div class="editor-section-label">🎬 영상 1 — 파이썬 변수와 자료형 개념</div>
+                <div class="flex gap-xs">
+                  <span class="badge badge-ok">등록됨</span>
+                  <button class="quiz-edit-btn" aria-label="삭제">🗑</button>
+                </div>
+              </div>
+              <div class="editor-section-body">
+                <div class="video-placeholder">
+                  <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);"></div>
+                  <div style="position:relative;z-index:1;text-align:center;">
+                    <div class="video-play-btn" onclick="alert('영상 재생 (목업)')">▶</div>
+                    <div style="color:white;font-size:14px;font-weight:600;margin-bottom:4px;">파이썬 변수와 자료형 완벽 정리 | 중학교 정보</div>
+                    <div style="color:rgba(255,255,255,0.6);font-size:11px;">📺 YouTube · 08:42 · 정보교사 김지현</div>
+                  </div>
+                </div>
+
+                <div class="video-url-row">
+                  <input class="video-url-input" value="https://www.youtube.com/watch?v=python_var_type_lecture" aria-label="영상 URL" />
+                  <button class="btn btn-ghost btn-sm">URL 변경</button>
+                </div>
+
+                <label style="font-size:12px;font-weight:600;color:var(--color-gray);display:block;margin-bottom:4px;">영상 설명 (학생에게 표시)</label>
+                <textarea class="input editor-textarea" style="min-height:60px;">이 영상에서는 파이썬 변수의 개념과 int, float, str, bool 네 가지 기본 자료형을 설명합니다. 영상 시청 후 퀴즈형 문제를 풀어보세요.</textarea>
+
+                <div style="display:flex;gap:var(--space-md);margin-top:var(--space-sm);flex-wrap:wrap;">
+                  <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--color-ink);cursor:pointer;">
+                    <input type="checkbox" checked style="accent-color:var(--color-mid)"> 수업 전 필수 시청
+                  </label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--color-ink);cursor:pointer;">
+                    <input type="checkbox" style="accent-color:var(--color-mid)"> 배속 제한 (1.5× 이하)
+                  </label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--color-ink);cursor:pointer;">
+                    <input type="checkbox" checked style="accent-color:var(--color-mid)"> 시청 완료 후 다음 자료 해제
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="media-upload-area" onclick="alert('영상 업로드 다이얼로그 (목업)')">
+              <div class="media-upload-icon">🎬</div>
+              <div class="media-upload-text">YouTube URL 붙여넣기 또는 동영상 파일 업로드</div>
+              <div class="media-upload-sub">지원 형식: MP4, MOV · 최대 500MB · 또는 YouTube / Vimeo URL</div>
+            </div>
+          </div><!-- /tab-video -->
+
+
+          <!-- ══ Tab 4: 엔트리 실습 ══ -->
+          <div class="editor-tab-content" id="tab-entry">
+            <div class="tab-header">
+              <div>
+                <div class="tab-title">엔트리 실습</div>
+                <div class="tab-desc">블록 코딩 실습 (중등) · 엔트리 에디터 연동</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="color:var(--color-entry);border-color:var(--color-entry);" onclick="location.href='wfs03a_entry.html'">
+                🟢 엔트리 에디터 열기
+              </button>
+            </div>
+
+            <div class="practice-info-card">
+              <div class="practice-info-title">📋 실습 지시사항</div>
+              <div class="instruction-list">
+                <div class="instruction-item">
+                  <div class="instruction-step">1</div>
+                  <div class="instruction-text">엔트리에서 <strong>변수 블록</strong>을 사용해 이름(name), 나이(age) 변수를 생성하세요.</div>
+                </div>
+                <div class="instruction-item">
+                  <div class="instruction-step">2</div>
+                  <div class="instruction-text"><strong>말하기 블록</strong>을 연결해 "내 이름은 ○○○이고, 나이는 ○살입니다."를 출력하세요.</div>
+                </div>
+                <div class="instruction-item">
+                  <div class="instruction-step">3</div>
+                  <div class="instruction-text">완성된 프로젝트를 <strong>저장 후 제출</strong>하세요. 엔트리 우측 상단 [제출] 버튼을 누르면 됩니다.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="practice-editor-placeholder entry">
+              <div class="practice-editor-bar entry">
+                <span>●</span> 엔트리 블록 에디터
+                <span style="margin-left:auto;font-size:11px;font-weight:400;opacity:0.85">학생 화면에서 실행됩니다</span>
+              </div>
+              <div class="practice-editor-body">
+                <div style="text-align:center;">
+                  <div style="font-size:40px;margin-bottom:12px;">🟢</div>
+                  <div style="color:#aaa;font-size:13px;margin-bottom:16px;">엔트리 실습 환경이 여기에 표시됩니다</div>
+                  <button class="practice-open-btn entry" onclick="location.href='wfs03a_entry.html'">
+                    🟢 엔트리 에디터 열기 →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-header">
+                <div class="editor-section-label">📊 채점 기준 (루브릭)</div>
+                <button class="btn btn-ghost btn-sm" onclick="location.href='wf04_scoring.html'">AI 채점 설정 →</button>
+              </div>
+              <div class="editor-section-body">
+                <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+                  <thead>
+                    <tr style="background:var(--color-light);">
+                      <th style="padding:8px 12px;text-align:left;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);">평가 기준</th>
+                      <th style="padding:8px 12px;text-align:center;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);width:60px;">배점</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">변수 2개(name, age) 정확히 생성</td>
+                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">4점</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">말하기 블록에 변수 올바르게 연결</td>
+                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">4점</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 12px;color:var(--color-ink);">정상 실행 및 출력 결과 정확</td>
+                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;">2점</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div><!-- /tab-entry -->
+
+
+          <!-- ══ Tab 5: 파이썬 실습 ══ -->
+          <div class="editor-tab-content" id="tab-python">
+            <div class="tab-header">
+              <div>
+                <div class="tab-title">파이썬 실습</div>
+                <div class="tab-desc">텍스트 코딩 실습 (고등) · 파이썬 에디터 연동</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="color:var(--color-python);border-color:var(--color-python);" onclick="location.href='wfs03b_python.html'">
+                🐍 파이썬 에디터 열기
+              </button>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-header">
+                <div class="editor-section-label">💻 스타터 코드</div>
+                <div class="flex gap-xs">
+                  <span class="badge badge-mid" style="font-size:11px;">학생에게 제공</span>
+                  <button class="btn btn-ghost btn-sm">편집</button>
+                </div>
+              </div>
+              <div class="editor-section-body" style="padding:0;">
+                <div class="code-block" style="border-radius:0 0 8px 8px;margin:0;">
+                  <span class="code-comment"># 3차시: 변수와 자료형 실습</span><br>
+                  <span class="code-comment"># 아래 빈 칸을 채워 코드를 완성하세요.</span><br>
+                  <br>
+                  <span class="code-comment"># ① 변수 선언</span><br>
+                  <span class="code-var">name</span>   = <span class="code-string">""</span>     <span class="code-comment"># 자신의 이름 (문자열)</span><br>
+                  <span class="code-var">age</span>    = <span class="code-num">0</span>       <span class="code-comment"># 자신의 나이 (정수)</span><br>
+                  <span class="code-var">height</span> = <span class="code-num">0.0</span>     <span class="code-comment"># 자신의 키 (실수)</span><br>
+                  <br>
+                  <span class="code-comment"># ② 출력</span><br>
+                  <span class="code-keyword">print</span>(<span class="code-string">"이름:"</span>, <span class="code-var">name</span>)<br>
+                  <span class="code-keyword">print</span>(<span class="code-string">"나이:"</span>, <span class="code-var">age</span>)<br>
+                  <span class="code-keyword">print</span>(<span class="code-string">"키:"</span>, <span class="code-var">height</span>)<br>
+                  <br>
+                  <span class="code-comment"># ③ 자료형 확인</span><br>
+                  <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">name</span>))<br>
+                  <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">age</span>))<br>
+                  <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">height</span>))
+                </div>
+              </div>
+            </div>
+
+            <div class="practice-editor-placeholder python">
+              <div class="practice-editor-bar python">
+                <span>🐍</span> 파이썬 코드 에디터
+                <span style="margin-left:auto;font-size:11px;font-weight:400;opacity:0.85">학생 화면에서 실행됩니다</span>
+              </div>
+              <div class="practice-editor-body">
+                <div style="text-align:center;">
+                  <div style="font-size:40px;margin-bottom:12px;">🐍</div>
+                  <div style="color:#aaa;font-size:13px;margin-bottom:16px;">파이썬 코드 에디터가 여기에 표시됩니다</div>
+                  <button class="practice-open-btn python" onclick="location.href='wfs03b_python.html'">
+                    🐍 파이썬 에디터 열기 →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-header">
+                <div class="editor-section-label">📊 채점 기준 (루브릭)</div>
+                <button class="btn btn-ghost btn-sm" onclick="location.href='wf04_scoring.html'">AI 채점 설정 →</button>
+              </div>
+              <div class="editor-section-body">
+                <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+                  <thead>
+                    <tr style="background:var(--color-light);">
+                      <th style="padding:8px 12px;text-align:left;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);">평가 기준</th>
+                      <th style="padding:8px 12px;text-align:center;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);width:60px;">배점</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">name, age, height 변수에 알맞은 값 할당</td>
+                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">3점</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">print()로 세 변수 모두 출력</td>
+                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">3점</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">type()으로 세 변수의 자료형 확인 출력</td>
+                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">2점</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 12px;color:var(--color-ink);">코드 실행 시 오류 없이 정상 동작</td>
+                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;">2점</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div><!-- /tab-python -->
+
+
+          <!-- ══ Tab 6: 평가형 문제 ══ -->
+          <div class="editor-tab-content" id="tab-quiz-eval">
+            <div class="tab-header">
+              <div>
+                <div class="tab-title">평가형 문제</div>
+                <div class="tab-desc">수업 후 성취도 평가 · 코드 작성 / 오류 수정 / 프로그램 완성 · 3문항 · 총 30점</div>
+              </div>
+              <div class="flex gap-sm">
+                <button class="btn btn-ghost btn-sm">🪄 AI 생성</button>
+                <button class="btn btn-ghost btn-sm">+ 문항 추가</button>
+              </div>
+            </div>
+
+            <!-- P1 -->
+            <div class="eval-item">
+              <div class="eval-item-header">
+                <div class="eval-num">P1</div>
+                <span class="eval-type-badge eval-type-code">코드 작성</span>
+                <span class="eval-question">다음 조건을 만족하는 파이썬 프로그램을 작성하시오.</span>
+                <span class="text-sm text-gray" style="white-space:nowrap;margin-left:auto;">10점</span>
+              </div>
+              <div style="background:var(--color-light);border-radius:6px;padding:var(--space-md);margin-bottom:var(--space-sm);font-size:13px;line-height:1.8;color:var(--color-ink);">
+                <strong>[조건]</strong><br>
+                ① 자신의 <code style="font-family:monospace;background:white;padding:1px 4px;border-radius:3px;">이름</code>,
+                <code style="font-family:monospace;background:white;padding:1px 4px;border-radius:3px;">나이</code>,
+                <code style="font-family:monospace;background:white;padding:1px 4px;border-radius:3px;">키</code>를 각각 str, int, float 자료형의 변수에 저장하시오.<br>
+                ② <code style="font-family:monospace;background:white;padding:1px 4px;border-radius:3px;">print()</code>로 "나는 ○○이고, 나이는 ○살이며, 키는 ○cm입니다."를 출력하시오.<br>
+                ③ <code style="font-family:monospace;background:white;padding:1px 4px;border-radius:3px;">type()</code>으로 각 변수의 자료형을 출력하시오.
+              </div>
+              <div class="eval-answer-area">
+                <span style="color:#546E7A;"># 여기에 코드를 작성하세요</span>
+              </div>
+              <div class="eval-rubric" style="margin-top:var(--space-sm);">
+                <div class="eval-rubric-title">채점 기준</div>
+                <div class="eval-rubric-row"><span class="eval-rubric-label">3가지 변수를 올바른 자료형으로 선언</span><span class="eval-rubric-score">4점</span></div>
+                <div class="eval-rubric-row"><span class="eval-rubric-label">f-string 또는 문자열 연결로 문장 출력</span><span class="eval-rubric-score">4점</span></div>
+                <div class="eval-rubric-row"><span class="eval-rubric-label">type() 함수로 자료형 3개 출력</span><span class="eval-rubric-score">2점</span></div>
+              </div>
+            </div>
+
+            <!-- P2 -->
+            <div class="eval-item">
+              <div class="eval-item-header">
+                <div class="eval-num">P2</div>
+                <span class="eval-type-badge eval-type-fix">오류 수정</span>
+                <span class="eval-question">다음 코드의 오류를 모두 찾아 수정하고, 올바른 실행 결과를 작성하시오.</span>
+                <span class="text-sm text-gray" style="white-space:nowrap;margin-left:auto;">10점</span>
+              </div>
+              <div class="code-block-sm" style="margin-bottom:var(--space-sm);">
+                <span class="code-var">1score</span> = <span class="code-num">95</span><br>
+                <span class="code-var">student name</span> = <span class="code-string">"이서연"</span><br>
+                <span class="code-keyword">print</span>(<span class="code-var">student name</span>, <span class="code-string">"의 점수:"</span>, <span class="code-var">1score</span>)
+              </div>
+              <div class="eval-answer-area" style="min-height:60px;">
+                <span style="color:#546E7A;"># 수정된 코드를 작성하세요</span>
+              </div>
+              <div class="eval-rubric" style="margin-top:var(--space-sm);">
+                <div class="eval-rubric-title">채점 기준</div>
+                <div class="eval-rubric-row"><span class="eval-rubric-label">1score → score (숫자 시작 오류 수정)</span><span class="eval-rubric-score">4점</span></div>
+                <div class="eval-rubric-row"><span class="eval-rubric-label">student name → student_name (공백 오류 수정)</span><span class="eval-rubric-score">4점</span></div>
+                <div class="eval-rubric-row"><span class="eval-rubric-label">올바른 실행 결과 작성</span><span class="eval-rubric-score">2점</span></div>
+              </div>
+            </div>
+
+            <!-- P3 -->
+            <div class="eval-item">
+              <div class="eval-item-header">
+                <div class="eval-num">P3</div>
+                <span class="eval-type-badge eval-type-fill">프로그램 완성</span>
+                <span class="eval-question">아래 스타터 코드를 완성하여 가격 계산 프로그램을 만드시오.</span>
+                <span class="text-sm text-gray" style="white-space:nowrap;margin-left:auto;">10점</span>
+              </div>
+              <div class="code-block-sm" style="margin-bottom:var(--space-sm);">
+                <span class="code-comment"># 가격 계산 프로그램</span><br>
+                <span class="code-var">item_name</span>  = <span class="code-string">"연필"</span>    <span class="code-comment"># 상품명</span><br>
+                <span class="code-var">price</span>      = ___       <span class="code-comment"># 단가 (int, 원)</span><br>
+                <span class="code-var">quantity</span>   = ___       <span class="code-comment"># 수량 (int)</span><br>
+                <span class="code-var">total</span>      = ___       <span class="code-comment"># 총액 = price × quantity</span><br>
+                <br>
+                <span class="code-keyword">print</span>(<span class="code-string">"상품:"</span>, ___)<br>
+                <span class="code-keyword">print</span>(<span class="code-string">"단가:"</span>, ___, <span class="code-string">"원"</span>)<br>
+                <span class="code-keyword">print</span>(<span class="code-string">"수량:"</span>, ___, <span class="code-string">"개"</span>)<br>
+                <span class="code-keyword">print</span>(<span class="code-string">"총액:"</span>, ___, <span class="code-string">"원"</span>)
+              </div>
+              <div class="eval-answer-area">
+                <span style="color:#546E7A;"># 완성된 코드를 작성하세요</span>
+              </div>
+              <div class="eval-rubric" style="margin-top:var(--space-sm);">
+                <div class="eval-rubric-title">채점 기준</div>
+                <div class="eval-rubric-row"><span class="eval-rubric-label">price, quantity를 정수(int)로 올바르게 할당</span><span class="eval-rubric-score">4점</span></div>
+                <div class="eval-rubric-row"><span class="eval-rubric-label">total = price × quantity 계산식 작성</span><span class="eval-rubric-score">3점</span></div>
+                <div class="eval-rubric-row"><span class="eval-rubric-label">print 4개 올바르게 완성 (변수 참조)</span><span class="eval-rubric-score">3점</span></div>
+              </div>
+            </div>
+
+          </div><!-- /tab-quiz-eval -->
+
+        </div><!-- /editor-tab-body -->
       </section><!-- /editor-panel -->
 
       <!-- ━━━ 우측: 배포 패널 ━━━ -->
@@ -1395,6 +2349,231 @@
 <div class="toast" id="save-toast">✅ 수정 사항이 저장되었습니다</div>
 
 <script>
+  /* ── 탭 드래그 앤 드롭 (순서 변경) ─────────── */
+  var _dragSrc = null;
+  var _wasDragging = false;
+
+  function _setupTabDrag(tab) {
+    tab.setAttribute('draggable', 'true');
+    tab.addEventListener('dragstart', function(e) {
+      _dragSrc = this;
+      _wasDragging = true;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    tab.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('.editor-tab').forEach(function(t) {
+        t.classList.remove('drag-over-left', 'drag-over-right');
+      });
+      if (this !== _dragSrc) {
+        var mid = this.getBoundingClientRect().left + this.getBoundingClientRect().width / 2;
+        this.classList.add(e.clientX < mid ? 'drag-over-left' : 'drag-over-right');
+      }
+    });
+    tab.addEventListener('dragleave', function() {
+      this.classList.remove('drag-over-left', 'drag-over-right');
+    });
+    tab.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (_dragSrc && this !== _dragSrc) {
+        var parent = this.parentNode;
+        var mid = this.getBoundingClientRect().left + this.getBoundingClientRect().width / 2;
+        if (e.clientX < mid) {
+          parent.insertBefore(_dragSrc, this);
+        } else {
+          parent.insertBefore(_dragSrc, this.nextSibling);
+        }
+      }
+      this.classList.remove('drag-over-left', 'drag-over-right');
+    });
+    tab.addEventListener('dragend', function() {
+      document.querySelectorAll('.editor-tab').forEach(function(t) {
+        t.classList.remove('dragging', 'drag-over-left', 'drag-over-right');
+      });
+      _dragSrc = null;
+      setTimeout(function() { _wasDragging = false; }, 50);
+    });
+  }
+
+  function initTabDrag() {
+    document.querySelectorAll('.editor-tab').forEach(function(tab) {
+      _setupTabDrag(tab);
+    });
+  }
+
+  /* ── 탭 전환 ────────────────────────────────── */
+  function switchTab(id) {
+    if (_wasDragging) return;
+    document.querySelectorAll('.editor-tab').forEach(function(tab) {
+      tab.classList.remove('active');
+    });
+    document.querySelectorAll('.editor-tab-content').forEach(function(content) {
+      content.classList.remove('active');
+    });
+    var targetTab = document.querySelector('.editor-tab[onclick="switchTab(\'' + id + '\')"]');
+    if (targetTab) targetTab.classList.add('active');
+    var targetContent = document.getElementById('tab-' + id);
+    if (targetContent) targetContent.classList.add('active');
+  }
+
+  initTabDrag();
+
+  /* ── 자료 추가 모달 ─────────────────────────── */
+  var _selectedMats = {};
+  var _newTabCounter = 0;
+
+  function openAddModal() {
+    _selectedMats = {};
+    document.querySelectorAll('.mat-option').forEach(function(opt) {
+      opt.classList.remove('selected');
+    });
+    document.getElementById('add-mat-overlay').classList.add('open');
+  }
+
+  function closeAddModal() {
+    document.getElementById('add-mat-overlay').classList.remove('open');
+  }
+
+  function toggleMatOption(el) {
+    var key = el.dataset.key;
+    if (_selectedMats[key]) {
+      delete _selectedMats[key];
+      el.classList.remove('selected');
+    } else {
+      _selectedMats[key] = { label: el.dataset.label, icon: el.dataset.icon };
+      el.classList.add('selected');
+    }
+  }
+
+  function addSelectedMaterials() {
+    var keys = Object.keys(_selectedMats);
+    if (keys.length === 0) { closeAddModal(); return; }
+    var container = document.querySelector('.editor-tabs');
+    keys.forEach(function(key) {
+      var info = _selectedMats[key];
+      _newTabCounter++;
+      var tabId = 'new-' + key + '-' + _newTabCounter;
+      var tab = document.createElement('div');
+      tab.className = 'editor-tab';
+      tab.dataset.tabId = tabId;
+      tab.innerHTML =
+        '<span>' + info.icon + ' ' + info.label + '</span>' +
+        '<button class="tab-del" aria-label="탭 삭제">✕</button>';
+      tab.querySelector('.tab-del').addEventListener('click', function(e) {
+        e.stopPropagation();
+        confirmDeleteTab(tab);
+      });
+      tab.addEventListener('click', function() {
+        if (_wasDragging) return;
+        document.querySelectorAll('.editor-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.editor-tab-content').forEach(function(c) { c.classList.remove('active'); });
+        tab.classList.add('active');
+        var placeholder = document.getElementById('tab-' + tabId);
+        if (!placeholder) {
+          placeholder = document.createElement('div');
+          placeholder.className = 'editor-tab-content active';
+          placeholder.id = 'tab-' + tabId;
+          placeholder.innerHTML =
+            '<div class="tab-header"><div><div class="tab-title">' + info.icon + ' ' + info.label + '</div>' +
+            '<div class="tab-desc">내용을 입력하세요</div></div></div>' +
+            '<div style="border:2px dashed var(--color-border);border-radius:8px;padding:48px;text-align:center;color:var(--color-gray);font-size:14px;">자료 내용을 여기에 추가하세요</div>';
+          document.querySelector('.editor-tab-body').appendChild(placeholder);
+        } else {
+          placeholder.classList.add('active');
+        }
+      });
+      _setupTabDrag(tab);
+      container.appendChild(tab);
+    });
+    closeAddModal();
+    updateScrollBtns();
+    showToast('✅ ' + keys.length + '개 자료가 추가되었습니다');
+  }
+
+  document.getElementById('add-mat-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAddModal();
+  });
+
+  /* ── 탭 삭제 확인 ────────────────────────────── */
+  var _tabToDelete = null;
+
+  function confirmDeleteTab(tab) {
+    _tabToDelete = tab;
+    var clone = tab.cloneNode(true);
+    var del = clone.querySelector('.tab-del');
+    if (del) del.remove();
+    var count = clone.querySelector('.tab-count');
+    if (count) count.remove();
+    var name = clone.textContent.replace(/\s+/g, ' ').trim();
+    document.getElementById('del-confirm-name').textContent = '"' + name + '"';
+    document.getElementById('del-confirm-overlay').classList.add('open');
+  }
+
+  function closeDelConfirm() {
+    document.getElementById('del-confirm-overlay').classList.remove('open');
+    _tabToDelete = null;
+  }
+
+  function confirmDelete() {
+    if (!_tabToDelete) return;
+    // 새로 추가된 탭: data-tab-id로 콘텐츠 찾기
+    var tabId = _tabToDelete.dataset.tabId;
+    if (tabId) {
+      var content = document.getElementById('tab-' + tabId);
+      if (content) content.remove();
+    }
+    // 기존 탭: onclick="switchTab('id')" 에서 id 추출
+    var onclickAttr = _tabToDelete.getAttribute('onclick');
+    if (onclickAttr) {
+      var match = onclickAttr.match(/switchTab\('([^']+)'\)/);
+      if (match) {
+        var existing = document.getElementById('tab-' + match[1]);
+        if (existing) existing.remove();
+      }
+    }
+    if (_tabToDelete.classList.contains('active')) {
+      var remaining = Array.prototype.filter.call(
+        document.querySelectorAll('.editor-tab'),
+        function(t) { return t !== _tabToDelete; }
+      );
+      if (remaining.length) remaining[0].click();
+    }
+    _tabToDelete.remove();
+    closeDelConfirm();
+    showToast('🗑 탭이 삭제되었습니다');
+  }
+
+  document.getElementById('del-confirm-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeDelConfirm();
+  });
+
+  /* ── 탭 스크롤 화살표 ───────────────────────── */
+  function scrollTabs(dir) {
+    var container = document.getElementById('editor-tabs-container');
+    container.scrollLeft += dir * 160;
+  }
+
+  function updateScrollBtns() {
+    var container = document.getElementById('editor-tabs-container');
+    var btnL = document.getElementById('tab-scroll-left');
+    var btnR = document.getElementById('tab-scroll-right');
+    var hasOverflow = container.scrollWidth > container.clientWidth + 1;
+    var atStart = container.scrollLeft <= 0;
+    var atEnd   = container.scrollLeft >= container.scrollWidth - container.clientWidth - 1;
+    btnL.classList.toggle('visible', hasOverflow);
+    btnR.classList.toggle('visible', hasOverflow);
+    btnL.style.opacity  = atStart ? '0.3' : '1';
+    btnR.style.opacity  = atEnd   ? '0.3' : '1';
+    btnL.disabled = atStart;
+    btnR.disabled = atEnd;
+  }
+
+  document.getElementById('editor-tabs-container').addEventListener('scroll', updateScrollBtns);
+  window.addEventListener('resize', updateScrollBtns);
+  updateScrollBtns();
+
   /* ── 목차 아코디언 ───────────────────────────── */
   function toggleUnit(btn) {
     var caret    = btn.querySelector('.toc-caret');
@@ -1512,6 +2691,70 @@
     });
   });
 </script>
+
+<!-- 자료 추가 모달 -->
+<div class="add-mat-overlay" id="add-mat-overlay">
+  <div class="add-mat-modal" onclick="event.stopPropagation()">
+    <div class="add-mat-title">+ 자료 추가</div>
+    <div class="mat-options">
+      <div class="mat-option" data-key="quiz" data-label="퀴즈" data-icon="❓" onclick="toggleMatOption(this)">
+        <span class="mat-icon">❓</span> 퀴즈
+      </div>
+      <div class="mat-option" data-key="concept" data-label="개념자료" data-icon="📖" onclick="toggleMatOption(this)">
+        <span class="mat-icon">📖</span> 개념자료
+      </div>
+      <div class="mat-option" data-key="video" data-label="영상" data-icon="🎬" onclick="toggleMatOption(this)">
+        <span class="mat-icon">🎬</span> 영상
+      </div>
+      <div class="mat-option" data-key="entry" data-label="엔트리 실습" data-icon="🟢" onclick="toggleMatOption(this)">
+        <span class="mat-icon">🟢</span> 엔트리 실습
+      </div>
+      <div class="mat-option" data-key="python" data-label="파이썬 실습" data-icon="🐍" onclick="toggleMatOption(this)">
+        <span class="mat-icon">🐍</span> 파이썬 실습
+      </div>
+      <div class="mat-option" data-key="eval" data-label="평가형" data-icon="📝" onclick="toggleMatOption(this)">
+        <span class="mat-icon">📝</span> 평가형
+      </div>
+      <div class="mat-option" data-key="scratch" data-label="스크래치 실습" data-icon="🔴" onclick="toggleMatOption(this)">
+        <span class="mat-icon">🔴</span> 스크래치 실습
+      </div>
+      <div class="mat-option" data-key="pdf" data-label="PDF 자료" data-icon="📄" onclick="toggleMatOption(this)">
+        <span class="mat-icon">📄</span> PDF 자료
+      </div>
+      <div class="mat-option" data-key="url" data-label="URL 링크" data-icon="🔗" onclick="toggleMatOption(this)">
+        <span class="mat-icon">🔗</span> URL 링크
+      </div>
+      <div class="mat-option" data-key="image" data-label="이미지/그림" data-icon="🖼" onclick="toggleMatOption(this)">
+        <span class="mat-icon">🖼</span> 이미지/그림
+      </div>
+      <div class="mat-option" data-key="assignment" data-label="과제 제출" data-icon="📋" onclick="toggleMatOption(this)">
+        <span class="mat-icon">📋</span> 과제 제출
+      </div>
+      <div class="mat-option" data-key="physical" data-label="피지컬 컴퓨팅" data-icon="🔌" onclick="toggleMatOption(this)">
+        <span class="mat-icon">🔌</span> 피지컬 컴퓨팅
+      </div>
+    </div>
+    <div class="add-mat-footer">
+      <button class="btn btn-secondary btn-sm" onclick="closeAddModal()">취소</button>
+      <button class="btn btn-primary btn-sm" onclick="addSelectedMaterials()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- 탭 삭제 확인 모달 -->
+<div class="del-confirm-overlay" id="del-confirm-overlay">
+  <div class="del-confirm-modal" onclick="event.stopPropagation()">
+    <div class="del-confirm-icon">🗑</div>
+    <div class="del-confirm-title">탭을 삭제하시겠습니까?</div>
+    <div class="del-confirm-desc">
+      <span id="del-confirm-name"></span> 탭을 삭제하면<br>해당 자료가 모두 사라집니다.
+    </div>
+    <div class="del-confirm-footer">
+      <button class="btn btn-secondary btn-sm" onclick="closeDelConfirm()">취소</button>
+      <button class="btn btn-sm" style="background:var(--color-danger);color:white;border:none;border-radius:6px;padding:8px 20px;font-weight:600;cursor:pointer;" onclick="confirmDelete()">삭제</button>
+    </div>
+  </div>
+</div>
 
 <!-- 반 선택 모달 -->
 <div class="class-modal-overlay" id="classModalOverlay" onclick="closeClassModal()" style="display:none">
