@@ -223,6 +223,198 @@
       box-sizing: border-box;
     }
 
+    /* ── 실습 탭 (엔트리/파이썬) 분할 레이아웃 ───── */
+    .editor-tab-body.practice-mode {
+      padding: 0;
+      overflow: hidden;
+    }
+    .editor-tab-body.practice-mode .editor-tab-content.active {
+      display: flex;
+      height: 100%;
+    }
+
+    .practice-split {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .practice-preview {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--color-border);
+      min-width: 0;
+    }
+    .practice-preview-bar {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-md);
+      background: var(--color-light);
+      border-bottom: 1px solid var(--color-border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-gray);
+      flex-shrink: 0;
+      gap: var(--space-sm);
+    }
+    .practice-preview-bar.entry  { border-top: 3px solid var(--color-entry); }
+    .practice-preview-bar.python { border-top: 3px solid var(--color-python); }
+    .practice-preview-bar button {
+      margin-left: auto;
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      font-size: 11px;
+      padding: 3px 8px;
+      cursor: pointer;
+      color: var(--color-gray);
+      font-family: inherit;
+    }
+    .practice-preview-bar button:hover { background: var(--color-white); color: var(--color-ink); }
+    .practice-iframe { flex: 1; border: none; width: 100%; }
+
+    /* 오른쪽 편집 패널 */
+    .practice-edit-panel {
+      width: 320px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--color-white);
+    }
+    .practice-edit-scroll {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .pep-section {
+      padding: var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .pep-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .pep-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--color-light);
+      color: var(--color-gray);
+    }
+    .pep-badge.warn { background: rgba(217,119,6,0.1); color: var(--color-warn); }
+    .pep-badge.ok   { background: rgba(13,148,136,0.1); color: var(--color-ok); }
+    .pep-input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--color-ink);
+      outline: none;
+      margin-bottom: 8px;
+      transition: border-color 0.15s;
+    }
+    .pep-input:focus { border-color: var(--color-mid); }
+    .pep-textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 12.5px;
+      font-family: inherit;
+      color: var(--color-ink);
+      outline: none;
+      resize: vertical;
+      line-height: 1.6;
+      transition: border-color 0.15s;
+    }
+    .pep-textarea:focus { border-color: var(--color-mid); }
+    .pep-code {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      color: var(--color-ink);
+      background: #f8fafc;
+      outline: none;
+      resize: vertical;
+      line-height: 1.7;
+      transition: border-color 0.15s;
+    }
+    .pep-code:focus { border-color: var(--color-mid); }
+    .pep-footer {
+      padding: var(--space-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 2px solid var(--color-border);
+      background: var(--color-white);
+      flex-shrink: 0;
+    }
+    .pep-ai-loading {
+      text-align: center;
+      padding: 20px;
+      color: var(--color-gray);
+      font-size: 13px;
+    }
+    .pep-ai-loading .ai-spinner { font-size: 28px; display: block; margin-bottom: 8px; }
+
+    /* 루브릭 행 */
+    .rubric-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .rubric-row:last-child { border-bottom: none; }
+    .rubric-label-input {
+      flex: 1;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 4px 7px;
+      font-size: 11.5px;
+      font-family: inherit;
+      outline: none;
+      min-width: 0;
+    }
+    .rubric-label-input:focus { border-color: var(--color-mid); }
+    .rubric-score-input {
+      width: 40px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 4px 5px;
+      font-size: 12px;
+      text-align: center;
+      font-family: inherit;
+      outline: none;
+      flex-shrink: 0;
+    }
+    .rubric-score-input:focus { border-color: var(--color-mid); }
+    .rubric-total-row {
+      display: flex;
+      justify-content: flex-end;
+      font-size: 12px;
+      color: var(--color-gray);
+      padding-top: 8px;
+      gap: 4px;
+    }
+
     /* ── 중앙: 에디터 ────────────────────────────── */
     .editor-panel {
       flex: 1;
@@ -525,7 +717,8 @@
 
     .quiz-option input[type="radio"] { accent-color: var(--color-mid); }
 
-    /* ── 우측: 배포 패널 ─────────────────────────── */
+    /* ── 우측: 배포 패널 (수준별 배포 — 향후 재도입 예정) ── */
+    /* TODO: 수준별 배포 기능 재활성화 시 아래 주석 해제
     .deploy-panel {
       width: 270px;
       flex-shrink: 0;
@@ -681,6 +874,8 @@
 
     .deploy-history-label { color: var(--color-ink); }
     .deploy-history-date  { color: var(--color-gray); }
+    */
+    /* ── 수준별 배포 CSS 끝 ── */
 
     /* ── AI 퀴즈 모달 ────────────────────────────── */
     .modal-overlay {
@@ -2079,80 +2274,83 @@
 
           <!-- ══ Tab 4: 엔트리 실습 ══ -->
           <div class="editor-tab-content" id="tab-entry">
-            <div class="tab-header">
-              <div>
-                <div class="tab-title">엔트리 실습</div>
-                <div class="tab-desc">블록 코딩 실습 (중등) · 엔트리 에디터 연동</div>
-              </div>
-              <button class="btn btn-ghost btn-sm" style="color:var(--color-entry);border-color:var(--color-entry);" onclick="location.href='wfs03a_entry.html'">
-                🟢 엔트리 에디터 열기
-              </button>
-            </div>
+            <div class="practice-split">
 
-            <div class="practice-info-card">
-              <div class="practice-info-title">📋 실습 지시사항</div>
-              <div class="instruction-list">
-                <div class="instruction-item">
-                  <div class="instruction-step">1</div>
-                  <div class="instruction-text">엔트리에서 <strong>변수 블록</strong>을 사용해 이름(name), 나이(age) 변수를 생성하세요.</div>
+              <!-- 왼쪽: 학생 화면 미리보기 -->
+              <div class="practice-preview">
+                <div class="practice-preview-bar entry">
+                  <span>🟢 엔트리 실습 — 학생 화면 미리보기</span>
+                  <button onclick="window.open('wfs03a_entry.html','_blank')">새 창에서 열기 ↗</button>
                 </div>
-                <div class="instruction-item">
-                  <div class="instruction-step">2</div>
-                  <div class="instruction-text"><strong>말하기 블록</strong>을 연결해 "내 이름은 ○○○이고, 나이는 ○살입니다."를 출력하세요.</div>
-                </div>
-                <div class="instruction-item">
-                  <div class="instruction-step">3</div>
-                  <div class="instruction-text">완성된 프로젝트를 <strong>저장 후 제출</strong>하세요. 엔트리 우측 상단 [제출] 버튼을 누르면 됩니다.</div>
-                </div>
+                <iframe src="wfs03a_entry.html" class="practice-iframe" id="entry-iframe" title="엔트리 실습 미리보기"></iframe>
               </div>
-            </div>
 
-            <div class="practice-editor-placeholder entry">
-              <div class="practice-editor-bar entry">
-                <span>●</span> 엔트리 블록 에디터
-                <span style="margin-left:auto;font-size:11px;font-weight:400;opacity:0.85">학생 화면에서 실행됩니다</span>
-              </div>
-              <div class="practice-editor-body">
-                <div style="text-align:center;">
-                  <div style="font-size:40px;margin-bottom:12px;">🟢</div>
-                  <div style="color:#aaa;font-size:13px;margin-bottom:16px;">엔트리 실습 환경이 여기에 표시됩니다</div>
-                  <button class="practice-open-btn entry" onclick="location.href='wfs03a_entry.html'">
-                    🟢 엔트리 에디터 열기 →
-                  </button>
-                </div>
-              </div>
-            </div>
+              <!-- 오른쪽: 편집 패널 -->
+              <div class="practice-edit-panel">
+                <div class="practice-edit-scroll">
 
-            <div class="editor-section">
-              <div class="editor-section-header">
-                <div class="editor-section-label">📊 채점 기준 (루브릭)</div>
-                <button class="btn btn-ghost btn-sm" onclick="location.href='wf04_scoring.html'">AI 채점 설정 →</button>
-              </div>
-              <div class="editor-section-body">
-                <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
-                  <thead>
-                    <tr style="background:var(--color-light);">
-                      <th style="padding:8px 12px;text-align:left;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);">평가 기준</th>
-                      <th style="padding:8px 12px;text-align:center;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);width:60px;">배점</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">변수 2개(name, age) 정확히 생성</td>
-                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">4점</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">말하기 블록에 변수 올바르게 연결</td>
-                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">4점</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:8px 12px;color:var(--color-ink);">정상 실행 및 출력 결과 정확</td>
-                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;">2점</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                  <!-- 미션 설정 -->
+                  <div class="pep-section">
+                    <div class="pep-section-title">📋 미션 설정</div>
+                    <input class="pep-input" id="entry-mission-title" type="text" value="변수로 자기소개 만들기" placeholder="미션 제목">
+                    <textarea class="pep-textarea" id="entry-mission-desc" rows="3">name, age 변수를 만들고 말하기 블록으로 자기소개 문장을 출력하세요.</textarea>
+                  </div>
+
+                  <!-- 스켈레톤 코드 -->
+                  <div class="pep-section">
+                    <div class="pep-section-title">
+                      🧩 스켈레톤 코드
+                      <span class="pep-badge">학생 시작 코드</span>
+                    </div>
+                    <textarea class="pep-code" id="entry-skeleton" rows="5">// 변수를 만들어 보세요
+name ← ?
+age  ← ?
+// 말하기 블록으로 출력하기</textarea>
+                  </div>
+
+                  <!-- 정답 코드 -->
+                  <div class="pep-section">
+                    <div class="pep-section-title">
+                      ✅ 정답 코드
+                      <span class="pep-badge warn">AI 채점 기준 생성에 사용</span>
+                    </div>
+                    <textarea class="pep-code" id="entry-answer" rows="5" placeholder="정답 코드를 입력하면 AI가 채점 기준표를 자동 생성합니다..."></textarea>
+                    <button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%;" onclick="generateEntryRubric()">
+                      🤖 AI 채점 기준 생성
+                    </button>
+                  </div>
+
+                  <!-- AI 로딩 -->
+                  <div class="pep-section" id="entry-rubric-loading" style="display:none;">
+                    <div class="pep-ai-loading">
+                      <span class="ai-spinner">🤖</span>
+                      미션 내용과 정답 코드를 분석 중입니다...
+                    </div>
+                  </div>
+
+                  <!-- 루브릭 -->
+                  <div class="pep-section" id="entry-rubric-section" style="display:none;">
+                    <div class="pep-section-title">
+                      📊 채점 기준표
+                      <span class="pep-badge ok">AI 생성</span>
+                      <button class="toc-action-btn" onclick="addEntryRubricRow()" title="기준 추가" style="margin-left:auto;width:20px;height:20px;font-size:13px;">＋</button>
+                    </div>
+                    <div id="entry-rubric-rows"></div>
+                    <div class="rubric-total-row">
+                      총 <strong id="entry-rubric-total" style="color:var(--color-mid);margin:0 2px;">10</strong>점
+                    </div>
+                  </div>
+
+                </div><!-- /practice-edit-scroll -->
+
+                <!-- 하단 배포 버튼 -->
+                <div class="pep-footer">
+                  <button class="btn btn-secondary btn-sm" onclick="refreshEntryPreview()">↻ 미리보기 갱신</button>
+                  <button class="btn btn-primary" onclick="deployEntry()" style="padding:8px 20px;">🚀 학생에게 배포</button>
+                </div>
+              </div><!-- /practice-edit-panel -->
+
+            </div><!-- /practice-split -->
           </div><!-- /tab-entry -->
 
 
@@ -2352,147 +2550,7 @@
         </div><!-- /editor-tab-body -->
       </section><!-- /editor-panel -->
 
-      <!-- ━━━ 우측: 배포 패널 ━━━ -->
-      <aside class="deploy-panel">
-        <div class="deploy-panel-header">
-          수준별 배포
-          <span class="badge badge-ok">수정됨</span>
-        </div>
-
-        <!-- 배포 진행 상태 -->
-        <div class="deploy-status-bar">
-          <div class="deploy-status-info">
-            <span class="text-sm text-gray">마지막 배포</span>
-            <span class="text-sm font-semibold">6/12 09:20</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill progress-fill-ok" style="width:73%"></div>
-          </div>
-          <div class="deploy-status-info mt-sm">
-            <span class="text-sm text-gray">열람 학생</span>
-            <span class="text-sm font-semibold" style="color:var(--color-ok)">19 / 26명</span>
-          </div>
-        </div>
-
-        <!-- 상 그룹 -->
-        <div class="deploy-group">
-          <div class="deploy-group-header" onclick="toggleGroup(this)">
-            <div class="group-level-badge group-high">상</div>
-            <div class="group-name">고급 학습자</div>
-            <div class="group-count">6명</div>
-            <span style="font-size:10px;color:var(--color-gray);">▼</span>
-          </div>
-          <div class="deploy-group-body">
-            <label class="deploy-option">
-              <input type="checkbox" checked aria-label="기본 설명 자료">
-              기본 설명 자료
-            </label>
-            <label class="deploy-option">
-              <input type="checkbox" checked aria-label="실습 과제">
-              실습 과제
-              <span class="deploy-option-extra">필수</span>
-            </label>
-            <label class="deploy-option">
-              <input type="checkbox" checked aria-label="심화 문제">
-              심화 문제 (+)
-            </label>
-            <label class="deploy-extra-option">
-              <input type="checkbox" aria-label="힌트 제공">
-              힌트 제공 (숨김)
-            </label>
-          </div>
-        </div>
-
-        <!-- 중 그룹 -->
-        <div class="deploy-group">
-          <div class="deploy-group-header" onclick="toggleGroup(this)">
-            <div class="group-level-badge group-mid-bg">중</div>
-            <div class="group-name">기본 학습자</div>
-            <div class="group-count">14명</div>
-            <span style="font-size:10px;color:var(--color-gray);">▼</span>
-          </div>
-          <div class="deploy-group-body">
-            <label class="deploy-option">
-              <input type="checkbox" checked aria-label="기본 설명 자료">
-              기본 설명 자료
-            </label>
-            <label class="deploy-option">
-              <input type="checkbox" checked aria-label="실습 과제">
-              실습 과제
-              <span class="deploy-option-extra">필수</span>
-            </label>
-            <label class="deploy-option">
-              <input type="checkbox" aria-label="심화 문제">
-              심화 문제 (+)
-            </label>
-            <label class="deploy-extra-option">
-              <input type="checkbox" checked aria-label="힌트 제공">
-              힌트 제공 (표시)
-            </label>
-          </div>
-        </div>
-
-        <!-- 하 그룹 -->
-        <div class="deploy-group">
-          <div class="deploy-group-header" onclick="toggleGroup(this)">
-            <div class="group-level-badge group-low">하</div>
-            <div class="group-name">기초 학습자</div>
-            <div class="group-count">6명</div>
-            <span style="font-size:10px;color:var(--color-gray);">▼</span>
-          </div>
-          <div class="deploy-group-body">
-            <label class="deploy-option">
-              <input type="checkbox" checked aria-label="기본 설명 자료">
-              기본 설명 자료
-            </label>
-            <label class="deploy-option">
-              <input type="checkbox" checked aria-label="실습 과제">
-              실습 과제
-              <span class="deploy-option-extra">필수</span>
-            </label>
-            <label class="deploy-option">
-              <input type="checkbox" aria-label="심화 문제">
-              심화 문제 (+)
-            </label>
-            <label class="deploy-extra-option">
-              <input type="checkbox" checked aria-label="힌트 제공">
-              힌트 제공 (표시)
-            </label>
-            <label class="deploy-extra-option">
-              <input type="checkbox" checked aria-label="보충 자료">
-              보충 자료 추가 배포
-            </label>
-          </div>
-        </div>
-
-        <!-- 배포 버튼 -->
-        <div class="deploy-actions">
-          <button class="btn btn-primary" onclick="deployLesson()" aria-label="그룹별 배포 실행">
-            🚀 그룹별 배포 실행
-          </button>
-          <button class="btn btn-ghost btn-sm" onclick="alert('배포 이력 (목업)')">
-            📋 배포 이력 확인
-          </button>
-        </div>
-
-        <!-- 배포 이력 -->
-        <div class="deploy-history">
-          <div class="deploy-history-title">최근 배포 이력</div>
-          <div class="deploy-history-item">
-            <span class="deploy-history-label">전체 배포 (상/중/하)</span>
-            <span class="deploy-history-date">6/12</span>
-          </div>
-          <div class="deploy-history-item">
-            <span class="deploy-history-label">하 그룹 보충 추가</span>
-            <span class="deploy-history-date">6/11</span>
-          </div>
-          <div class="deploy-history-item">
-            <span class="deploy-history-label">퀴즈 3문항 추가</span>
-            <span class="deploy-history-date">6/10</span>
-          </div>
-        </div>
-
-      </aside><!-- /deploy-panel -->
+      <!-- 수준별 배포 패널 — 향후 재도입 예정, 현재 비활성 -->
 
     </div><!-- /lesson-body -->
   </main>
@@ -2669,6 +2727,14 @@
     if (targetTab) targetTab.classList.add('active');
     var targetContent = document.getElementById('tab-' + id);
     if (targetContent) targetContent.classList.add('active');
+
+    // 실습 탭은 패딩 없는 분할 레이아웃으로 전환
+    var tabBody = document.getElementById('editor-tab-body');
+    if (id === 'entry' || id === 'python') {
+      tabBody.classList.add('practice-mode');
+    } else {
+      tabBody.classList.remove('practice-mode');
+    }
   }
 
   initTabDrag();
@@ -3125,6 +3191,86 @@
     toastTimer = setTimeout(function () {
       toast.classList.remove('show');
     }, 2800);
+  }
+
+  /* ── 엔트리 실습 편집 ──────────────────────── */
+  var _entryRubric = [];
+
+  function generateEntryRubric() {
+    var answer = document.getElementById('entry-answer').value.trim();
+    if (!answer) { showToast('⚠️ 먼저 정답 코드를 입력해주세요'); return; }
+
+    document.getElementById('entry-rubric-loading').style.display = 'block';
+    document.getElementById('entry-rubric-section').style.display = 'none';
+
+    setTimeout(function() {
+      var title = document.getElementById('entry-mission-title').value;
+      // 미션 내용 기반 AI 루브릭 생성 시뮬레이션
+      _entryRubric = [
+        { label: 'name 변수를 올바르게 선언', score: 3 },
+        { label: 'age 변수를 올바르게 선언', score: 3 },
+        { label: '말하기 블록에 변수 연결', score: 2 },
+        { label: '정상 실행 및 출력 결과 정확', score: 2 },
+      ];
+      renderEntryRubric();
+      document.getElementById('entry-rubric-loading').style.display = 'none';
+      document.getElementById('entry-rubric-section').style.display = 'block';
+      showToast('✅ AI 채점 기준이 생성되었습니다 (총 10점)');
+    }, 1800);
+  }
+
+  function renderEntryRubric() {
+    var container = document.getElementById('entry-rubric-rows');
+    container.innerHTML = '';
+    _entryRubric.forEach(function(row, i) {
+      var div = document.createElement('div');
+      div.className = 'rubric-row';
+      div.innerHTML =
+        '<input class="rubric-label-input" type="text" value="' + row.label + '" ' +
+          'onchange="_entryRubric[' + i + '].label = this.value">' +
+        '<input class="rubric-score-input" type="number" value="' + row.score + '" min="0" max="20" ' +
+          'onchange="_entryRubric[' + i + '].score = +this.value; updateEntryRubricTotal()">' +
+        '<span style="font-size:11px;color:var(--color-gray);flex-shrink:0">점</span>' +
+        '<button class="toc-action-btn danger" onclick="deleteEntryRubricRow(' + i + ')" title="삭제">✕</button>';
+      container.appendChild(div);
+    });
+    updateEntryRubricTotal();
+  }
+
+  function addEntryRubricRow() {
+    _entryRubric.push({ label: '새 평가 기준', score: 2 });
+    document.getElementById('entry-rubric-section').style.display = 'block';
+    renderEntryRubric();
+  }
+
+  function deleteEntryRubricRow(i) {
+    _entryRubric.splice(i, 1);
+    renderEntryRubric();
+  }
+
+  function updateEntryRubricTotal() {
+    var total = _entryRubric.reduce(function(s, r) { return s + (+r.score || 0); }, 0);
+    var el = document.getElementById('entry-rubric-total');
+    if (el) el.textContent = total;
+  }
+
+  function deployEntry() {
+    var iframe = document.getElementById('entry-iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({
+        type: 'DEPLOY_MISSION',
+        title:    document.getElementById('entry-mission-title').value,
+        desc:     document.getElementById('entry-mission-desc').value,
+        skeleton: document.getElementById('entry-skeleton').value,
+        rubric:   _entryRubric
+      }, '*');
+    }
+    showToast('🚀 1학년 3반 학생에게 배포되었습니다');
+  }
+
+  function refreshEntryPreview() {
+    var iframe = document.getElementById('entry-iframe');
+    if (iframe) { iframe.src = iframe.src; }
   }
 
   // 반 선택 모달
