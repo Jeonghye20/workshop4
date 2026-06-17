@@ -116,6 +116,25 @@
               window.parent.postMessage({ type: 'GRADE_RESULT', project: null }, '*');
             }
           }
+          if (e.data?.type === 'REQUEST_SAVE') {
+            try {
+              var project = Entry.exportProject ? Entry.exportProject() : null;
+              window.parent.postMessage({ type: 'SAVE_DATA', project: project }, '*');
+            } catch (_) {
+              window.parent.postMessage({ type: 'SAVE_DATA', project: null }, '*');
+            }
+          }
+          if (e.data?.type === 'ENTRY_LOAD') {
+            try { Entry.loadProject(e.data.project); } catch (_) {}
+          }
+          if (e.data?.type === 'ENTRY_NEW') {
+            try {
+              Entry.clearProject && Entry.clearProject();
+              Entry.loadProject();
+            } catch (_) {
+              try { Entry.loadProject(); } catch (_) {}
+            }
+          }
         });
       } catch (err) {
         loadingText.textContent = '⚠ 초기화 오류: ' + err.message;
