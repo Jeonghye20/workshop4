@@ -8,102 +8,39 @@
   <style>
     /* ── 홈 전용 스타일 ─────────────────────── */
 
-    .home-wrap {
-      height: calc(100vh - var(--nav-height) - var(--gnb-height));
-      background: var(--color-light);
-      padding: 16px 32px 16px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .home-inner {
-      max-width: 1060px;
-      width: 100%;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-height: 0;
-    }
-
-    /* 요약 스트립 */
-    .home-summary {
-      display: flex;
-      align-items: center;
-      background: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      flex-shrink: 0;
-    }
-
-    .home-summary-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      padding: 10px var(--space-lg);
-      border-right: 1px solid var(--color-border);
-    }
-
-    .home-summary-item:last-child { border-right: none; }
-
-    .home-summary-value {
-      font-size: 22px;
-      font-weight: 700;
-      line-height: 1;
-      color: var(--color-ink);
-    }
-
-    .home-summary-label {
-      font-size: 11px;
-      color: var(--color-gray);
-    }
-
-    /* ── 탭 네비게이션 ── */
-    .tab-nav {
-      display: flex;
-      gap: 0;
-      border-bottom: 2px solid var(--color-border);
-      margin-bottom: 12px;
-      flex-shrink: 0;
-    }
-
-    .tab-btn {
-      padding: 8px 20px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--color-gray);
-      background: transparent;
-      border: none;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
-    }
-
-    .tab-btn:hover { color: var(--color-ink); }
-
-    .tab-btn.active {
-      color: var(--color-mid);
-      border-bottom-color: var(--color-mid);
-    }
-
     /* ── 탭 패널 ── */
-    .tab-panel { display: none; flex: 1; min-height: 0; flex-direction: column; gap: 12px; }
+    .tab-panel { display: none; flex-direction: column; gap: 14px; }
     .tab-panel.active { display: flex; }
 
-    /* ── 내 학급 탭: 상단 2열 ── */
-    .upper-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      flex-shrink: 0;
+    /* ── 내 학급 탭: 메인 + 사이드 레이아웃 ── */
+    .classes-layout {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
     }
+
+    .classes-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .classes-side {
+      width: 272px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+    }
+
+    /* ── 그리드 ── */
+    .home-grid { display: grid; gap: 14px; }
+    .home-grid-2 { grid-template-columns: 1fr 1fr; }
+    .home-grid-4 { grid-template-columns: repeat(4, 1fr); }
 
     .section-card {
       background: var(--color-white);
@@ -202,13 +139,76 @@
       text-overflow: ellipsis;
     }
 
-    /* ── 반별 현황 비교 테이블 ── */
-    .cmp-table {
+    /* ── D-day 일정 ── */
+    .dday-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .dday-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: 7px;
+      border: 1px solid var(--color-border);
+      background: var(--color-light);
+    }
+
+    .dday-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 5px;
+      flex-shrink: 0;
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .dday-urgent { background: #FEE2E2; color: var(--color-danger); }
+    .dday-warn   { background: #FEF3C7; color: var(--color-warn); }
+    .dday-mid    { background: rgba(6,90,130,0.1); color: var(--color-mid); }
+
+    .dday-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      flex: 1;
+    }
+
+    .dday-date {
+      font-size: 11px;
+      color: var(--color-gray);
+      flex-shrink: 0;
+    }
+
+    /* ── 수업 준비 체크 ── */
+    .prep-list { display: flex; flex-direction: column; gap: 7px; }
+
+    .prep-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: 7px;
+      border: 1px solid var(--color-border);
+      font-size: 13px;
+    }
+
+    .prep-item.prep-ok   { background: rgba(13,148,136,0.05); border-color: rgba(13,148,136,0.2); }
+    .prep-item.prep-warn { background: rgba(217,119,6,0.05);  border-color: rgba(217,119,6,0.2); }
+    .prep-item.prep-idle { background: var(--color-light); opacity: 0.6; }
+
+    .prep-icon { font-size: 14px; flex-shrink: 0; }
+
+    .prep-body { flex: 1; min-width: 0; }
+    .prep-class { font-weight: 700; color: var(--color-ink); }
+    .prep-sub   { font-size: 11px; color: var(--color-gray); margin-top: 1px; }
+
+    /* ── 학급별 성취 트렌드 ── */
+    .trend-table {
       width: 100%;
       border-collapse: collapse;
     }
 
-    .cmp-table th {
+    .trend-table th {
       font-size: 11px;
       font-weight: 600;
       color: var(--color-gray);
@@ -218,57 +218,162 @@
       background: var(--color-light);
     }
 
-    .cmp-table td {
-      padding: 8px 8px;
+    .trend-table td {
+      padding: 9px 8px;
       font-size: 13px;
       border-bottom: 1px solid var(--color-border);
       vertical-align: middle;
     }
 
-    .cmp-table tbody tr:last-child td { border-bottom: none; }
+    .trend-table tbody tr:last-child td { border-bottom: none; }
+    .trend-table tbody tr:hover { background: rgba(6,90,130,0.03); }
 
-    .cmp-table tbody tr.row-active {
-      background: rgba(6,90,130,0.06);
-      cursor: pointer;
-    }
-
-    .cmp-table tbody tr.row-active:hover {
-      background: rgba(6,90,130,0.11);
-    }
-
-    .cmp-table tbody tr.row-inactive {
-      cursor: default;
-    }
-
-    .cmp-class-name {
+    .trend-class-name {
       font-weight: 700;
       font-size: 13px;
       color: var(--color-ink);
     }
 
-    .cmp-class-sub {
+    .trend-class-sub {
       font-size: 10px;
       color: var(--color-gray);
       margin-top: 1px;
     }
 
-    .cmp-progress-wrap {
+    .trend-arrow-up   { color: var(--color-ok);     font-weight: 700; font-size: 13px; }
+    .trend-arrow-down { color: var(--color-danger);  font-weight: 700; font-size: 13px; }
+    .trend-arrow-flat { color: var(--color-gray);    font-weight: 700; font-size: 13px; }
+
+    /* ── 메모 패드 ── */
+    .memo-area {
+      width: 100%;
+      height: 130px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--color-ink);
+      background: var(--color-light);
+      resize: none;
+      outline: none;
+      box-sizing: border-box;
+      line-height: 1.6;
+    }
+
+    .memo-area:focus { border-color: var(--color-mid); background: white; }
+
+    .memo-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .memo-saved { font-size: 11px; color: var(--color-gray); }
+
+    /* ── 자료 열람 통계 ── */
+    .stat-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-rank {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--color-light);
+      border: 1px solid var(--color-border);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat-rank.rank-1 { background: #FEF3C7; border-color: #D97706; color: #92400E; }
+    .stat-rank.rank-2 { background: var(--color-light); border-color: #94A3B8; color: #475569; }
+
+    .stat-body { flex: 1; min-width: 0; }
+
+    .stat-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stat-bar-row {
       display: flex;
       align-items: center;
       gap: 6px;
+      margin-top: 3px;
     }
 
-    .cmp-pct {
-      font-size: 12px;
+    .stat-count {
+      font-size: 11px;
       font-weight: 700;
-      white-space: nowrap;
-      width: 32px;
-      text-align: right;
+      color: var(--color-gray);
+      flex-shrink: 0;
     }
 
-    .cmp-score {
+    /* ── 동료 교사 공유 자료 ── */
+    .shared-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .shared-card {
+      border: 1px solid var(--color-border);
+      border-radius: 7px;
+      padding: 11px 13px;
+      background: var(--color-light);
+      transition: border-color 0.12s, box-shadow 0.12s;
+      cursor: pointer;
+    }
+
+    .shared-card:hover {
+      border-color: var(--color-mid);
+      box-shadow: 0 2px 8px rgba(6,90,130,0.09);
+    }
+
+    .shared-card-title {
       font-size: 13px;
       font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .shared-card-meta {
+      font-size: 11px;
+      color: var(--color-gray);
+      margin-bottom: 6px;
+    }
+
+    .shared-card-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .shared-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(6,90,130,0.08);
+      color: var(--color-mid);
+      font-weight: 600;
     }
 
     /* ── 하단 컴팩트 카드 4개 ── */
@@ -360,22 +465,398 @@
       white-space: nowrap;
     }
 
-    /* ── 스텁 패널 (자료실·공지·설정) ── */
-    .stub-panel {
+    /* ── 공통: 탭 내부 스크롤 영역 ── */
+    .tab-scroll {
       flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    /* ── 자료실 탭 ── */
+    .mat-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mat-search {
+      flex: 1;
+      max-width: 280px;
+      height: 34px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 0 12px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .mat-search:focus {
+      border-color: var(--color-mid);
+    }
+
+    .mat-filter-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .mat-filter-btn {
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--color-border);
+      border-radius: 5px;
+      background: var(--color-white);
+      color: var(--color-gray);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .mat-filter-btn:hover { border-color: var(--color-mid); color: var(--color-mid); }
+    .mat-filter-btn.active { background: var(--color-mid); color: white; border-color: var(--color-mid); }
+
+    .mat-table-wrap {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .mat-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .mat-table th {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-gray);
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+      background: var(--color-light);
+      white-space: nowrap;
+    }
+
+    .mat-table td {
+      padding: 10px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: middle;
+    }
+
+    .mat-table tbody tr:last-child td { border-bottom: none; }
+
+    .mat-table tbody tr:hover { background: rgba(6,90,130,0.03); }
+
+    .mat-file-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-right: 8px;
+    }
+
+    .icon-ppt { background: #FFE5E5; color: #C0392B; }
+    .icon-pdf { background: #FFE8D6; color: #D35400; }
+    .icon-zip { background: #E8F5E9; color: #27AE60; }
+    .icon-mp4 { background: #E8EAF6; color: #3949AB; }
+    .icon-py  { background: #E3F2FD; color: var(--color-python); }
+
+    .mat-file-name {
+      font-weight: 600;
+      color: var(--color-ink);
+      cursor: pointer;
+    }
+
+    .mat-file-name:hover { color: var(--color-mid); text-decoration: underline; }
+
+    .mat-badge-unit {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      background: var(--color-light);
+      color: var(--color-gray);
+      border: 1px solid var(--color-border);
+    }
+
+    .mat-class-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .mat-class-tag {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      background: rgba(6,90,130,0.08);
+      color: var(--color-mid);
+    }
+
+    /* ── 공지 탭 ── */
+    .notice-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .notice-filter-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .notice-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .notice-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: box-shadow 0.12s, border-color 0.12s;
+    }
+
+    .notice-card:hover {
+      border-color: var(--color-mid);
+      box-shadow: 0 2px 8px rgba(6,90,130,0.1);
+    }
+
+    .notice-card.is-pinned {
+      border-left: 3px solid var(--color-warn);
+    }
+
+    .notice-card-body { flex: 1; min-width: 0; }
+
+    .notice-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .notice-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .notice-preview {
+      font-size: 12px;
+      color: var(--color-gray);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .notice-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .notice-date {
+      font-size: 11px;
+      color: var(--color-gray);
+      margin-bottom: 6px;
+    }
+
+    .notice-read {
+      font-size: 11px;
+      color: var(--color-gray);
+    }
+
+    .notice-read span {
+      font-weight: 700;
+      color: var(--color-mid);
+    }
+
+    /* ── 설정 탭 ── */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .settings-section {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .settings-section-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-light);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .settings-section-body { padding: 14px 16px; }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .settings-row:last-child { border-bottom: none; }
+
+    .settings-label {
+      font-size: 13px;
+      color: var(--color-ink);
+    }
+
+    .settings-sub {
+      font-size: 11px;
+      color: var(--color-gray);
+      margin-top: 2px;
+    }
+
+    /* 토글 스위치 */
+    .toggle-wrap {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .toggle-wrap input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--color-border);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle-wrap input:checked + .toggle-slider { background: var(--color-mid); }
+    .toggle-wrap input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+    .settings-avatar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .settings-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--color-mid);
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--color-gray);
-      font-size: 14px;
-      border: 2px dashed var(--color-border);
-      border-radius: 8px;
+      flex-shrink: 0;
     }
 
-    /* page-header 간격 조정 */
-    .home-wrap .page-header {
-      margin-bottom: 12px;
-      flex-shrink: 0;
+    .settings-avatar-info { flex: 1; }
+
+    .settings-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 2px;
+    }
+
+    .settings-role {
+      font-size: 12px;
+      color: var(--color-gray);
+    }
+
+    .settings-input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 0 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--color-ink);
+      background: var(--color-light);
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .settings-input:focus {
+      border-color: var(--color-mid);
+      background: white;
+    }
+
+    .class-manage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .class-manage-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--color-light);
+    }
+
+    .class-manage-info { font-size: 13px; font-weight: 600; color: var(--color-ink); }
+    .class-manage-sub  { font-size: 11px; color: var(--color-gray); margin-top: 1px; }
+
+    .settings-save-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
     }
   </style>
 </head>
@@ -411,9 +892,30 @@
   </div>
 </header>
 
-<!-- 메인 콘텐츠 -->
-<div class="home-wrap">
-  <div class="home-inner">
+<!-- 앱 레이아웃 -->
+<div class="app-layout">
+
+  <!-- 좌측 사이드바 -->
+  <aside class="sidebar">
+    <nav class="sidebar-menu">
+      <div class="sidebar-section-label">메뉴</div>
+      <div class="sidebar-menu-item active" data-tab="tab-classes">
+        <span class="menu-icon">🏠</span>내 학급
+      </div>
+      <div class="sidebar-menu-item" data-tab="tab-materials">
+        <span class="menu-icon">📁</span>자료실
+      </div>
+      <div class="sidebar-menu-item" data-tab="tab-notices">
+        <span class="menu-icon">📢</span>공지
+      </div>
+      <div class="sidebar-menu-item" data-tab="tab-settings">
+        <span class="menu-icon">⚙️</span>설정
+      </div>
+    </nav>
+  </aside>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="main-content">
 
     <!-- 페이지 헤더 -->
     <div class="page-header">
@@ -424,337 +926,912 @@
       <button class="btn btn-ghost btn-sm" onclick="alert('주간 계획 화면으로 이동')">📅 주간 계획</button>
     </div>
 
-    <!-- 오늘 요약 스트립 -->
-    <div class="home-summary">
-      <div class="home-summary-item">
-        <div class="home-summary-value">4</div>
-        <div class="home-summary-label">담당 학급</div>
-      </div>
-      <div class="home-summary-item">
-        <div class="home-summary-value" style="color: var(--color-ok)">1</div>
-        <div class="home-summary-label">수업 진행 중</div>
-      </div>
-      <div class="home-summary-item">
-        <div class="home-summary-value" style="color: var(--color-mid)">1</div>
-        <div class="home-summary-label">오후 수업 예정</div>
-      </div>
-      <div class="home-summary-item">
-        <div class="home-summary-value" style="color: var(--color-warn)">2</div>
-        <div class="home-summary-label">도움 요청 학생</div>
-      </div>
-      <div class="home-summary-item">
-        <div class="home-summary-value">103</div>
-        <div class="home-summary-label">전체 학생 수</div>
-      </div>
-    </div>
 
-    <!-- 탭 네비게이션 -->
-    <div class="tab-nav" role="tablist">
-      <button class="tab-btn active" role="tab" aria-selected="true"  data-tab="tab-classes">내 학급</button>
-      <button class="tab-btn"        role="tab" aria-selected="false" data-tab="tab-materials">자료실</button>
-      <button class="tab-btn"        role="tab" aria-selected="false" data-tab="tab-notices">공지</button>
-      <button class="tab-btn"        role="tab" aria-selected="false" data-tab="tab-settings">설정</button>
-    </div>
 
     <!-- ════════════════════════════════════════
          탭 1: 내 학급
          ════════════════════════════════════════ -->
     <div class="tab-panel active" id="tab-classes" role="tabpanel">
+    <div class="classes-layout">
 
-      <!-- 상단 2열: 타임라인 + 반별 현황 -->
-      <div class="upper-grid">
+    <!-- ── 메인 컬럼 ── -->
+    <div class="classes-main">
 
-        <!-- 왼쪽: 오늘 수업 일정 (타임라인) -->
+      <!-- 행 1: 오늘 수업 일정 / 수업 준비 체크 -->
+      <div class="home-grid home-grid-2">
+
+        <!-- 오늘 수업 일정 (타임라인) -->
         <div class="section-card">
           <div class="section-card-title">📅 오늘 수업 일정</div>
           <div class="timeline">
-
-            <!-- 1교시: 완료 -->
             <div class="tl-item tl-done" aria-label="1교시 완료">
               <div class="tl-time">09:00<br>1교시</div>
-              <div class="tl-dot" style="background: var(--color-gray)"></div>
+              <div class="tl-dot" style="background:var(--color-gray)"></div>
               <div class="tl-body">
-                <div class="tl-row">
-                  <span class="tl-period">1학년 3반</span>
-                </div>
+                <div class="tl-row"><span class="tl-period">1학년 3반</span></div>
                 <div class="tl-sub">변수와 자료형 이해하기</div>
               </div>
               <span class="badge badge-gray" style="font-size:10px">완료</span>
             </div>
-
-            <!-- 2교시: 진행 중 (클릭 → wf01) -->
-            <div class="tl-item tl-current"
-                 onclick="location.href='wf01_dashboard.html'"
-                 role="button"
-                 tabindex="0"
-                 aria-label="2교시 진행 중 — 1학년 3반 대시보드로 이동">
-              <div class="tl-time" style="color: var(--color-mid)">현재<br>2교시</div>
-              <div class="tl-dot" style="background: var(--color-mid)"></div>
+            <div class="tl-item tl-current" onclick="location.href='wf01_dashboard.html'"
+                 role="button" tabindex="0" aria-label="2교시 진행 중 — 1학년 3반 대시보드로 이동">
+              <div class="tl-time">현재<br>2교시</div>
+              <div class="tl-dot" style="background:var(--color-mid)"></div>
               <div class="tl-body">
                 <div class="tl-row">
-                  <span class="tl-period" style="color: var(--color-mid)">1학년 3반</span>
+                  <span class="tl-period" style="color:var(--color-mid)">1학년 3반</span>
                   <span class="tl-class">· 진행 중 68%</span>
                 </div>
                 <div class="tl-sub">변수와 자료형 이해하기</div>
               </div>
               <span class="badge badge-mid" style="font-size:10px">진행 중</span>
             </div>
-
-            <!-- 4교시: 예정 -->
             <div class="tl-item tl-upcoming" aria-label="4교시 예정">
               <div class="tl-time">14:00<br>4교시</div>
-              <div class="tl-dot" style="background: var(--color-border)"></div>
+              <div class="tl-dot" style="background:var(--color-border)"></div>
               <div class="tl-body">
-                <div class="tl-row">
-                  <span class="tl-period">1학년 4반</span>
-                </div>
+                <div class="tl-row"><span class="tl-period">1학년 4반</span></div>
                 <div class="tl-sub">변수와 자료형 이해하기</div>
               </div>
               <span class="badge badge-gray" style="font-size:10px">예정</span>
             </div>
-
-            <!-- 5교시: 예정 -->
             <div class="tl-item tl-upcoming" aria-label="5교시 예정">
               <div class="tl-time">15:00<br>5교시</div>
-              <div class="tl-dot" style="background: var(--color-border)"></div>
+              <div class="tl-dot" style="background:var(--color-border)"></div>
               <div class="tl-body">
-                <div class="tl-row">
-                  <span class="tl-period">2학년 1반</span>
-                </div>
+                <div class="tl-row"><span class="tl-period">2학년 1반</span></div>
                 <div class="tl-sub">알고리즘과 문제 해결</div>
               </div>
               <span class="badge badge-gray" style="font-size:10px">예정</span>
             </div>
+          </div>
+        </div>
 
-          </div><!-- /timeline -->
-        </div><!-- /timeline section-card -->
-
-        <!-- 오른쪽: 반별 현황 비교 테이블 -->
+        <!-- 수업 준비 체크 -->
         <div class="section-card">
-          <div class="section-card-title">📊 반별 현황</div>
-          <table class="cmp-table">
+          <div class="section-card-title">✅ 수업 준비 체크</div>
+          <div class="prep-list">
+            <div class="prep-item prep-ok">
+              <span class="prep-icon">✔</span>
+              <div class="prep-body">
+                <div class="prep-class">1학년 3반 · 2교시</div>
+                <div class="prep-sub">자료 배포 완료 · 변수와 자료형</div>
+              </div>
+            </div>
+            <div class="prep-item prep-warn">
+              <span class="prep-icon">⚠</span>
+              <div class="prep-body">
+                <div class="prep-class">1학년 4반 · 4교시</div>
+                <div class="prep-sub">자료 미배포 — 지금 배포하기</div>
+              </div>
+            </div>
+            <div class="prep-item prep-ok">
+              <span class="prep-icon">✔</span>
+              <div class="prep-body">
+                <div class="prep-class">2학년 1반 · 5교시</div>
+                <div class="prep-sub">자료 배포 완료 · 알고리즘</div>
+              </div>
+            </div>
+            <div class="prep-item prep-idle">
+              <span class="prep-icon">–</span>
+              <div class="prep-body">
+                <div class="prep-class">2학년 2반</div>
+                <div class="prep-sub">오늘 수업 없음</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /행 1 -->
+
+      <!-- 행 2: 학급별 진행현황 + 성취 트렌드 / 자료 열람 통계 -->
+      <div class="home-grid home-grid-2">
+
+        <!-- 학급별 진행현황 + 성취 트렌드 -->
+        <div class="section-card">
+          <div class="section-card-title">📊 학급별 진행현황 · 성취 트렌드</div>
+          <table class="trend-table">
             <thead>
               <tr>
                 <th>학급</th>
                 <th>진행률</th>
-                <th>반 평균 점수</th>
+                <th>평균 점수</th>
+                <th>지난주 대비</th>
               </tr>
             </thead>
             <tbody>
-
-              <!-- 1학년 3반: 진행 중 강조 + 클릭 가능 -->
-              <tr class="row-active"
-                  onclick="location.href='wf01_dashboard.html'"
-                  role="button"
-                  tabindex="0"
-                  aria-label="1학년 3반 대시보드로 이동">
+              <tr style="cursor:pointer" onclick="location.href='wf01_dashboard.html'" aria-label="1학년 3반 대시보드로 이동">
                 <td>
-                  <div class="cmp-class-name" style="color: var(--color-mid)">1학년 3반</div>
-                  <div class="cmp-class-sub">🟢 수업 중 · 26명</div>
+                  <div class="trend-class-name" style="color:var(--color-mid)">1학년 3반</div>
+                  <div class="trend-class-sub">🟢 수업 중 · 26명</div>
                 </td>
                 <td>
-                  <div class="cmp-progress-wrap">
-                    <div class="progress-bar" style="width: 90px; height: 5px">
-                      <div class="progress-fill progress-fill-primary" style="width: 68%"></div>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div class="progress-bar" style="width:70px;height:5px">
+                      <div class="progress-fill progress-fill-primary" style="width:68%"></div>
                     </div>
-                    <span class="cmp-pct" style="color: var(--color-mid)">68%</span>
+                    <span style="font-size:12px;font-weight:700;color:var(--color-mid)">68%</span>
                   </div>
                 </td>
-                <td>
-                  <span class="cmp-score" style="color: var(--color-ok)">82점</span>
-                </td>
+                <td style="font-weight:700">82점</td>
+                <td><span class="trend-arrow-up">▲ +4점</span></td>
               </tr>
-
-              <!-- 1학년 4반: 오후 예정 -->
-              <tr class="row-inactive">
+              <tr>
                 <td>
-                  <div class="cmp-class-name">1학년 4반</div>
-                  <div class="cmp-class-sub">⏰ 오후 예정 · 24명</div>
+                  <div class="trend-class-name">1학년 4반</div>
+                  <div class="trend-class-sub">⏰ 오후 예정 · 24명</div>
                 </td>
                 <td>
-                  <div class="cmp-progress-wrap">
-                    <div class="progress-bar" style="width: 90px; height: 5px">
-                      <div class="progress-fill progress-fill-primary" style="width: 0%"></div>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div class="progress-bar" style="width:70px;height:5px">
+                      <div class="progress-fill progress-fill-primary" style="width:0%"></div>
                     </div>
-                    <span class="cmp-pct text-gray">–</span>
+                    <span style="font-size:12px;color:var(--color-gray)">–</span>
                   </div>
                 </td>
-                <td>
-                  <span class="cmp-score text-gray">–</span>
-                </td>
+                <td style="color:var(--color-gray)">–</td>
+                <td><span class="trend-arrow-flat">→ 미시작</span></td>
               </tr>
-
-              <!-- 2학년 1반: 완료 -->
-              <tr class="row-inactive">
+              <tr>
                 <td>
-                  <div class="cmp-class-name">2학년 1반</div>
-                  <div class="cmp-class-sub">✓ 수업 완료 · 28명</div>
+                  <div class="trend-class-name">2학년 1반</div>
+                  <div class="trend-class-sub">✓ 완료 · 28명</div>
                 </td>
                 <td>
-                  <div class="cmp-progress-wrap">
-                    <div class="progress-bar" style="width: 90px; height: 5px">
-                      <div class="progress-fill progress-fill-ok" style="width: 91%"></div>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div class="progress-bar" style="width:70px;height:5px">
+                      <div class="progress-fill progress-fill-ok" style="width:91%"></div>
                     </div>
-                    <span class="cmp-pct" style="color: var(--color-ok)">91%</span>
+                    <span style="font-size:12px;font-weight:700;color:var(--color-ok)">91%</span>
                   </div>
                 </td>
-                <td>
-                  <span class="cmp-score">88점</span>
-                </td>
+                <td style="font-weight:700">88점</td>
+                <td><span class="trend-arrow-up">▲ +6점</span></td>
               </tr>
-
-              <!-- 2학년 2반: 완료 -->
-              <tr class="row-inactive">
+              <tr>
                 <td>
-                  <div class="cmp-class-name">2학년 2반</div>
-                  <div class="cmp-class-sub">✓ 단원 진행 · 25명</div>
+                  <div class="trend-class-name">2학년 2반</div>
+                  <div class="trend-class-sub">진행 중 · 25명</div>
                 </td>
                 <td>
-                  <div class="cmp-progress-wrap">
-                    <div class="progress-bar" style="width: 90px; height: 5px">
-                      <div class="progress-fill progress-fill-primary" style="width: 78%"></div>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div class="progress-bar" style="width:70px;height:5px">
+                      <div class="progress-fill progress-fill-primary" style="width:78%"></div>
                     </div>
-                    <span class="cmp-pct" style="color: var(--color-mid)">78%</span>
+                    <span style="font-size:12px;font-weight:700;color:var(--color-mid)">78%</span>
                   </div>
                 </td>
-                <td>
-                  <span class="cmp-score">79점</span>
-                </td>
+                <td style="font-weight:700">79점</td>
+                <td><span class="trend-arrow-down">▼ −2점</span></td>
               </tr>
-
             </tbody>
           </table>
-        </div><!-- /comparison section-card -->
+        </div>
 
-      </div><!-- /upper-grid -->
+        <!-- 자료 열람 통계 -->
+        <div class="section-card">
+          <div class="section-card-title">👁 자료 열람 통계 <span style="font-size:10px;font-weight:400;color:var(--color-gray)">이번 주</span></div>
+          <div class="stat-list">
+            <div class="stat-item">
+              <div class="stat-rank rank-1">1</div>
+              <div class="stat-body">
+                <div class="stat-name">변수와 자료형_수업자료.pptx</div>
+                <div class="stat-bar-row">
+                  <div class="progress-bar" style="flex:1;height:5px">
+                    <div class="progress-fill progress-fill-primary" style="width:100%"></div>
+                  </div>
+                  <span class="stat-count">147회</span>
+                </div>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-rank rank-2">2</div>
+              <div class="stat-body">
+                <div class="stat-name">Ⅲ-2-01 학습지.pdf</div>
+                <div class="stat-bar-row">
+                  <div class="progress-bar" style="flex:1;height:5px">
+                    <div class="progress-fill progress-fill-primary" style="width:67%"></div>
+                  </div>
+                  <span class="stat-count">98회</span>
+                </div>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-rank">3</div>
+              <div class="stat-body">
+                <div class="stat-name">프로그래밍 시작하기 강의영상.mp4</div>
+                <div class="stat-bar-row">
+                  <div class="progress-bar" style="flex:1;height:5px">
+                    <div class="progress-fill progress-fill-primary" style="width:50%"></div>
+                  </div>
+                  <span class="stat-count">73회</span>
+                </div>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-rank">4</div>
+              <div class="stat-body">
+                <div class="stat-name">알고리즘과 문제 해결_수업자료.pptx</div>
+                <div class="stat-bar-row">
+                  <div class="progress-bar" style="flex:1;height:5px">
+                    <div class="progress-fill progress-fill-primary" style="width:36%"></div>
+                  </div>
+                  <span class="stat-count">52회</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <!-- 하단: 컴팩트 카드 4개 가로 나열 -->
+      </div><!-- /행 2 -->
+
+      <!-- 행 3: 동료 교사 공유 자료 -->
+      <div class="section-card">
+        <div class="section-card-title" style="margin-bottom:12px">🤝 동료 교사 공유 자료</div>
+        <div class="shared-grid">
+          <div class="shared-card" onclick="alert('자료 상세 — 준비 중')" role="button" tabindex="0" aria-label="공유 자료 열기">
+            <div class="shared-card-title">파이썬 기초 실습 예제 모음</div>
+            <div class="shared-card-meta">이수빈 선생님 · 2학년 정보 · 어제 공유</div>
+            <div class="shared-card-tags">
+              <span class="shared-tag">파이썬</span><span class="shared-tag">실습</span><span class="shared-tag">Ⅲ-2</span>
+            </div>
+          </div>
+          <div class="shared-card" onclick="alert('자료 상세 — 준비 중')" role="button" tabindex="0" aria-label="공유 자료 열기">
+            <div class="shared-card-title">정렬 알고리즘 시각화 시뮬레이터</div>
+            <div class="shared-card-meta">박현우 선생님 · 1학년 정보 · 2일 전 공유</div>
+            <div class="shared-card-tags">
+              <span class="shared-tag">알고리즘</span><span class="shared-tag">시각화</span><span class="shared-tag">Ⅳ-1</span>
+            </div>
+          </div>
+          <div class="shared-card" onclick="alert('자료 상세 — 준비 중')" role="button" tabindex="0" aria-label="공유 자료 열기">
+            <div class="shared-card-title">변수·자료형 형성평가 문제지 (수정본)</div>
+            <div class="shared-card-meta">김태연 선생님 · 1학년 정보 · 3일 전 공유</div>
+            <div class="shared-card-tags">
+              <span class="shared-tag">평가</span><span class="shared-tag">형성평가</span><span class="shared-tag">Ⅲ-2-01</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 행 4: 담당 학급 카드 -->
       <div>
         <div class="strip-header">📚 담당 학급</div>
-        <div class="class-strip-grid">
-
-          <!-- 1학년 3반 (진행 중 — 강조) -->
-          <div class="cc-compact is-active"
-               onclick="location.href='wf01_dashboard.html'"
-               role="button"
-               tabindex="0"
-               aria-label="1학년 3반 대시보드 열기">
-            <div class="ccc-head">
-              <div class="ccc-name">1학년 3반</div>
-              <span class="badge badge-ok" style="font-size:10px">수업 중</span>
-            </div>
+        <div class="home-grid home-grid-4">
+          <div class="cc-compact is-active" onclick="location.href='wf01_dashboard.html'"
+               role="button" tabindex="0" aria-label="1학년 3반 대시보드 열기">
+            <div class="ccc-head"><div class="ccc-name">1학년 3반</div><span class="badge badge-ok" style="font-size:10px">수업 중</span></div>
             <div class="ccc-meta">26명 · Ⅲ-2-01</div>
             <div class="ccc-lesson">변수와 자료형 이해하기</div>
             <div class="ccc-progress">
-              <div class="progress-bar" style="flex:1; height:4px">
-                <div class="progress-fill progress-fill-primary" style="width:68%"></div>
-              </div>
-              <span class="ccc-pct" style="color: var(--color-mid)">68%</span>
+              <div class="progress-bar" style="flex:1;height:4px"><div class="progress-fill progress-fill-primary" style="width:68%"></div></div>
+              <span class="ccc-pct" style="color:var(--color-mid)">68%</span>
             </div>
           </div>
-
-          <!-- 1학년 4반 (오후 예정) -->
-          <div class="cc-compact"
-               onclick="alert('1학년 4반은 오후 수업 시작 후 활성화됩니다.')"
-               role="button"
-               tabindex="0"
-               aria-label="1학년 4반">
-            <div class="ccc-head">
-              <div class="ccc-name">1학년 4반</div>
-              <span class="badge badge-mid" style="font-size:10px">오후</span>
-            </div>
+          <div class="cc-compact" onclick="alert('1학년 4반은 오후 수업 시작 후 활성화됩니다.')"
+               role="button" tabindex="0" aria-label="1학년 4반">
+            <div class="ccc-head"><div class="ccc-name">1학년 4반</div><span class="badge badge-mid" style="font-size:10px">오후</span></div>
             <div class="ccc-meta">24명 · Ⅲ-2-01</div>
             <div class="ccc-lesson">변수와 자료형 이해하기</div>
             <div class="ccc-progress">
-              <div class="progress-bar" style="flex:1; height:4px">
-                <div class="progress-fill progress-fill-primary" style="width:0%"></div>
-              </div>
+              <div class="progress-bar" style="flex:1;height:4px"><div class="progress-fill progress-fill-primary" style="width:0%"></div></div>
               <span class="ccc-pct text-gray">–</span>
             </div>
           </div>
-
-          <!-- 2학년 1반 (완료) -->
-          <div class="cc-compact"
-               onclick="alert('2학년 1반 대시보드는 준비 중입니다.')"
-               role="button"
-               tabindex="0"
-               aria-label="2학년 1반">
-            <div class="ccc-head">
-              <div class="ccc-name">2학년 1반</div>
-              <span class="badge badge-gray" style="font-size:10px">완료</span>
-            </div>
+          <div class="cc-compact" onclick="alert('2학년 1반 대시보드는 준비 중입니다.')"
+               role="button" tabindex="0" aria-label="2학년 1반">
+            <div class="ccc-head"><div class="ccc-name">2학년 1반</div><span class="badge badge-gray" style="font-size:10px">완료</span></div>
             <div class="ccc-meta">28명 · Ⅳ-1-02</div>
             <div class="ccc-lesson">알고리즘과 문제 해결</div>
             <div class="ccc-progress">
-              <div class="progress-bar" style="flex:1; height:4px">
-                <div class="progress-fill progress-fill-ok" style="width:100%"></div>
-              </div>
-              <span class="ccc-pct" style="color: var(--color-ok)">100%</span>
+              <div class="progress-bar" style="flex:1;height:4px"><div class="progress-fill progress-fill-ok" style="width:100%"></div></div>
+              <span class="ccc-pct" style="color:var(--color-ok)">100%</span>
             </div>
           </div>
-
-          <!-- 2학년 2반 (수업 없음) -->
-          <div class="cc-compact is-idle"
-               onclick="alert('2학년 2반 대시보드는 준비 중입니다.')"
-               role="button"
-               tabindex="0"
-               aria-label="2학년 2반">
-            <div class="ccc-head">
-              <div class="ccc-name">2학년 2반</div>
-              <span class="badge badge-gray" style="font-size:10px">없음</span>
-            </div>
+          <div class="cc-compact is-idle" onclick="alert('2학년 2반 대시보드는 준비 중입니다.')"
+               role="button" tabindex="0" aria-label="2학년 2반">
+            <div class="ccc-head"><div class="ccc-name">2학년 2반</div><span class="badge badge-gray" style="font-size:10px">없음</span></div>
             <div class="ccc-meta">25명 · Ⅴ-1-01</div>
             <div class="ccc-lesson">데이터 분석 입문</div>
             <div class="ccc-progress">
-              <div class="progress-bar" style="flex:1; height:4px">
-                <div class="progress-fill progress-fill-primary" style="width:40%"></div>
-              </div>
-              <span class="ccc-pct" style="color: var(--color-mid)">40%</span>
+              <div class="progress-bar" style="flex:1;height:4px"><div class="progress-fill progress-fill-primary" style="width:40%"></div></div>
+              <span class="ccc-pct" style="color:var(--color-mid)">40%</span>
             </div>
           </div>
-
-        </div><!-- /class-strip-grid -->
+        </div>
       </div>
 
+    </div><!-- /classes-main -->
+
+    <!-- ── 우측 사이드 컬럼 ── -->
+    <div class="classes-side">
+
+      <!-- 이번 주 주요 일정 -->
+      <div class="section-card">
+        <div class="section-card-title" style="justify-content:space-between">
+          <span>📌 이번 주 주요 일정</span>
+          <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 8px"
+                  onclick="alert('일정 추가 — 준비 중')">+ 추가</button>
+        </div>
+        <div class="dday-list">
+          <div class="dday-item">
+            <span class="dday-badge dday-urgent">D-3</span>
+            <span class="dday-text">1학기 지필평가</span>
+            <span class="dday-date">6/19~20</span>
+          </div>
+          <div class="dday-item">
+            <span class="dday-badge dday-urgent">D-1</span>
+            <span class="dday-text">1-3반 과제 제출 마감</span>
+            <span class="dday-date">6/17</span>
+          </div>
+          <div class="dday-item">
+            <span class="dday-badge dday-warn">D-8</span>
+            <span class="dday-text">AI 활용 공개 수업</span>
+            <span class="dday-date">6/24</span>
+          </div>
+          <div class="dday-item">
+            <span class="dday-badge dday-mid">D-12</span>
+            <span class="dday-text">2학년 단원 평가</span>
+            <span class="dday-date">6/28</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 메모 패드 -->
+      <div class="section-card">
+        <div class="section-card-title">📝 메모 패드</div>
+        <textarea class="memo-area" id="memoArea"
+                  placeholder="오늘 할 일, 메모를 자유롭게 적어두세요.&#10;&#10;예) 3반 김민준 상담 예정&#10;예) 4반 실습 파일 수정 필요"></textarea>
+        <div class="memo-footer">
+          <span class="memo-saved" id="memoSaved"></span>
+          <button class="btn btn-ghost btn-sm" onclick="saveMemo()">저장</button>
+        </div>
+      </div>
+
+    </div><!-- /classes-side -->
+
+    </div><!-- /classes-layout -->
     </div><!-- /tab-classes -->
 
     <!-- ════════════════════════════════════════
          탭 2: 자료실
          ════════════════════════════════════════ -->
     <div class="tab-panel" id="tab-materials" role="tabpanel">
-      <div class="stub-panel">📁 자료실 — 준비 중</div>
-    </div>
+
+      <!-- 툴바: 검색 + 필터 + 업로드 -->
+      <div class="mat-toolbar">
+        <input class="mat-search" type="search" placeholder="파일명 검색…" aria-label="파일명 검색"
+               id="matSearch" oninput="filterMaterials()">
+        <div class="mat-filter-group" role="group" aria-label="단원 필터">
+          <button class="mat-filter-btn active" data-filter="all"  onclick="setMatFilter(this)">전체</button>
+          <button class="mat-filter-btn"        data-filter="3-2"  onclick="setMatFilter(this)">Ⅲ-2 프로그래밍</button>
+          <button class="mat-filter-btn"        data-filter="4-1"  onclick="setMatFilter(this)">Ⅳ-1 알고리즘</button>
+          <button class="mat-filter-btn"        data-filter="5-1"  onclick="setMatFilter(this)">Ⅴ-1 데이터</button>
+        </div>
+        <button class="btn btn-primary btn-sm" style="margin-left:auto"
+                onclick="alert('파일 업로드 모달 — 준비 중')" aria-label="자료 업로드">
+          + 자료 업로드
+        </button>
+      </div>
+
+      <!-- 파일 목록 테이블 -->
+      <div class="tab-scroll">
+        <div class="mat-table-wrap">
+          <table class="mat-table" aria-label="수업 자료 목록">
+            <thead>
+              <tr>
+                <th style="width:40%">파일명</th>
+                <th>단원</th>
+                <th>배포 학급</th>
+                <th>업로드일</th>
+                <th style="text-align:right">학생 열람</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="matTableBody">
+              <tr data-unit="3-2">
+                <td>
+                  <div style="display:flex;align-items:center">
+                    <span class="mat-file-icon icon-ppt">PPT</span>
+                    <span class="mat-file-name" onclick="alert('파일 미리보기 — 준비 중')">변수와 자료형_수업자료.pptx</span>
+                  </div>
+                </td>
+                <td><span class="mat-badge-unit">Ⅲ-2-01</span></td>
+                <td>
+                  <div class="mat-class-tags">
+                    <span class="mat-class-tag">1-3반</span>
+                    <span class="mat-class-tag">1-4반</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-gray);font-size:12px">2026-06-14</td>
+                <td style="text-align:right;font-size:13px;font-weight:700">24 / 26</td>
+                <td style="text-align:right">
+                  <button class="btn btn-ghost btn-sm" onclick="alert('파일 옵션')">···</button>
+                </td>
+              </tr>
+              <tr data-unit="3-2">
+                <td>
+                  <div style="display:flex;align-items:center">
+                    <span class="mat-file-icon icon-pdf">PDF</span>
+                    <span class="mat-file-name" onclick="alert('파일 미리보기 — 준비 중')">Ⅲ-2-01 학습지.pdf</span>
+                  </div>
+                </td>
+                <td><span class="mat-badge-unit">Ⅲ-2-01</span></td>
+                <td>
+                  <div class="mat-class-tags">
+                    <span class="mat-class-tag">1-3반</span>
+                    <span class="mat-class-tag">1-4반</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-gray);font-size:12px">2026-06-14</td>
+                <td style="text-align:right;font-size:13px;font-weight:700">21 / 26</td>
+                <td style="text-align:right">
+                  <button class="btn btn-ghost btn-sm" onclick="alert('파일 옵션')">···</button>
+                </td>
+              </tr>
+              <tr data-unit="3-2">
+                <td>
+                  <div style="display:flex;align-items:center">
+                    <span class="mat-file-icon icon-py">PY</span>
+                    <span class="mat-file-name" onclick="alert('파일 미리보기 — 준비 중')">두 수 사칙연산_실습코드.py</span>
+                  </div>
+                </td>
+                <td><span class="mat-badge-unit">Ⅲ-2-02</span></td>
+                <td>
+                  <div class="mat-class-tags">
+                    <span class="mat-class-tag">1-3반</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-gray);font-size:12px">2026-06-10</td>
+                <td style="text-align:right;font-size:13px;font-weight:700">26 / 26</td>
+                <td style="text-align:right">
+                  <button class="btn btn-ghost btn-sm" onclick="alert('파일 옵션')">···</button>
+                </td>
+              </tr>
+              <tr data-unit="3-2">
+                <td>
+                  <div style="display:flex;align-items:center">
+                    <span class="mat-file-icon icon-mp4">MP4</span>
+                    <span class="mat-file-name" onclick="alert('파일 미리보기 — 준비 중')">프로그래밍 시작하기 강의영상.mp4</span>
+                  </div>
+                </td>
+                <td><span class="mat-badge-unit">Ⅲ-2-01</span></td>
+                <td>
+                  <div class="mat-class-tags">
+                    <span class="mat-class-tag">1-3반</span>
+                    <span class="mat-class-tag">1-4반</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-gray);font-size:12px">2026-06-08</td>
+                <td style="text-align:right;font-size:13px;font-weight:700">18 / 26</td>
+                <td style="text-align:right">
+                  <button class="btn btn-ghost btn-sm" onclick="alert('파일 옵션')">···</button>
+                </td>
+              </tr>
+              <tr data-unit="4-1">
+                <td>
+                  <div style="display:flex;align-items:center">
+                    <span class="mat-file-icon icon-ppt">PPT</span>
+                    <span class="mat-file-name" onclick="alert('파일 미리보기 — 준비 중')">알고리즘과 문제 해결_수업자료.pptx</span>
+                  </div>
+                </td>
+                <td><span class="mat-badge-unit">Ⅳ-1-02</span></td>
+                <td>
+                  <div class="mat-class-tags">
+                    <span class="mat-class-tag">2-1반</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-gray);font-size:12px">2026-06-12</td>
+                <td style="text-align:right;font-size:13px;font-weight:700">28 / 28</td>
+                <td style="text-align:right">
+                  <button class="btn btn-ghost btn-sm" onclick="alert('파일 옵션')">···</button>
+                </td>
+              </tr>
+              <tr data-unit="4-1">
+                <td>
+                  <div style="display:flex;align-items:center">
+                    <span class="mat-file-icon icon-zip">ZIP</span>
+                    <span class="mat-file-name" onclick="alert('파일 미리보기 — 준비 중')">정렬알고리즘_실습파일.zip</span>
+                  </div>
+                </td>
+                <td><span class="mat-badge-unit">Ⅳ-1-03</span></td>
+                <td>
+                  <div class="mat-class-tags">
+                    <span class="mat-class-tag">2-1반</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-gray);font-size:12px">2026-06-11</td>
+                <td style="text-align:right;font-size:13px;font-weight:700">25 / 28</td>
+                <td style="text-align:right">
+                  <button class="btn btn-ghost btn-sm" onclick="alert('파일 옵션')">···</button>
+                </td>
+              </tr>
+              <tr data-unit="5-1">
+                <td>
+                  <div style="display:flex;align-items:center">
+                    <span class="mat-file-icon icon-pdf">PDF</span>
+                    <span class="mat-file-name" onclick="alert('파일 미리보기 — 준비 중')">데이터 분석 입문_학습지.pdf</span>
+                  </div>
+                </td>
+                <td><span class="mat-badge-unit">Ⅴ-1-01</span></td>
+                <td>
+                  <div class="mat-class-tags">
+                    <span class="mat-class-tag">2-2반</span>
+                  </div>
+                </td>
+                <td style="color:var(--color-gray);font-size:12px">2026-06-05</td>
+                <td style="text-align:right;font-size:13px;font-weight:700">20 / 25</td>
+                <td style="text-align:right">
+                  <button class="btn btn-ghost btn-sm" onclick="alert('파일 옵션')">···</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /tab-scroll -->
+
+    </div><!-- /tab-materials -->
 
     <!-- ════════════════════════════════════════
          탭 3: 공지
          ════════════════════════════════════════ -->
     <div class="tab-panel" id="tab-notices" role="tabpanel">
-      <div class="stub-panel">📢 공지 — 준비 중</div>
-    </div>
+
+      <!-- 툴바 -->
+      <div class="notice-toolbar">
+        <div class="notice-filter-group">
+          <button class="mat-filter-btn active" data-nfilter="all"    onclick="setNoticeFilter(this)">전체</button>
+          <button class="mat-filter-btn"        data-nfilter="school" onclick="setNoticeFilter(this)">학교 공지</button>
+          <button class="mat-filter-btn"        data-nfilter="my"     onclick="setNoticeFilter(this)">내 공지</button>
+        </div>
+        <button class="btn btn-primary btn-sm"
+                onclick="alert('공지 작성 화면 — 준비 중')" aria-label="공지 작성">
+          + 공지 작성
+        </button>
+      </div>
+
+      <!-- 공지 목록 -->
+      <div class="tab-scroll">
+        <div class="notice-list" id="noticeList">
+
+          <!-- 고정 공지 1 -->
+          <div class="notice-card is-pinned" data-ntype="school"
+               onclick="alert('공지 상세 — 준비 중')" role="button" tabindex="0" aria-label="공지 열기">
+            <div class="notice-card-body">
+              <div class="notice-meta">
+                <span class="badge badge-warn" style="font-size:10px">📌 고정</span>
+                <span class="badge badge-gray" style="font-size:10px">학교 공지</span>
+                <span class="mat-class-tag">전체</span>
+              </div>
+              <div class="notice-title">2026년 1학기 AI 코스웨어 활용 지침 안내</div>
+              <div class="notice-preview">AI 코스웨어를 활용한 수업 운영 시 유의사항 및 개인정보 처리 지침을 안내드립니다. 반드시 숙지하신 후 수업에 활용해 주시기 바랍니다.</div>
+            </div>
+            <div class="notice-right">
+              <div class="notice-date">2026-03-02</div>
+              <div class="notice-read">읽음 <span>58</span> / 58</div>
+            </div>
+          </div>
+
+          <!-- 고정 공지 2 -->
+          <div class="notice-card is-pinned" data-ntype="school"
+               onclick="alert('공지 상세 — 준비 중')" role="button" tabindex="0" aria-label="공지 열기">
+            <div class="notice-card-body">
+              <div class="notice-meta">
+                <span class="badge badge-warn" style="font-size:10px">📌 고정</span>
+                <span class="badge badge-gray" style="font-size:10px">학교 공지</span>
+                <span class="mat-class-tag">전체</span>
+              </div>
+              <div class="notice-title">1학기 지필평가 일정 안내 (6월 19일~20일)</div>
+              <div class="notice-preview">1학기 1차 지필평가가 6월 19일(목)~20일(금)에 실시됩니다. 평가 전날까지 수업 자료를 배포 마감하여 주시기 바랍니다.</div>
+            </div>
+            <div class="notice-right">
+              <div class="notice-date">2026-06-10</div>
+              <div class="notice-read">읽음 <span>52</span> / 58</div>
+            </div>
+          </div>
+
+          <!-- 내 공지 1 -->
+          <div class="notice-card" data-ntype="my"
+               onclick="alert('공지 상세 — 준비 중')" role="button" tabindex="0" aria-label="공지 열기">
+            <div class="notice-card-body">
+              <div class="notice-meta">
+                <span class="badge badge-mid" style="font-size:10px">내 공지</span>
+                <span class="mat-class-tag">1-3반</span>
+                <span class="mat-class-tag">1-4반</span>
+              </div>
+              <div class="notice-title">이번 주 실습 과제 안내 — 두 수 사칙연산 프로그램 완성</div>
+              <div class="notice-preview">이번 주 파이썬 실습 과제는 '두 수를 입력받아 사칙연산 결과를 출력하는 프로그램' 작성입니다. 금요일 수업 시작 전까지 플랫폼에 제출해 주세요.</div>
+            </div>
+            <div class="notice-right">
+              <div class="notice-date">2026-06-13</div>
+              <div class="notice-read">읽음 <span>39</span> / 50</div>
+            </div>
+          </div>
+
+          <!-- 내 공지 2 -->
+          <div class="notice-card" data-ntype="my"
+               onclick="alert('공지 상세 — 준비 중')" role="button" tabindex="0" aria-label="공지 열기">
+            <div class="notice-card-body">
+              <div class="notice-meta">
+                <span class="badge badge-mid" style="font-size:10px">내 공지</span>
+                <span class="mat-class-tag">2-1반</span>
+              </div>
+              <div class="notice-title">정렬 알고리즘 실습 파일 업데이트 안내</div>
+              <div class="notice-preview">정렬 알고리즘 실습 파일(버블정렬, 선택정렬)이 수정되어 재업로드되었습니다. 자료실에서 최신 파일을 다운로드해 주세요.</div>
+            </div>
+            <div class="notice-right">
+              <div class="notice-date">2026-06-12</div>
+              <div class="notice-read">읽음 <span>28</span> / 28</div>
+            </div>
+          </div>
+
+          <!-- 학교 공지 1 -->
+          <div class="notice-card" data-ntype="school"
+               onclick="alert('공지 상세 — 준비 중')" role="button" tabindex="0" aria-label="공지 열기">
+            <div class="notice-card-body">
+              <div class="notice-meta">
+                <span class="badge badge-gray" style="font-size:10px">학교 공지</span>
+                <span class="mat-class-tag">전체</span>
+              </div>
+              <div class="notice-title">교내 AI 활용 수업 공개 수업 참관 안내 (6월 24일)</div>
+              <div class="notice-preview">6월 24일(화) 2~3교시에 AI 코스웨어 활용 공개 수업이 진행됩니다. 참관을 원하시는 선생님께서는 교무실에 신청해 주시기 바랍니다.</div>
+            </div>
+            <div class="notice-right">
+              <div class="notice-date">2026-06-09</div>
+              <div class="notice-read">읽음 <span>44</span> / 58</div>
+            </div>
+          </div>
+
+          <!-- 내 공지 3 -->
+          <div class="notice-card" data-ntype="my"
+               onclick="alert('공지 상세 — 준비 중')" role="button" tabindex="0" aria-label="공지 열기">
+            <div class="notice-card-body">
+              <div class="notice-meta">
+                <span class="badge badge-mid" style="font-size:10px">내 공지</span>
+                <span class="mat-class-tag">2-2반</span>
+              </div>
+              <div class="notice-title">데이터 분석 입문 단원 시작 안내</div>
+              <div class="notice-preview">다음 주부터 Ⅴ-1 데이터 분석 단원이 시작됩니다. 교과서 150~180쪽을 미리 읽어오면 수업 이해에 도움이 됩니다.</div>
+            </div>
+            <div class="notice-right">
+              <div class="notice-date">2026-06-06</div>
+              <div class="notice-read">읽음 <span>22</span> / 25</div>
+            </div>
+          </div>
+
+        </div><!-- /notice-list -->
+      </div><!-- /tab-scroll -->
+
+    </div><!-- /tab-notices -->
 
     <!-- ════════════════════════════════════════
          탭 4: 설정
          ════════════════════════════════════════ -->
     <div class="tab-panel" id="tab-settings" role="tabpanel">
-      <div class="stub-panel">⚙️ 설정 — 준비 중</div>
-    </div>
+      <div class="tab-scroll">
+        <div class="settings-grid">
 
-  </div><!-- /home-inner -->
-</div><!-- /home-wrap -->
+          <!-- 프로필 -->
+          <div class="settings-section" style="grid-column: 1 / -1">
+            <div class="settings-section-header">👤 내 프로필</div>
+            <div class="settings-section-body">
+              <div class="settings-avatar-row">
+                <div class="settings-avatar">김</div>
+                <div class="settings-avatar-info">
+                  <div class="settings-name">김지현</div>
+                  <div class="settings-role">정보 교사 · 1학년 3반 담임</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="alert('프로필 사진 변경 — 준비 중')">사진 변경</button>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div>
+                  <div class="settings-sub" style="margin-bottom:4px">이름</div>
+                  <input class="settings-input" type="text" value="김지현" aria-label="이름">
+                </div>
+                <div>
+                  <div class="settings-sub" style="margin-bottom:4px">이메일</div>
+                  <input class="settings-input" type="email" value="jihyun.kim@school.edu" aria-label="이메일">
+                </div>
+                <div>
+                  <div class="settings-sub" style="margin-bottom:4px">담당 과목</div>
+                  <input class="settings-input" type="text" value="정보" aria-label="담당 과목">
+                </div>
+                <div>
+                  <div class="settings-sub" style="margin-bottom:4px">소속 학교</div>
+                  <input class="settings-input" type="text" value="한국중학교" aria-label="소속 학교">
+                </div>
+              </div>
+              <div class="settings-save-row">
+                <button class="btn btn-ghost btn-sm" onclick="alert('변경 취소')">취소</button>
+                <button class="btn btn-primary btn-sm" onclick="alert('프로필 저장 완료!')">저장</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 알림 설정 -->
+          <div class="settings-section">
+            <div class="settings-section-header">🔔 알림 설정</div>
+            <div class="settings-section-body">
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">도움 요청 알림</div>
+                  <div class="settings-sub">학생이 도움을 요청하면 즉시 알림</div>
+                </div>
+                <label class="toggle-wrap" aria-label="도움 요청 알림 토글">
+                  <input type="checkbox" checked onchange="saveToggle(this, '도움 요청 알림')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">수업 시작 5분 전 알림</div>
+                  <div class="settings-sub">다음 교시 수업 시작 전 리마인더</div>
+                </div>
+                <label class="toggle-wrap" aria-label="수업 시작 알림 토글">
+                  <input type="checkbox" checked onchange="saveToggle(this, '수업 시작 알림')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">AI 채점 완료 알림</div>
+                  <div class="settings-sub">자동 채점 처리 완료 시 알림</div>
+                </div>
+                <label class="toggle-wrap" aria-label="AI 채점 알림 토글">
+                  <input type="checkbox" checked onchange="saveToggle(this, 'AI 채점 알림')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">학교 공지 알림</div>
+                  <div class="settings-sub">관리자 공지 등록 시 알림</div>
+                </div>
+                <label class="toggle-wrap" aria-label="학교 공지 알림 토글">
+                  <input type="checkbox" onchange="saveToggle(this, '학교 공지 알림')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">이메일 알림</div>
+                  <div class="settings-sub">플랫폼 알림을 이메일로도 수신</div>
+                </div>
+                <label class="toggle-wrap" aria-label="이메일 알림 토글">
+                  <input type="checkbox" onchange="saveToggle(this, '이메일 알림')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 담당 학급 관리 -->
+          <div class="settings-section">
+            <div class="settings-section-header">🏫 담당 학급 관리</div>
+            <div class="settings-section-body">
+              <div class="class-manage-list">
+                <div class="class-manage-row">
+                  <div>
+                    <div class="class-manage-info">1학년 3반</div>
+                    <div class="class-manage-sub">26명 · 담임 학급 · Ⅲ-2 프로그래밍</div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" onclick="alert('1학년 3반 설정 — 준비 중')">관리</button>
+                </div>
+                <div class="class-manage-row">
+                  <div>
+                    <div class="class-manage-info">1학년 4반</div>
+                    <div class="class-manage-sub">24명 · Ⅲ-2 프로그래밍</div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" onclick="alert('1학년 4반 설정 — 준비 중')">관리</button>
+                </div>
+                <div class="class-manage-row">
+                  <div>
+                    <div class="class-manage-info">2학년 1반</div>
+                    <div class="class-manage-sub">28명 · Ⅳ-1 알고리즘</div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" onclick="alert('2학년 1반 설정 — 준비 중')">관리</button>
+                </div>
+                <div class="class-manage-row">
+                  <div>
+                    <div class="class-manage-info">2학년 2반</div>
+                    <div class="class-manage-sub">25명 · Ⅴ-1 데이터 분석</div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" onclick="alert('2학년 2반 설정 — 준비 중')">관리</button>
+                </div>
+              </div>
+              <div class="settings-save-row">
+                <button class="btn btn-ghost btn-sm" onclick="alert('학급 추가 — 준비 중')">+ 학급 추가</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 화면 · 접근성 -->
+          <div class="settings-section">
+            <div class="settings-section-header">🎨 화면 설정</div>
+            <div class="settings-section-body">
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">언어</div>
+                  <div class="settings-sub">플랫폼 표시 언어</div>
+                </div>
+                <select class="settings-input" style="width:100px;height:32px" aria-label="언어 선택">
+                  <option>한국어</option>
+                  <option>English</option>
+                </select>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">글자 크기</div>
+                  <div class="settings-sub">기본 / 크게</div>
+                </div>
+                <select class="settings-input" style="width:100px;height:32px" aria-label="글자 크기 선택">
+                  <option>기본</option>
+                  <option>크게</option>
+                </select>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">고대비 모드</div>
+                  <div class="settings-sub">저시력 접근성 지원</div>
+                </div>
+                <label class="toggle-wrap" aria-label="고대비 모드 토글">
+                  <input type="checkbox" onchange="saveToggle(this, '고대비 모드')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 계정 -->
+          <div class="settings-section">
+            <div class="settings-section-header">🔐 계정 및 보안</div>
+            <div class="settings-section-body">
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">비밀번호 변경</div>
+                  <div class="settings-sub">마지막 변경 90일 전</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="alert('비밀번호 변경 — 준비 중')">변경</button>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">2단계 인증</div>
+                  <div class="settings-sub">로그인 시 추가 인증</div>
+                </div>
+                <label class="toggle-wrap" aria-label="2단계 인증 토글">
+                  <input type="checkbox" onchange="saveToggle(this, '2단계 인증')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-label">로그아웃</div>
+                  <div class="settings-sub">현재 세션 종료</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" style="color:var(--color-danger)"
+                        onclick="if(confirm('로그아웃 하시겠습니까?')) alert('로그아웃 완료')">로그아웃</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /settings-grid -->
+      </div><!-- /tab-scroll -->
+
+    </div><!-- /tab-settings -->
+
+  </main><!-- /main-content -->
+</div><!-- /app-layout -->
 
 <script>
   // 탭 전환
-  document.querySelectorAll('.tab-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.tab-btn').forEach(function(b) {
-        b.classList.remove('active');
-        b.setAttribute('aria-selected', 'false');
+  document.querySelectorAll('.sidebar-menu-item[data-tab]').forEach(function(item) {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.sidebar-menu-item[data-tab]').forEach(function(i) {
+        i.classList.remove('active');
       });
       document.querySelectorAll('.tab-panel').forEach(function(p) {
         p.classList.remove('active');
       });
       this.classList.add('active');
-      this.setAttribute('aria-selected', 'true');
       document.getElementById(this.dataset.tab).classList.add('active');
     });
   });
@@ -778,6 +1855,62 @@
       }
     });
   });
+
+  // ── 메모 패드 ──
+  var memoArea = document.getElementById('memoArea');
+  var memoSaved = document.getElementById('memoSaved');
+  if (memoArea) {
+    memoArea.value = localStorage.getItem('teacher_memo') || '';
+  }
+  function saveMemo() {
+    localStorage.setItem('teacher_memo', memoArea.value);
+    memoSaved.textContent = '저장됨 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+    setTimeout(function() { memoSaved.textContent = ''; }, 3000);
+  }
+
+  // ── 자료실: 단원 필터 ──
+  var currentMatFilter = 'all';
+
+  function setMatFilter(btn) {
+    document.querySelectorAll('.mat-filter-btn[data-filter]').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    currentMatFilter = btn.dataset.filter;
+    filterMaterials();
+  }
+
+  function filterMaterials() {
+    var query = (document.getElementById('matSearch') || {}).value || '';
+    query = query.toLowerCase();
+    document.querySelectorAll('#matTableBody tr').forEach(function(row) {
+      var unitMatch = currentMatFilter === 'all' || row.dataset.unit === currentMatFilter;
+      var textMatch = !query || row.textContent.toLowerCase().includes(query);
+      row.style.display = (unitMatch && textMatch) ? '' : 'none';
+    });
+  }
+
+  // ── 공지: 분류 필터 ──
+  function setNoticeFilter(btn) {
+    document.querySelectorAll('.mat-filter-btn[data-nfilter]').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    var filter = btn.dataset.nfilter;
+    document.querySelectorAll('#noticeList .notice-card').forEach(function(card) {
+      if (filter === 'all') {
+        card.style.display = '';
+      } else {
+        card.style.display = card.dataset.ntype === filter ? '' : 'none';
+      }
+    });
+  }
+
+  // ── 설정: 토글 변경 피드백 ──
+  function saveToggle(input, name) {
+    var state = input.checked ? 'ON' : 'OFF';
+    console.log('[설정] ' + name + ': ' + state);
+  }
 </script>
 
 </body>

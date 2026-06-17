@@ -415,6 +415,204 @@
       gap: 4px;
     }
 
+    /* ── 소탭 2번째 줄 (탭 바 아래) ────────────────── */
+    .sub-tabs-row {
+      display: none;
+      align-items: center;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 var(--space-md);
+      flex-shrink: 0;
+    }
+    .sub-tabs-row.visible { display: flex; }
+
+    .sub-tab-group { display: none; align-items: center; }
+    .sub-tab-group.visible { display: flex; }
+
+    .sub-tab {
+      padding: 7px 16px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--color-gray);
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      cursor: pointer;
+      font-family: inherit;
+      margin-bottom: -1px;
+      transition: color 0.15s;
+      white-space: nowrap;
+    }
+    .sub-tab:hover { color: var(--color-ink); }
+    #sub-tabs-entry .sub-tab.active {
+      color: var(--color-mid);
+      font-weight: 700;
+      border-bottom-color: var(--color-mid);
+    }
+    #sub-tabs-python .sub-tab.active {
+      color: var(--color-python);
+      font-weight: 700;
+      border-bottom-color: var(--color-python);
+    }
+
+    /* entry-sub-content (소탭 콘텐츠 패널) */
+    .entry-sub-content { display: none; flex: 1; overflow: hidden; min-height: 0; }
+    .entry-sub-content.active { display: flex; flex-direction: column; }
+    .entry-sub-content.active .practice-split { flex: 1; overflow: hidden; }
+
+    /* 시작 코드 전체 에디터 */
+    .entry-full-editor { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* 축소 미리보기 래퍼 */
+    .iframe-scale-wrap {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      background: #f0f2f5;
+    }
+    .iframe-scale-wrap iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 154%;   /* 1/0.65 */
+      height: 154%;
+      border: none;
+      transform: scale(0.65);
+      transform-origin: top left;
+    }
+
+    /* 단계 편집 미니탭 */
+    .step-mini-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+    .step-mini-tab {
+      padding: 4px 12px;
+      font-size: 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      background: var(--color-white);
+      color: var(--color-gray);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.12s;
+    }
+    .step-mini-tab.active {
+      background: var(--color-mid);
+      color: white;
+      border-color: var(--color-mid);
+      font-weight: 600;
+    }
+    .step-edit-panel { display: none; }
+    .step-edit-panel.active { display: block; }
+
+    /* ── 교과서 편집 폼 (2열 레이아웃) ─────────── */
+    .tb-edit-form {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      background: var(--color-light);
+    }
+    .tb-edit-cols {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      gap: 0;
+    }
+    .tb-edit-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--color-white);
+      border-right: 1px solid var(--color-border);
+    }
+    .tb-edit-col:last-child { border-right: none; }
+    .tb-col-header {
+      padding: 12px var(--space-lg);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-ink);
+      background: var(--color-light);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+    .tb-col-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .tb-field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-gray);
+      margin-bottom: 3px;
+    }
+    .tb-edit-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 10px var(--space-lg);
+      border-top: 1px solid var(--color-border);
+      background: var(--color-white);
+      flex-shrink: 0;
+    }
+
+    /* 이미지 업로드 플레이스홀더 */
+    .pep-img-placeholder {
+      flex: 1;
+      border: 2px dashed var(--color-border);
+      border-radius: 6px;
+      padding: 12px 8px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--color-gray);
+      cursor: pointer;
+      transition: all 0.12s;
+      line-height: 1.8;
+    }
+    .pep-img-placeholder:hover {
+      border-color: var(--color-mid);
+      background: rgba(6,90,130,0.03);
+      color: var(--color-mid);
+    }
+
+    /* #tab-entry / #tab-python 활성 시 세로 방향 flex */
+    .editor-tab-body.practice-mode #tab-entry.active,
+    .editor-tab-body.practice-mode #tab-python.active { flex-direction: column; }
+
+    /* 파이썬 소탭 액티브 색상 오버라이드 */
+    #tab-python .entry-sub-tab.active {
+      color: var(--color-python);
+      border-bottom-color: var(--color-python);
+    }
+
+    /* 파이썬 전체 코드 에디터 */
+    .py-full-editor { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .py-code-area {
+      flex: 1;
+      resize: none;
+      border: none;
+      padding: var(--space-md);
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      background: var(--color-dark);
+      color: #e2e8f0;
+      outline: none;
+    }
+    .py-code-area::placeholder { color: #4a5568; }
+
+    /* 정답·채점 탭 - 좌측 코드 영역 */
+    .py-answer-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--color-border);
+      min-width: 0;
+      overflow: hidden;
+    }
+
     /* ── 중앙: 에디터 ────────────────────────────── */
     .editor-panel {
       flex: 1;
@@ -1967,6 +2165,22 @@
           </div>
         </div>
 
+        <!-- 소탭 2번째 줄 (엔트리/파이썬 탭 선택 시만 표시) -->
+        <div class="sub-tabs-row" id="sub-tabs-row" style="display:none;">
+          <div id="sub-tabs-entry" style="display:none;align-items:center;">
+            <button class="sub-tab active" data-etab="textbook" onclick="switchEntryTab('textbook')">📝 실습 내용</button>
+            <button class="sub-tab" data-etab="skeleton" onclick="switchEntryTab('skeleton')">🟢 시작 화면</button>
+            <button class="sub-tab" data-etab="answer" onclick="switchEntryTab('answer')">✅ 정답·채점</button>
+            <button class="sub-tab" data-etab="preview" onclick="switchEntryTab('preview')">👁 미리보기</button>
+          </div>
+          <div id="sub-tabs-python" style="display:none;align-items:center;">
+            <button class="sub-tab active" data-pytab="textbook" onclick="switchPythonTab('textbook')">📝 실습 내용</button>
+            <button class="sub-tab" data-pytab="skeleton" onclick="switchPythonTab('skeleton')">🐍 시작 화면</button>
+            <button class="sub-tab" data-pytab="answer" onclick="switchPythonTab('answer')">✅ 정답·채점</button>
+            <button class="sub-tab" data-pytab="preview" onclick="switchPythonTab('preview')">👁 미리보기</button>
+          </div>
+        </div>
+
         <!-- 빈 학습자료 상태 -->
         <div class="lesson-empty-state" id="lesson-empty-state" style="display:none;">
           <div class="empty-state-card">
@@ -2274,179 +2488,366 @@
 
           <!-- ══ Tab 4: 엔트리 실습 ══ -->
           <div class="editor-tab-content" id="tab-entry">
-            <div class="practice-split">
 
-              <!-- 왼쪽: 학생 화면 미리보기 -->
-              <div class="practice-preview">
+            <!-- ── 소탭 1: 실습 내용 (전체 너비 2열 폼) ── -->
+            <div class="entry-sub-content active" id="etab-textbook">
+              <div class="tb-edit-form">
+                <div class="tb-edit-cols">
+
+                  <!-- 왼쪽 열: 문제 이해 -->
+                  <div class="tb-edit-col">
+                    <div class="tb-col-header">📖 문제 이해</div>
+                    <div class="tb-col-body">
+                      <div class="tb-field-label">제목</div>
+                      <input class="pep-input" id="tb-understand-title" type="text" value="이름을 입력하면 인사하는 프로그램">
+                      <div class="tb-field-label">본문 설명</div>
+                      <textarea class="pep-textarea" id="tb-understand-body" rows="5">이름을 입력하면 "OOO님 안녕하세요?"라고 인사하는 프로그램으로 입력, 처리, 출력의 과정을 살펴보자.</textarea>
+                      <div class="tb-field-label">미리보기 이미지</div>
+                      <div style="display:flex;gap:8px;">
+                        <div class="pep-img-placeholder">📺 실행화면<br><span style="font-size:10px;">클릭하여 업로드</span></div>
+                        <div class="pep-img-placeholder">🎭 오브젝트<br><span style="font-size:10px;">클릭하여 업로드</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 오른쪽 열: 프로그래밍하기 단계 -->
+                  <div class="tb-edit-col">
+                    <div class="tb-col-header">🔢 프로그래밍하기 단계</div>
+                    <div class="tb-col-body">
+                      <div class="step-mini-tabs">
+                        <button class="step-mini-tab active" onclick="switchStepEdit(1, this)">1단계</button>
+                        <button class="step-mini-tab" onclick="switchStepEdit(2, this)">2단계</button>
+                        <button class="step-mini-tab" onclick="switchStepEdit(3, this)">3단계</button>
+                      </div>
+
+                      <!-- 1단계 -->
+                      <div class="step-edit-panel active" id="step-edit-1">
+                        <div class="tb-field-label">단계 설명</div>
+                        <textarea class="pep-textarea" rows="2">"이름을 입력하세요."라고 이름을 묻고 대답에 저장한다.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">블록 연결 안내 (힌트)</div>
+                        <textarea class="pep-textarea" rows="4">[자료] - ["안녕"을(를) 묻고 대답 기다리기] 블록을 [시작하기 버튼을 클릭했을 때] 블록 아래에 연결한다.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">코드 이미지</div>
+                        <div class="pep-img-placeholder">💻 코드 이미지<br><span style="font-size:10px;">클릭하여 업로드</span></div>
+                      </div>
+
+                      <!-- 2단계 -->
+                      <div class="step-edit-panel" id="step-edit-2">
+                        <div class="tb-field-label">단계 설명</div>
+                        <textarea class="pep-textarea" rows="2">입력받은 대답에 "님 안녕하세요?" 글자를 합쳐 말한다.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">블록 연결 안내 (힌트)</div>
+                        <textarea class="pep-textarea" rows="4">[계산] - ["안녕"과(와) "엔트리"을(를) 합친 값] 블록을 사용하여 [자료] - [대답] 블록과 "님 안녕하세요?" 글자를 입력하여 완성한다.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">코드 이미지</div>
+                        <div class="pep-img-placeholder">💻 코드 이미지<br><span style="font-size:10px;">클릭하여 업로드</span></div>
+                      </div>
+
+                      <!-- 3단계 -->
+                      <div class="step-edit-panel" id="step-edit-3">
+                        <div class="tb-field-label">단계 설명</div>
+                        <textarea class="pep-textarea" rows="2">오브젝트가 10만큼 이동하도록 블록을 추가하여 프로그램을 완성한다.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">블록 연결 안내 (힌트)</div>
+                        <textarea class="pep-textarea" rows="4">[움직임] - [10만큼 이동하기] 블록을 말하기 블록 아래에 연결하여 오브젝트가 인사하며 움직이도록 완성한다.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">코드 이미지</div>
+                        <div class="pep-img-placeholder">💻 코드 이미지<br><span style="font-size:10px;">클릭하여 업로드</span></div>
+                      </div>
+
+                    </div><!-- /tb-col-body -->
+                  </div><!-- /오른쪽 열 -->
+
+                </div><!-- /tb-edit-cols -->
+                <div class="tb-edit-footer">
+                  <button class="btn btn-primary" onclick="saveTextbook()">💾 저장하기</button>
+                </div>
+              </div><!-- /tb-edit-form -->
+            </div><!-- /etab-textbook -->
+
+            <!-- ── 소탭 2: 시작 화면 (Entry 시작 코드 편집) ── -->
+            <div class="entry-sub-content" id="etab-skeleton">
+              <div class="entry-full-editor">
                 <div class="practice-preview-bar entry">
-                  <span>🟢 엔트리 실습 — 학생 화면 미리보기</span>
+                  <span>🟢 시작 화면 편집 — 학생이 실습을 시작할 때 보게 될 초기 상태를 설정하세요</span>
+                  <button onclick="resetSkeletonEditor()">↺ 초기화</button>
+                </div>
+                <iframe src="entry-editor.html" class="practice-iframe" id="skeleton-editor-iframe" title="시작 코드 에디터"></iframe>
+                <div class="pep-footer">
+                  <span style="font-size:12px;color:var(--color-gray);">저장 후 학생이 실습 시작 시 이 상태로 로드됩니다</span>
+                  <button class="btn btn-primary" onclick="saveSkeletonCode()">💾 시작 코드 저장</button>
+                </div>
+              </div>
+            </div><!-- /etab-skeleton -->
+
+            <!-- ── 소탭 3: 정답·채점 ── -->
+            <div class="entry-sub-content" id="etab-answer">
+              <div class="practice-split">
+
+                <!-- 왼쪽: 정답 코드 Entry 에디터 -->
+                <div class="practice-preview" style="flex-direction:column;">
+                  <div class="practice-preview-bar entry">
+                    <span>✅ 정답 코드 에디터 — AI 채점의 기준이 됩니다</span>
+                    <button onclick="resetAnswerEditor()">↺ 초기화</button>
+                  </div>
+                  <iframe src="entry-editor.html" class="practice-iframe" id="answer-editor-iframe" title="정답 코드 에디터"></iframe>
+                  <div style="padding:8px 12px;border-top:1px solid var(--color-border);background:var(--color-white);flex-shrink:0;">
+                    <button class="btn btn-secondary btn-sm" style="width:100%;" onclick="saveAnswerCode()">💾 정답 코드 저장</button>
+                  </div>
+                </div>
+
+                <!-- 오른쪽: AI 채점 기준 -->
+                <div class="practice-edit-panel">
+                  <div class="practice-edit-scroll">
+
+                    <div class="pep-section">
+                      <div class="pep-section-title">🤖 AI 채점 기준</div>
+                      <p style="font-size:12px;color:var(--color-gray);line-height:1.6;margin-bottom:10px;">
+                        왼쪽 에디터에 정답 코드를 완성 후 저장하면<br>AI가 채점 기준표를 자동 생성합니다.
+                      </p>
+                      <button class="btn btn-primary btn-sm" style="width:100%;" onclick="generateEntryRubric()">
+                        🤖 AI 채점 기준 생성
+                      </button>
+                    </div>
+
+                    <!-- AI 로딩 -->
+                    <div class="pep-section" id="entry-rubric-loading" style="display:none;">
+                      <div class="pep-ai-loading">
+                        <span class="ai-spinner">🤖</span>
+                        정답 코드를 분석 중입니다...
+                      </div>
+                    </div>
+
+                    <!-- 루브릭 -->
+                    <div class="pep-section" id="entry-rubric-section" style="display:none;">
+                      <div class="pep-section-title">
+                        📊 채점 기준표
+                        <span class="pep-badge ok">AI 생성</span>
+                        <button class="toc-action-btn" onclick="addEntryRubricRow()" title="기준 추가" style="margin-left:auto;width:20px;height:20px;font-size:13px;">＋</button>
+                      </div>
+                      <div id="entry-rubric-rows"></div>
+                      <div class="rubric-total-row">
+                        총 <strong id="entry-rubric-total" style="color:var(--color-mid);margin:0 2px;">10</strong>점
+                      </div>
+                    </div>
+
+                  </div><!-- /practice-edit-scroll -->
+                  <div class="pep-footer">
+                    <span></span>
+                    <button class="btn btn-primary" onclick="deployEntry()" style="padding:8px 20px;">🚀 학생에게 배포</button>
+                  </div>
+                </div><!-- /practice-edit-panel -->
+
+              </div><!-- /practice-split -->
+            </div><!-- /etab-answer -->
+
+            <!-- ── 소탭 4: 미리보기 ── -->
+            <div class="entry-sub-content" id="etab-preview">
+              <div class="entry-full-editor">
+                <div class="practice-preview-bar entry">
+                  <span>👁 미리보기 — 실습 내용 + 시작 화면이 합쳐진 학생 화면</span>
                   <button onclick="window.open('wfs03a_entry.html','_blank')">새 창에서 열기 ↗</button>
                 </div>
-                <iframe src="wfs03a_entry.html" class="practice-iframe" id="entry-iframe" title="엔트리 실습 미리보기"></iframe>
-              </div>
-
-              <!-- 오른쪽: 편집 패널 -->
-              <div class="practice-edit-panel">
-                <div class="practice-edit-scroll">
-
-                  <!-- 미션 설정 -->
-                  <div class="pep-section">
-                    <div class="pep-section-title">📋 미션 설정</div>
-                    <input class="pep-input" id="entry-mission-title" type="text" value="변수로 자기소개 만들기" placeholder="미션 제목">
-                    <textarea class="pep-textarea" id="entry-mission-desc" rows="3">name, age 변수를 만들고 말하기 블록으로 자기소개 문장을 출력하세요.</textarea>
-                  </div>
-
-                  <!-- 스켈레톤 코드 -->
-                  <div class="pep-section">
-                    <div class="pep-section-title">
-                      🧩 스켈레톤 코드
-                      <span class="pep-badge">학생 시작 코드</span>
-                    </div>
-                    <textarea class="pep-code" id="entry-skeleton" rows="5">// 변수를 만들어 보세요
-name ← ?
-age  ← ?
-// 말하기 블록으로 출력하기</textarea>
-                  </div>
-
-                  <!-- 정답 코드 -->
-                  <div class="pep-section">
-                    <div class="pep-section-title">
-                      ✅ 정답 코드
-                      <span class="pep-badge warn">AI 채점 기준 생성에 사용</span>
-                    </div>
-                    <textarea class="pep-code" id="entry-answer" rows="5" placeholder="정답 코드를 입력하면 AI가 채점 기준표를 자동 생성합니다..."></textarea>
-                    <button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%;" onclick="generateEntryRubric()">
-                      🤖 AI 채점 기준 생성
-                    </button>
-                  </div>
-
-                  <!-- AI 로딩 -->
-                  <div class="pep-section" id="entry-rubric-loading" style="display:none;">
-                    <div class="pep-ai-loading">
-                      <span class="ai-spinner">🤖</span>
-                      미션 내용과 정답 코드를 분석 중입니다...
-                    </div>
-                  </div>
-
-                  <!-- 루브릭 -->
-                  <div class="pep-section" id="entry-rubric-section" style="display:none;">
-                    <div class="pep-section-title">
-                      📊 채점 기준표
-                      <span class="pep-badge ok">AI 생성</span>
-                      <button class="toc-action-btn" onclick="addEntryRubricRow()" title="기준 추가" style="margin-left:auto;width:20px;height:20px;font-size:13px;">＋</button>
-                    </div>
-                    <div id="entry-rubric-rows"></div>
-                    <div class="rubric-total-row">
-                      총 <strong id="entry-rubric-total" style="color:var(--color-mid);margin:0 2px;">10</strong>점
-                    </div>
-                  </div>
-
-                </div><!-- /practice-edit-scroll -->
-
-                <!-- 하단 배포 버튼 -->
-                <div class="pep-footer">
-                  <button class="btn btn-secondary btn-sm" onclick="refreshEntryPreview()">↻ 미리보기 갱신</button>
-                  <button class="btn btn-primary" onclick="deployEntry()" style="padding:8px 20px;">🚀 학생에게 배포</button>
+                <div class="iframe-scale-wrap">
+                  <iframe src="wfs03a_entry.html" id="entry-preview-full-iframe" title="학생 화면 전체 미리보기"></iframe>
                 </div>
-              </div><!-- /practice-edit-panel -->
+              </div>
+            </div><!-- /etab-preview -->
 
-            </div><!-- /practice-split -->
           </div><!-- /tab-entry -->
 
 
           <!-- ══ Tab 5: 파이썬 실습 ══ -->
           <div class="editor-tab-content" id="tab-python">
-            <div class="tab-header">
-              <div>
-                <div class="tab-title">파이썬 실습</div>
-                <div class="tab-desc">텍스트 코딩 실습 (고등) · 파이썬 에디터 연동</div>
-              </div>
-              <button class="btn btn-ghost btn-sm" style="color:var(--color-python);border-color:var(--color-python);" onclick="location.href='wfs03b_python.html'">
-                🐍 파이썬 에디터 열기
-              </button>
-            </div>
 
-            <div class="editor-section">
-              <div class="editor-section-header">
-                <div class="editor-section-label">💻 스타터 코드</div>
-                <div class="flex gap-xs">
-                  <span class="badge badge-mid" style="font-size:11px;">학생에게 제공</span>
-                  <button class="btn btn-ghost btn-sm">편집</button>
+            <!-- ── 소탭 1: 실습 내용 (2열 폼) ── -->
+            <div class="entry-sub-content active" id="pytab-textbook">
+              <div class="tb-edit-form">
+                <div class="tb-edit-cols">
+
+                  <!-- 왼쪽 열: 문제 이해 -->
+                  <div class="tb-edit-col">
+                    <div class="tb-col-header">📖 문제 이해</div>
+                    <div class="tb-col-body">
+                      <div class="tb-field-label">제목</div>
+                      <input class="pep-input" id="py-understand-title" type="text" value="변수와 자료형으로 자기소개 프로그램 만들기">
+                      <div class="tb-field-label">본문 설명</div>
+                      <textarea class="pep-textarea" id="py-understand-body" rows="5">name, age, height 변수를 선언하고 print()로 출력하는 자기소개 프로그램을 완성해보자. type()으로 각 변수의 자료형도 확인해보자.</textarea>
+                      <div class="tb-field-label">미리보기 이미지</div>
+                      <div style="display:flex;gap:8px;">
+                        <div class="pep-img-placeholder">📺 실행화면<br><span style="font-size:10px;">클릭하여 업로드</span></div>
+                        <div class="pep-img-placeholder">💡 예시 출력<br><span style="font-size:10px;">클릭하여 업로드</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 오른쪽 열: 실습 단계 -->
+                  <div class="tb-edit-col">
+                    <div class="tb-col-header">🔢 실습 단계</div>
+                    <div class="tb-col-body">
+                      <div class="step-mini-tabs">
+                        <button class="step-mini-tab active" onclick="switchPyStepEdit(1, this)">1단계</button>
+                        <button class="step-mini-tab" onclick="switchPyStepEdit(2, this)">2단계</button>
+                        <button class="step-mini-tab" onclick="switchPyStepEdit(3, this)">3단계</button>
+                      </div>
+
+                      <!-- 1단계 -->
+                      <div class="step-edit-panel active" id="py-step-edit-1">
+                        <div class="tb-field-label">단계 설명</div>
+                        <textarea class="pep-textarea" rows="2">name, age, height 변수에 자신의 정보를 입력하세요.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">힌트</div>
+                        <textarea class="pep-textarea" rows="3">문자열은 "" 안에, 정수는 숫자만, 실수는 소수점을 포함하여 입력합니다.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">예시 코드</div>
+                        <textarea class="pep-code" rows="4">name   = "홍길동"   # 문자열
+age    = 16        # 정수
+height = 168.5     # 실수</textarea>
+                      </div>
+
+                      <!-- 2단계 -->
+                      <div class="step-edit-panel" id="py-step-edit-2">
+                        <div class="tb-field-label">단계 설명</div>
+                        <textarea class="pep-textarea" rows="2">print()를 사용해 세 변수를 모두 출력하세요.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">힌트</div>
+                        <textarea class="pep-textarea" rows="3">print("이름:", name) 형태로 레이블과 함께 출력하면 더 보기 좋습니다.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">예시 코드</div>
+                        <textarea class="pep-code" rows="4">print("이름:", name)
+print("나이:", age)
+print("키:", height)</textarea>
+                      </div>
+
+                      <!-- 3단계 -->
+                      <div class="step-edit-panel" id="py-step-edit-3">
+                        <div class="tb-field-label">단계 설명</div>
+                        <textarea class="pep-textarea" rows="2">type()으로 각 변수의 자료형을 확인하여 출력하세요.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">힌트</div>
+                        <textarea class="pep-textarea" rows="3">print(type(name))처럼 type() 함수 안에 변수를 넣으면 자료형이 출력됩니다.</textarea>
+                        <div class="tb-field-label" style="margin-top:8px;">예시 코드</div>
+                        <textarea class="pep-code" rows="4">print(type(name))
+print(type(age))
+print(type(height))</textarea>
+                      </div>
+
+                    </div><!-- /tb-col-body -->
+                  </div><!-- /오른쪽 열 -->
+
+                </div><!-- /tb-edit-cols -->
+                <div class="tb-edit-footer">
+                  <button class="btn btn-primary" onclick="savePythonTextbook()">💾 저장하기</button>
+                </div>
+              </div><!-- /tb-edit-form -->
+            </div><!-- /pytab-textbook -->
+
+            <!-- ── 소탭 2: 시작 화면 (파이썬 시작 코드 편집) ── -->
+            <div class="entry-sub-content" id="pytab-skeleton">
+              <div class="py-full-editor">
+                <div class="practice-preview-bar python">
+                  <span>🐍 시작 화면 편집 — 학생이 실습을 시작할 때 보게 될 초기 코드를 작성하세요</span>
+                  <button onclick="resetPythonSkeleton()">↺ 초기화</button>
+                </div>
+                <textarea class="py-code-area" id="py-skeleton-code" spellcheck="false"># 3차시: 변수와 자료형 실습
+# 아래 빈 칸을 채워 코드를 완성하세요.
+
+# ① 변수 선언
+name   = ""      # 자신의 이름 (문자열)
+age    = 0       # 자신의 나이 (정수)
+height = 0.0     # 자신의 키 (실수)
+
+# ② 출력
+print("이름:", name)
+print("나이:", age)
+print("키:", height)
+
+# ③ 자료형 확인
+print(type(name))
+print(type(age))
+print(type(height))</textarea>
+                <div class="pep-footer">
+                  <span style="font-size:12px;color:var(--color-gray);">저장 후 학생이 실습 시작 시 이 코드로 로드됩니다</span>
+                  <button class="btn btn-primary" onclick="savePythonSkeleton()">💾 시작 코드 저장</button>
                 </div>
               </div>
-              <div class="editor-section-body" style="padding:0;">
-                <div class="code-block" style="border-radius:0 0 8px 8px;margin:0;">
-                  <span class="code-comment"># 3차시: 변수와 자료형 실습</span><br>
-                  <span class="code-comment"># 아래 빈 칸을 채워 코드를 완성하세요.</span><br>
-                  <br>
-                  <span class="code-comment"># ① 변수 선언</span><br>
-                  <span class="code-var">name</span>   = <span class="code-string">""</span>     <span class="code-comment"># 자신의 이름 (문자열)</span><br>
-                  <span class="code-var">age</span>    = <span class="code-num">0</span>       <span class="code-comment"># 자신의 나이 (정수)</span><br>
-                  <span class="code-var">height</span> = <span class="code-num">0.0</span>     <span class="code-comment"># 자신의 키 (실수)</span><br>
-                  <br>
-                  <span class="code-comment"># ② 출력</span><br>
-                  <span class="code-keyword">print</span>(<span class="code-string">"이름:"</span>, <span class="code-var">name</span>)<br>
-                  <span class="code-keyword">print</span>(<span class="code-string">"나이:"</span>, <span class="code-var">age</span>)<br>
-                  <span class="code-keyword">print</span>(<span class="code-string">"키:"</span>, <span class="code-var">height</span>)<br>
-                  <br>
-                  <span class="code-comment"># ③ 자료형 확인</span><br>
-                  <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">name</span>))<br>
-                  <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">age</span>))<br>
-                  <span class="code-keyword">print</span>(<span class="code-var">type</span>(<span class="code-var">height</span>))
+            </div><!-- /pytab-skeleton -->
+
+            <!-- ── 소탭 3: 정답·채점 ── -->
+            <div class="entry-sub-content" id="pytab-answer">
+              <div class="practice-split">
+
+                <!-- 왼쪽: 정답 코드 편집기 -->
+                <div class="py-answer-left">
+                  <div class="practice-preview-bar python">
+                    <span>✅ 정답 코드 — AI 채점의 기준이 됩니다</span>
+                    <button onclick="resetPythonAnswer()">↺ 초기화</button>
+                  </div>
+                  <textarea class="py-code-area" id="py-answer-code" spellcheck="false" placeholder="# 정답 코드를 작성하세요
+# 저장 후 AI 채점 기준 생성이 활성화됩니다
+
+name   = &quot;홍길동&quot;
+age    = 16
+height = 168.5
+
+print(&quot;이름:&quot;, name)
+print(&quot;나이:&quot;, age)
+print(&quot;키:&quot;, height)
+
+print(type(name))
+print(type(age))
+print(type(height))"></textarea>
+                  <div style="padding:8px 12px;border-top:1px solid var(--color-border);background:var(--color-white);flex-shrink:0;">
+                    <button class="btn btn-secondary btn-sm" style="width:100%;" onclick="savePythonAnswer()">💾 정답 코드 저장</button>
+                  </div>
+                </div>
+
+                <!-- 오른쪽: AI 채점 기준 -->
+                <div class="practice-edit-panel">
+                  <div class="practice-edit-scroll">
+
+                    <div class="pep-section">
+                      <div class="pep-section-title">🤖 AI 채점 기준</div>
+                      <p style="font-size:12px;color:var(--color-gray);line-height:1.6;margin-bottom:10px;">
+                        왼쪽에 정답 코드를 작성 후 저장하면<br>AI가 채점 기준표를 자동 생성합니다.
+                      </p>
+                      <button class="btn btn-primary btn-sm" style="width:100%;" onclick="generatePythonRubric()">
+                        🤖 AI 채점 기준 생성
+                      </button>
+                    </div>
+
+                    <div class="pep-section" id="py-rubric-loading" style="display:none;">
+                      <div class="pep-ai-loading">
+                        <span class="ai-spinner">🤖</span>
+                        정답 코드를 분석 중입니다...
+                      </div>
+                    </div>
+
+                    <div class="pep-section" id="py-rubric-section" style="display:none;">
+                      <div class="pep-section-title">
+                        📊 채점 기준표
+                        <span class="pep-badge ok">AI 생성</span>
+                        <button class="toc-action-btn" onclick="addPythonRubricRow()" title="기준 추가" style="margin-left:auto;width:20px;height:20px;font-size:13px;">＋</button>
+                      </div>
+                      <div id="py-rubric-rows"></div>
+                      <div class="rubric-total-row">
+                        총 <strong id="py-rubric-total" style="color:var(--color-mid);margin:0 2px;">10</strong>점
+                      </div>
+                    </div>
+
+                  </div><!-- /practice-edit-scroll -->
+                  <div class="pep-footer">
+                    <span></span>
+                    <button class="btn btn-primary" onclick="deployPython()" style="padding:8px 20px;">🚀 학생에게 배포</button>
+                  </div>
+                </div><!-- /practice-edit-panel -->
+
+              </div><!-- /practice-split -->
+            </div><!-- /pytab-answer -->
+
+            <!-- ── 소탭 4: 미리보기 ── -->
+            <div class="entry-sub-content" id="pytab-preview">
+              <div class="entry-full-editor">
+                <div class="practice-preview-bar python">
+                  <span>👁 미리보기 — 실습 내용 + 시작 화면이 합쳐진 학생 화면</span>
+                  <button onclick="window.open('wfs03b_python.html','_blank')">새 창에서 열기 ↗</button>
+                </div>
+                <div class="iframe-scale-wrap">
+                  <iframe src="wfs03b_python.html" id="python-preview-iframe" title="파이썬 학생 화면 미리보기"></iframe>
                 </div>
               </div>
-            </div>
+            </div><!-- /pytab-preview -->
 
-            <div class="practice-editor-placeholder python">
-              <div class="practice-editor-bar python">
-                <span>🐍</span> 파이썬 코드 에디터
-                <span style="margin-left:auto;font-size:11px;font-weight:400;opacity:0.85">학생 화면에서 실행됩니다</span>
-              </div>
-              <div class="practice-editor-body">
-                <div style="text-align:center;">
-                  <div style="font-size:40px;margin-bottom:12px;">🐍</div>
-                  <div style="color:#aaa;font-size:13px;margin-bottom:16px;">파이썬 코드 에디터가 여기에 표시됩니다</div>
-                  <button class="practice-open-btn python" onclick="location.href='wfs03b_python.html'">
-                    🐍 파이썬 에디터 열기 →
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="editor-section">
-              <div class="editor-section-header">
-                <div class="editor-section-label">📊 채점 기준 (루브릭)</div>
-                <button class="btn btn-ghost btn-sm" onclick="location.href='wf04_scoring.html'">AI 채점 설정 →</button>
-              </div>
-              <div class="editor-section-body">
-                <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
-                  <thead>
-                    <tr style="background:var(--color-light);">
-                      <th style="padding:8px 12px;text-align:left;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);">평가 기준</th>
-                      <th style="padding:8px 12px;text-align:center;color:var(--color-gray);font-weight:700;border-bottom:1px solid var(--color-border);width:60px;">배점</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">name, age, height 변수에 알맞은 값 할당</td>
-                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">3점</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">print()로 세 변수 모두 출력</td>
-                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">3점</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:8px 12px;color:var(--color-ink);border-bottom:1px solid var(--color-border);">type()으로 세 변수의 자료형 확인 출력</td>
-                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;border-bottom:1px solid var(--color-border);">2점</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:8px 12px;color:var(--color-ink);">코드 실행 시 오류 없이 정상 동작</td>
-                      <td style="padding:8px 12px;text-align:center;color:var(--color-mid);font-weight:600;">2점</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div><!-- /tab-python -->
 
 
@@ -2728,12 +3129,25 @@ age  ← ?
     var targetContent = document.getElementById('tab-' + id);
     if (targetContent) targetContent.classList.add('active');
 
-    // 실습 탭은 패딩 없는 분할 레이아웃으로 전환
+    // 실습 탭: practice-mode + 소탭 2번째 줄 표시
     var tabBody = document.getElementById('editor-tab-body');
-    if (id === 'entry' || id === 'python') {
+    var subTabsRow = document.getElementById('sub-tabs-row');
+    var subTabsEntry = document.getElementById('sub-tabs-entry');
+    var subTabsPython = document.getElementById('sub-tabs-python');
+
+    if (id === 'entry') {
       tabBody.classList.add('practice-mode');
+      subTabsRow.style.display = 'flex';
+      subTabsEntry.style.display = 'flex';
+      subTabsPython.style.display = 'none';
+    } else if (id === 'python') {
+      tabBody.classList.add('practice-mode');
+      subTabsRow.style.display = 'flex';
+      subTabsEntry.style.display = 'none';
+      subTabsPython.style.display = 'flex';
     } else {
       tabBody.classList.remove('practice-mode');
+      subTabsRow.style.display = 'none';
     }
   }
 
@@ -3195,21 +3609,62 @@ age  ← ?
 
   /* ── 엔트리 실습 편집 ──────────────────────── */
   var _entryRubric = [];
+  var _answerSaved = false;
+
+  /* 소탭 전환 */
+  function switchEntryTab(tabId) {
+    document.querySelectorAll('#sub-tabs-entry .sub-tab').forEach(function(t) {
+      t.classList.toggle('active', t.dataset.etab === tabId);
+    });
+    document.querySelectorAll('#tab-entry .entry-sub-content').forEach(function(c) {
+      c.classList.toggle('active', c.id === 'etab-' + tabId);
+    });
+  }
+
+  /* 단계 편집 미니탭 전환 */
+  function switchStepEdit(n, btn) {
+    document.querySelectorAll('.step-mini-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('.step-edit-panel').forEach(function(p) {
+      p.classList.toggle('active', p.id === 'step-edit-' + n);
+    });
+  }
+
+  function saveTextbook() {
+    showToast('💾 교과서 내용이 저장되었습니다');
+  }
+
+  function saveSkeletonCode() {
+    showToast('💾 시작 코드가 저장되었습니다');
+  }
+
+  function saveAnswerCode() {
+    _answerSaved = true;
+    showToast('💾 정답 코드가 저장되었습니다');
+  }
+
+  function resetSkeletonEditor() {
+    var iframe = document.getElementById('skeleton-editor-iframe');
+    if (iframe) { iframe.src = iframe.src; }
+  }
+
+  function resetAnswerEditor() {
+    var iframe = document.getElementById('answer-editor-iframe');
+    if (iframe) { iframe.src = iframe.src; }
+    _answerSaved = false;
+  }
 
   function generateEntryRubric() {
-    var answer = document.getElementById('entry-answer').value.trim();
-    if (!answer) { showToast('⚠️ 먼저 정답 코드를 입력해주세요'); return; }
+    if (!_answerSaved) { showToast('⚠️ 먼저 정답 코드를 저장해주세요'); return; }
 
     document.getElementById('entry-rubric-loading').style.display = 'block';
     document.getElementById('entry-rubric-section').style.display = 'none';
 
     setTimeout(function() {
-      var title = document.getElementById('entry-mission-title').value;
-      // 미션 내용 기반 AI 루브릭 생성 시뮬레이션
       _entryRubric = [
-        { label: 'name 변수를 올바르게 선언', score: 3 },
-        { label: 'age 변수를 올바르게 선언', score: 3 },
-        { label: '말하기 블록에 변수 연결', score: 2 },
+        { label: '이름 입력받기 블록 사용', score: 3 },
+        { label: '대답 변수 올바르게 연결', score: 3 },
+        { label: '문자 합치기 블록으로 인사 문장 완성', score: 2 },
         { label: '정상 실행 및 출력 결과 정확', score: 2 },
       ];
       renderEntryRubric();
@@ -3255,22 +3710,110 @@ age  ← ?
   }
 
   function deployEntry() {
-    var iframe = document.getElementById('entry-iframe');
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({
-        type: 'DEPLOY_MISSION',
-        title:    document.getElementById('entry-mission-title').value,
-        desc:     document.getElementById('entry-mission-desc').value,
-        skeleton: document.getElementById('entry-skeleton').value,
-        rubric:   _entryRubric
-      }, '*');
-    }
     showToast('🚀 1학년 3반 학생에게 배포되었습니다');
   }
 
-  function refreshEntryPreview() {
-    var iframe = document.getElementById('entry-iframe');
-    if (iframe) { iframe.src = iframe.src; }
+  /* ── 파이썬 실습 편집 ──────────────────────── */
+  var _pythonRubric = [];
+  var _pythonAnswerSaved = false;
+
+  function switchPythonTab(tabId) {
+    document.querySelectorAll('#sub-tabs-python .sub-tab').forEach(function(t) {
+      t.classList.toggle('active', t.dataset.pytab === tabId);
+    });
+    document.querySelectorAll('#tab-python .entry-sub-content').forEach(function(c) {
+      c.classList.toggle('active', c.id === 'pytab-' + tabId);
+    });
+  }
+
+  function switchPyStepEdit(n, btn) {
+    var col = btn.closest('.tb-edit-col');
+    col.querySelectorAll('.step-mini-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    col.querySelectorAll('.step-edit-panel').forEach(function(p) {
+      p.classList.toggle('active', p.id === 'py-step-edit-' + n);
+    });
+  }
+
+  function savePythonTextbook() { showToast('💾 실습 내용이 저장되었습니다'); }
+
+  function savePythonSkeleton() { showToast('💾 시작 코드가 저장되었습니다'); }
+
+  function resetPythonSkeleton() {
+    document.getElementById('py-skeleton-code').value =
+      '# 3차시: 변수와 자료형 실습\n# 아래 빈 칸을 채워 코드를 완성하세요.\n\n' +
+      '# ① 변수 선언\nname   = ""      # 자신의 이름 (문자열)\n' +
+      'age    = 0       # 자신의 나이 (정수)\nheight = 0.0     # 자신의 키 (실수)\n\n' +
+      '# ② 출력\nprint("이름:", name)\nprint("나이:", age)\nprint("키:", height)\n\n' +
+      '# ③ 자료형 확인\nprint(type(name))\nprint(type(age))\nprint(type(height))';
+    showToast('↺ 시작 코드가 초기화되었습니다');
+  }
+
+  function savePythonAnswer() {
+    _pythonAnswerSaved = true;
+    showToast('💾 정답 코드가 저장되었습니다');
+  }
+
+  function resetPythonAnswer() {
+    document.getElementById('py-answer-code').value = '';
+    _pythonAnswerSaved = false;
+  }
+
+  function generatePythonRubric() {
+    if (!_pythonAnswerSaved) { showToast('⚠️ 먼저 정답 코드를 저장해주세요'); return; }
+    document.getElementById('py-rubric-loading').style.display = 'block';
+    document.getElementById('py-rubric-section').style.display = 'none';
+    setTimeout(function() {
+      _pythonRubric = [
+        { label: 'name, age, height 변수에 알맞은 값 할당', score: 3 },
+        { label: 'print()로 세 변수 모두 출력', score: 3 },
+        { label: 'type()으로 세 변수의 자료형 확인 출력', score: 2 },
+        { label: '코드 실행 시 오류 없이 정상 동작', score: 2 },
+      ];
+      renderPythonRubric();
+      document.getElementById('py-rubric-loading').style.display = 'none';
+      document.getElementById('py-rubric-section').style.display = 'block';
+      showToast('✅ AI 채점 기준이 생성되었습니다 (총 10점)');
+    }, 1800);
+  }
+
+  function renderPythonRubric() {
+    var container = document.getElementById('py-rubric-rows');
+    container.innerHTML = '';
+    _pythonRubric.forEach(function(row, i) {
+      var div = document.createElement('div');
+      div.className = 'rubric-row';
+      div.innerHTML =
+        '<input class="rubric-label-input" type="text" value="' + row.label + '" ' +
+          'onchange="_pythonRubric[' + i + '].label = this.value">' +
+        '<input class="rubric-score-input" type="number" value="' + row.score + '" min="0" max="20" ' +
+          'onchange="_pythonRubric[' + i + '].score = +this.value; updatePythonRubricTotal()">' +
+        '<span style="font-size:11px;color:var(--color-gray);flex-shrink:0">점</span>' +
+        '<button class="toc-action-btn danger" onclick="deletePythonRubricRow(' + i + ')" title="삭제">✕</button>';
+      container.appendChild(div);
+    });
+    updatePythonRubricTotal();
+  }
+
+  function addPythonRubricRow() {
+    _pythonRubric.push({ label: '새 평가 기준', score: 2 });
+    document.getElementById('py-rubric-section').style.display = 'block';
+    renderPythonRubric();
+  }
+
+  function deletePythonRubricRow(i) {
+    _pythonRubric.splice(i, 1);
+    renderPythonRubric();
+  }
+
+  function updatePythonRubricTotal() {
+    var total = _pythonRubric.reduce(function(s, r) { return s + (+r.score || 0); }, 0);
+    var el = document.getElementById('py-rubric-total');
+    if (el) el.textContent = total;
+  }
+
+  function deployPython() {
+    showToast('🚀 1학년 3반 학생에게 배포되었습니다');
   }
 
   // 반 선택 모달
