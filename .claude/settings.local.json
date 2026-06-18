@@ -17,7 +17,9 @@
       "Bash(start *)",
       "Bash(node -e ' *)",
       "PowerShell(head *)",
-      "PowerShell(cmd /c 'mklink /J \"C:\\\\Users\\\\user\\\\Desktop\\\\workshop4\\\\images\" \"C:\\\\Users\\\\user\\\\Desktop\\\\workshop4\\\\entry-lib\\\\@entrylabs\\\\entry\\\\images\"')"
+      "PowerShell(cmd /c 'mklink /J \"C:\\\\Users\\\\user\\\\Desktop\\\\workshop4\\\\images\" \"C:\\\\Users\\\\user\\\\Desktop\\\\workshop4\\\\entry-lib\\\\@entrylabs\\\\entry\\\\images\"')",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\user\\\\Desktop\\\\workshop4\\\\entry-lib\" | Where-Object {!$_.PSIsContainer} | Select-Object Name)",
+      "PowerShell(Head-Object *)"
     ]
   }
 }
