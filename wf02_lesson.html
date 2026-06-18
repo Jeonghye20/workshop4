@@ -3654,7 +3654,11 @@ print(type(height))"></textarea>
 
   function savePythonTextbook() { showToast('💾 실습 내용이 저장되었습니다'); }
 
-  function savePythonSkeleton() { showToast('💾 시작 코드가 저장되었습니다'); }
+  function savePythonSkeleton() {
+    var code = document.getElementById('py-skeleton-code').value;
+    localStorage.setItem('wf02_python_skeleton', code);
+    showToast('💾 파이썬 시작 코드가 저장되었습니다');
+  }
 
   function resetPythonSkeleton() {
     document.getElementById('py-skeleton-code').value =

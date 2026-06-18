@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>교사 교과서 뷰어 — 변수와 자료형 이해하기</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
   <style>
     body { background: #F8FAFC; overflow: hidden; }
 
@@ -13,20 +15,60 @@
       position: fixed;
       top: var(--nav-height);
       left: 0; right: 0;
-      bottom: 63px;
+      bottom: 0;
       display: flex;
       overflow: hidden;
     }
-
     /* ── 좌측: 목차 트리 (wf02 구조 동일) ─────── */
     .toc-panel {
       width: 230px;
       flex-shrink: 0;
       border-right: 1px solid var(--color-border);
-      overflow-y: auto;
       background: var(--color-white);
       height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
+    .toc-panel { transition: width 0.25s ease; }
+    .toc-panel.toc-collapsed { width: 0; }
+    .toc-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: var(--color-white);
+    }
+    .toc-body::-webkit-scrollbar { width: 4px; }
+    .toc-body::-webkit-scrollbar-track { background: var(--color-white); }
+    .toc-body::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+    .toc-body::-webkit-scrollbar-thumb:hover { background: var(--color-gray); }
+    /* 목차 헤더 내 접기 버튼 */
+    .toc-toggle-icon {
+      width: 22px; height: 22px; border-radius: 4px;
+      border: 1px solid var(--color-border);
+      background: transparent; color: var(--color-gray);
+      font-size: 12px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .toc-toggle-icon:hover { background: var(--color-light); color: var(--color-ink); }
+    /* TOC 접혔을 때 고정 복원 버튼 */
+    .toc-show-btn {
+      position: fixed;
+      top: calc(var(--nav-height) + 8px);
+      left: 4px;
+      z-index: 300;
+      display: none;
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--color-white);
+      color: var(--color-ink);
+      font-size: 14px; cursor: pointer;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      align-items: center; justify-content: center;
+    }
+    .toc-show-btn:hover { background: var(--color-light); }
     .toc-header {
       padding: var(--space-md) var(--space-md) var(--space-sm);
       font-size: 11px;
@@ -147,7 +189,316 @@
       flex: 1;
       overflow-y: auto;
       height: 100%;
+      position: relative;
+      padding-bottom: 63px; /* 하단 네비게이션 바 높이만큼 여백 */
     }
+
+    /* ── 실습 패널: 콘텐츠 영역 전체 점유 ─────────── */
+    #mat-entry.active,
+    #mat-python.active {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 63px;
+      overflow: hidden;
+    }
+    .tt-practice-wrap {
+      display: flex;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ── 실습 좌측 단계 패널 ────────────────────── */
+    .tt-step-panel {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--color-white);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .tt-panel-header {
+      padding: 12px var(--space-md);
+      color: white;
+      flex-shrink: 0;
+    }
+    .tt-panel-header .tt-unit-label { font-size: 11px; opacity: 0.8; margin-bottom: 4px; }
+    .tt-panel-header .tt-mission-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
+    .tt-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .tt-mission-desc { border-radius: 8px; padding: var(--space-md); }
+    .tt-mission-desc .tt-desc-title { font-size: 11px; font-weight: 700; margin-bottom: var(--space-sm); }
+    .tt-mission-desc .tt-desc-body  { font-size: 13px; line-height: 1.7; color: var(--color-ink); }
+    .tt-steps-label {
+      font-size: 11px; font-weight: 700; color: var(--color-gray);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;
+    }
+    .tt-step-item { border-radius: 8px; border: 1px solid var(--color-border); overflow: hidden; margin-bottom: 6px; }
+    .tt-step-header { display: flex; align-items: center; gap: var(--space-sm); padding: 9px 12px; cursor: pointer; user-select: none; }
+    .tt-step-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; flex-shrink: 0; font-weight: 700;
+    }
+    .tt-step-label { flex: 1; font-size: 12px; font-weight: 600; color: var(--color-ink); }
+    .tt-step-arrow { font-size: 10px; color: var(--color-gray); transition: transform 0.2s; }
+    .tt-step-arrow.open { transform: rotate(90deg); }
+    .tt-step-content { display: none; padding: 0 12px 12px; border-top: 1px solid var(--color-border); }
+    .tt-step-content.open { display: block; }
+    .tt-step-content p { font-size: 12px; line-height: 1.7; color: var(--color-ink); margin-bottom: 6px; }
+    .tt-hint-box { border-left: 3px solid; border-radius: 0 4px 4px 0; padding: 8px 10px; margin-top: 8px; }
+    .tt-hint-title { font-size: 10px; font-weight: 700; margin-bottom: 4px; }
+    .tt-code-hint {
+      font-family: 'Consolas','Monaco',monospace; font-size: 11px;
+      background: #1a1a2e; color: #a9dc76; padding: 4px 8px; border-radius: 3px; margin-top: 4px;
+    }
+    .tt-hint-box ol { list-style: decimal; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
+    .tt-hint-box ol li { font-size: 11px; line-height: 1.6; color: var(--color-ink); }
+
+    /* ── 엔트리 에디터 컬럼 ─────────────────────── */
+    .tt-editor-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .tt-entry-toolbar {
+      display: flex; align-items: center; gap: 0;
+      padding: 0 10px; height: 40px; background: #4765FF; flex-shrink: 0;
+    }
+    .tt-entry-logo-area { display: flex; align-items: center; gap: 2px; }
+    .tt-entry-logo-letter {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 3px;
+      background: rgba(255,255,255,0.22); color: #fff; font-size: 11px; font-weight: 700;
+    }
+    .tt-tb-group { display: flex; align-items: center; gap: 3px; margin-left: auto; }
+    .tt-tb-sep { width: 1px; height: 22px; background: rgba(255,255,255,0.35); margin: 0 6px; flex-shrink: 0; }
+    .tt-tb-btn {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 5px 7px; border-radius: 6px; border: none;
+      background: rgba(255,255,255,0.18); color: #fff; cursor: pointer; line-height: 1;
+    }
+    .tt-tb-btn:hover { background: rgba(255,255,255,0.32); }
+    .tt-tb-btn svg { width: 18px; height: 18px; display: block; fill: none; stroke: #fff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .tt-tb-round {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      background: rgba(255,255,255,0.55); color: #4765FF; cursor: pointer;
+    }
+    .tt-tb-round:hover { background: rgba(255,255,255,0.78); }
+    .tt-tb-round svg { width: 14px; height: 14px; fill: none; stroke: #4765FF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .tt-editor-area { flex: 1; position: relative; background: #f5f7fa; min-height: 0; }
+    #skeleton-editor-iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    /* ── 파이썬 IDE ────────────────────────────── */
+    .tt-ide-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; background: #1a1a2e; }
+    .tt-ide-toolbar {
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: 8px 14px; background: #2d2d44;
+      border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+    }
+    .tt-file-tab {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 12px; background: #1a1a2e; border-radius: 4px 4px 0 0;
+      font-size: 12px; color: rgba(255,255,255,0.85); font-family: 'Consolas','Monaco',monospace;
+    }
+    .tt-file-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-python); }
+    .tt-btn-run {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 14px; border: none; border-radius: 6px;
+      font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap;
+    }
+    .tt-btn-run-primary { background: var(--color-python); color: white; }
+    .tt-btn-run-primary:hover:not(:disabled) { background: #2a6099; }
+    .tt-btn-run-primary:disabled { background: #555; cursor: not-allowed; }
+    .tt-btn-run-ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+    .tt-btn-run-ghost:hover { background: rgba(255,255,255,0.14); color: white; }
+    .tt-ide-body { flex: 1; display: flex; overflow: hidden; }
+    .tt-editor-wrap { flex: 1; overflow: hidden; position: relative; }
+    .tt-editor-wrap .CodeMirror { height: 100%; font-size: 14px; font-family: 'Consolas','Monaco','Courier New',monospace; line-height: 1.65; }
+    .tt-editor-wrap .CodeMirror-scroll { height: 100%; }
+    .tt-output-panel {
+      width: 300px; flex-shrink: 0;
+      border-left: 1px solid rgba(255,255,255,0.07);
+      background: #12121f; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .tt-output-header {
+      display: flex; align-items: center; gap: 5px;
+      padding: 7px 14px; background: #1e1e35;
+      border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
+    }
+    .tt-traffic-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .tt-output-title { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; margin-left: 4px; }
+    .tt-output-body { flex: 1; padding: var(--space-md); overflow-y: auto; font-family: 'Consolas','Monaco',monospace; font-size: 13px; line-height: 1.7; }
+    .tt-out-system { color: rgba(255,255,255,0.3); }
+    .tt-out-prompt { color: #64ffda; }
+    .tt-out-result { color: #a9dc76; }
+    .tt-out-error  { color: #ff6b6b; }
+    .tt-out-time   { color: rgba(255,255,255,0.25); font-size: 11px; }
+    .tt-output-cursor { display: inline-block; width: 7px; height: 13px; background: rgba(255,255,255,0.45); animation: ttBlink 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
+    @keyframes ttBlink { 50% { opacity: 0; } }
+    .tt-ai-feedback { display: none; margin: 8px; padding: 8px 10px; background: rgba(55,118,171,0.18); border: 1px solid rgba(55,118,171,0.35); border-radius: 6px; font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.5; }
+
+    /* ── 엔트리 실습 좌측: 학생화면과 동일한 스타일 ── */
+    #mat-entry .understand-section {
+      background: rgba(76,175,80,0.05);
+      border: 1px solid rgba(76,175,80,0.18);
+      border-radius: 8px; padding: 12px;
+    }
+    #mat-entry .understand-title {
+      font-size: 17px; font-weight: 700; color: var(--color-ink);
+      margin-bottom: 6px; line-height: 1.4;
+    }
+    #mat-entry .understand-body {
+      font-size: 16px; line-height: 1.75; color: var(--color-ink); margin-bottom: 10px;
+    }
+    #mat-entry .understand-btns { display: flex; gap: 6px; }
+    #mat-entry .preview-btn {
+      flex: 1; font-size: 11px; font-weight: 700;
+      padding: 10px 4px; border-radius: 6px;
+      border: 1.5px solid var(--color-entry); background: white; color: var(--color-entry);
+      cursor: pointer; text-align: center; line-height: 1.4; transition: all 0.15s;
+    }
+    #mat-entry .preview-btn:hover { background: var(--color-entry); color: white; }
+    #mat-entry .inline-section-header {
+      background: var(--color-entry); color: white;
+      font-size: 19px; font-weight: 700;
+      padding: 10px var(--space-md) 0;
+      margin: 4px calc(-1 * var(--space-md)) 0;
+      display: flex; flex-direction: column;
+    }
+    #mat-entry .prog-stage-btns {
+      display: flex; gap: 6px; padding: 8px 0 10px; margin-top: 8px;
+      border-top: 1.5px solid rgba(255,255,255,0.35);
+    }
+    #mat-entry .prog-gnb-btn {
+      flex: 1; font-size: 13px; font-weight: 700; padding: 6px 4px;
+      border-radius: 6px; border: 1.5px solid rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85);
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    #mat-entry .prog-gnb-btn.active { background: white; border-color: white; color: var(--color-entry); }
+    #mat-entry .prog-gnb-btn:not(.active):hover { background: rgba(255,255,255,0.28); border-color: white; color: white; }
+    #mat-entry .prog-panel { display: none; flex-direction: column; gap: 8px; }
+    #mat-entry .prog-panel.p-active { display: flex; }
+    #mat-entry .prog-step-desc {
+      font-size: 16px; line-height: 1.75; color: var(--color-ink);
+      padding: 9px 10px; background: var(--color-light); border-radius: 6px;
+    }
+    #mat-entry .step-num { font-size: 22px; }
+    #mat-entry .prog-warn-box {
+      background: rgba(217,119,6,0.06); border-left: 3px solid var(--color-warn);
+      border-radius: 0 6px 6px 0; padding: 9px 10px;
+      font-size: 16px; line-height: 1.7; color: var(--color-ink);
+    }
+    #mat-entry .warn-label { font-size: 14px; font-weight: 700; color: var(--color-warn); margin-bottom: 4px; }
+    #mat-entry .code-view-btn {
+      align-self: flex-start; font-size: 16px; font-weight: 700;
+      padding: 10px 16px; border-radius: 6px; border: 1.5px solid var(--color-entry);
+      background: rgba(76,175,80,0.07); color: var(--color-entry);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s;
+    }
+    #mat-entry .code-view-btn:hover { background: var(--color-entry); color: white; }
+    #mat-entry .code-expand {
+      display: none; overflow: hidden;
+      border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);
+      margin: 0 calc(-1 * var(--space-md));
+    }
+    #mat-entry .code-expand.open { display: block; }
+    #mat-entry .code-expand img { width: 100%; display: block; cursor: zoom-in; }
+
+    /* ── 파이썬 실습 좌측: 학생화면과 동일한 스타일 ── */
+    #mat-python .mission-desc {
+      background: rgba(55,118,171,0.06);
+      border: 1px solid rgba(55,118,171,0.2);
+      border-radius: 8px; padding: var(--space-md);
+    }
+    #mat-python .mission-desc .desc-title {
+      font-size: 11px; font-weight: 700; color: var(--color-python); margin-bottom: var(--space-sm);
+    }
+    #mat-python .mission-desc .desc-body { font-size: 12px; line-height: 1.7; color: var(--color-ink); }
+    #mat-python .io-example {
+      background: #1a1a2e; border-radius: 6px;
+      padding: 8px 10px; margin-top: 8px;
+      font-family: 'Consolas','Monaco',monospace; font-size: 11px; line-height: 1.7;
+    }
+    #mat-python .io-label { color: rgba(255,255,255,0.4); font-size: 10px; margin-bottom: 2px; }
+    #mat-python .io-out { color: #a9dc76; }
+
+    #mat-python .steps-section .steps-title {
+      font-size: 11px; font-weight: 700; color: var(--color-gray);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: var(--space-sm);
+    }
+    #mat-python .py-step-item {
+      border-radius: 8px; border: 1px solid var(--color-border);
+      overflow: hidden; margin-bottom: 6px;
+    }
+    #mat-python .py-step-item.done   { border-color: rgba(13,148,136,0.3); background: rgba(13,148,136,0.03); }
+    #mat-python .py-step-item.active { border-color: var(--color-python);  background: rgba(55,118,171,0.04); }
+    #mat-python .py-step-item.locked { background: var(--color-light); }
+    #mat-python .py-step-header {
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: 9px 12px; cursor: pointer; user-select: none;
+    }
+    #mat-python .py-step-item.locked .py-step-header { cursor: default; }
+    #mat-python .py-step-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; flex-shrink: 0; font-weight: 700;
+    }
+    #mat-python .py-step-item.done   .py-step-dot { background: var(--color-ok);    border-color: var(--color-ok);    color: white; }
+    #mat-python .py-step-item.active .py-step-dot { background: var(--color-python); border-color: var(--color-python); color: white; }
+    #mat-python .py-step-item.locked .py-step-dot { color: var(--color-gray); }
+    #mat-python .py-step-label { flex: 1; font-size: 12px; font-weight: 600; color: var(--color-ink); }
+    #mat-python .py-step-item.locked .py-step-label { color: var(--color-gray); }
+    #mat-python .py-step-item.done   .py-step-label { color: var(--color-ok); }
+    #mat-python .py-step-arrow { font-size: 10px; color: var(--color-gray); transition: transform 0.2s; }
+    #mat-python .py-step-arrow.open { transform: rotate(90deg); }
+    #mat-python .py-current-badge {
+      font-size: 9px; font-weight: 700;
+      background: var(--color-python); color: white;
+      padding: 1px 6px; border-radius: 10px; flex-shrink: 0;
+    }
+    #mat-python .py-step-content { display: none; padding: 0 12px 12px; border-top: 1px solid var(--color-border); }
+    #mat-python .py-step-content.open { display: block; }
+    #mat-python .py-step-content p { font-size: 11px; line-height: 1.7; color: var(--color-ink); margin-bottom: 6px; }
+    #mat-python .py-hint-box {
+      border-left: 3px solid var(--color-python);
+      background: rgba(55,118,171,0.07);
+      border-radius: 0 4px 4px 0; padding: 8px 10px; margin-top: 8px;
+    }
+    #mat-python .py-hint-box.done { border-left-color: var(--color-ok); background: rgba(13,148,136,0.07); }
+    #mat-python .py-hint-title { font-size: 10px; font-weight: 700; color: var(--color-python); margin-bottom: 4px; }
+    #mat-python .py-hint-box.done .py-hint-title { color: var(--color-ok); }
+    #mat-python .py-code-hint {
+      font-family: 'Consolas','Monaco',monospace; font-size: 11px;
+      background: #1a1a2e; color: #a9dc76; padding: 4px 8px; border-radius: 3px; margin-top: 4px;
+    }
+    #mat-python .py-hint-box ol { list-style: decimal; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
+    #mat-python .py-hint-box ol li { font-size: 11px; line-height: 1.6; color: var(--color-ink); }
+
+    /* ── 실습 하단 채점 바 ───────────────────────── */
+    .tt-grade-bar {
+      background: var(--color-white);
+      border-top: 1px solid var(--color-border);
+      display: flex; align-items: center;
+      padding: 0 var(--space-lg); gap: var(--space-md);
+      flex-shrink: 0; height: 64px;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+    }
+    .tt-grade-btn-group { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+    .tt-grade-divider { width: 1px; height: 40px; background: var(--color-border); flex-shrink: 0; margin: 0 var(--space-sm); }
+    .tt-grade-result { flex: 1; display: flex; align-items: center; gap: var(--space-md); }
+    .tt-score-display { display: none; align-items: center; gap: var(--space-sm); }
+    .tt-score-display.show { display: flex; }
+    .tt-score-num { font-size: 28px; font-weight: 800; line-height: 1; }
+    .tt-score-label { font-size: 11px; color: var(--color-gray); line-height: 1.3; }
+    .tt-score-feedback { font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 8px; display: none; }
+    .tt-score-feedback.show { display: block; }
+    .tt-grade-empty { font-size: 12px; color: var(--color-gray); }
     .content-inner {
       max-width: 760px;
       margin: 0 auto;
@@ -370,17 +721,134 @@
     }
     .step-cta-msg { font-size: 13px; color: var(--color-gray); margin-bottom: var(--space-md); }
 
+    /* ── FAB 교사 도구 ──────────────────────── */
+    .fab-teacher {
+      position: fixed;
+      right: 24px; bottom: 80px;
+      z-index: 400;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+    }
+    .fab-main {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--color-mid); color: white;
+      border: none; font-size: 20px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .fab-main:hover { background: #054b6a; transform: scale(1.05); }
+    .fab-main.open { background: var(--color-gray); transform: rotate(45deg); }
+    .fab-menu {
+      display: none; flex-direction: column; align-items: flex-end; gap: 6px;
+    }
+    .fab-menu.open { display: flex; }
+    .fab-item {
+      display: flex; align-items: center; gap: 8px;
+      border: none; background: transparent; cursor: pointer; padding: 0;
+    }
+    .fab-item-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--color-white);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; transition: all 0.15s;
+    }
+    .fab-item:hover .fab-item-icon { transform: scale(1.1); box-shadow: 0 4px 14px rgba(0,0,0,0.2); }
+    .fab-item-label {
+      background: rgba(30,41,59,0.88);
+      color: white; font-size: 11.5px; font-weight: 600;
+      padding: 4px 10px; border-radius: 4px; white-space: nowrap;
+      font-family: 'Pretendard', sans-serif;
+    }
+    .fab-item.active-tool .fab-item-icon { background: var(--color-mid); color: white; }
+    .fab-teacher { cursor: grab; }
+    .fab-teacher.is-dragging { cursor: grabbing; opacity: 0.88; }
+    .fab-menu .fab-item { cursor: pointer; }
+
+    /* ── 타이머 패널 ─────────────────────────── */
+    .teacher-timer-panel {
+      position: fixed;
+      right: 82px; bottom: 80px;
+      z-index: 399;
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      width: 176px;
+      display: none;
+    }
+    .teacher-timer-panel.open { display: block; }
+    .timer-display {
+      font-size: 38px; font-weight: 700;
+      color: var(--color-ink); text-align: center;
+      letter-spacing: 2px; margin-bottom: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+    .timer-display.warning { color: var(--color-danger); }
+    .timer-presets { display: flex; gap: 4px; margin-bottom: 8px; }
+    .timer-preset-btn {
+      flex: 1; height: 26px;
+      border: 1px solid var(--color-border); border-radius: 4px;
+      background: var(--color-light); color: var(--color-ink);
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .timer-preset-btn:hover { background: var(--color-border); }
+    .timer-preset-btn.sel { background: var(--color-mid); color: white; border-color: var(--color-mid); }
+    .timer-controls { display: flex; gap: 6px; }
+    .timer-start-btn {
+      flex: 1; height: 32px; border: none; border-radius: 6px;
+      background: var(--color-mid); color: white;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      transition: background 0.15s; font-family: inherit;
+    }
+    .timer-start-btn:hover { background: #054b6a; }
+    .timer-reset-btn {
+      width: 32px; height: 32px;
+      border: 1px solid var(--color-border); border-radius: 6px;
+      background: var(--color-white); color: var(--color-gray);
+      font-size: 15px; cursor: pointer; transition: all 0.15s;
+    }
+    .timer-reset-btn:hover { background: var(--color-light); }
+
+    /* ── 퀵뷰 패널 ──────────────────────────── */
+    .teacher-quickview {
+      position: fixed;
+      right: 24px; bottom: 140px;
+      z-index: 399;
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.12);
+      width: 150px;
+      display: none;
+    }
+    .teacher-quickview.open { display: block; }
+    .qv-title {
+      font-size: 10px; font-weight: 700; color: var(--color-gray);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .qv-bar-wrap {
+      height: 5px; background: var(--color-border); border-radius: 3px;
+      margin: 4px 0 8px; overflow: hidden;
+    }
+    .qv-bar-fill { height: 100%; background: var(--color-ok); border-radius: 3px; }
+    .qv-numbers { display: flex; justify-content: space-between; font-size: 11.5px; }
+    .qv-done { color: var(--color-ok); font-weight: 700; }
+    .qv-total { color: var(--color-gray); }
+
     /* ── 하단 학습 네비게이션 바 ───────────────── */
     .lesson-bottom-nav {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0; left: 230px; right: 0;
+      transition: left 0.25s ease;
       background: var(--color-white);
       border-top: 1px solid var(--color-border);
       z-index: 200;
       box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
     }
-    .nav-progress-bar { height: 3px; background: var(--color-border); }
-    .nav-progress-fill { height: 100%; background: var(--color-mid); transition: width 0.3s ease; }
     .nav-controls {
       height: 60px;
       display: flex;
@@ -392,16 +860,34 @@
     .nav-info {
       flex: 1;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0;
+      gap: 4px;
     }
-    .nav-counter {
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--color-ink);
+    .nav-dots {
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
-    .nav-counter .nav-count-total { color: var(--color-gray); font-weight: 400; }
+    .nav-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--color-border);
+      cursor: pointer;
+      transition: all 0.25s;
+      flex-shrink: 0;
+    }
+    .nav-dot.active {
+      width: 18px;
+      border-radius: 4px;
+      background: var(--color-mid);
+    }
+    .nav-dot:hover:not(.active) { background: var(--color-gray); }
+    .nav-dot-label {
+      font-size: 11px;
+      color: var(--color-gray);
+    }
     .nav-complete-msg {
       display: none;
       font-size: 12.5px;
@@ -449,7 +935,10 @@
     <div class="toc-header">
       목차
       <span style="font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--color-gray);">3학년 1학기</span>
+      <button class="toc-toggle-icon" onclick="toggleToc()" title="목차 접기">✕</button>
     </div>
+
+    <div class="toc-body" id="toc-body">
 
     <!-- Ⅲ-1 닫힘 -->
     <div class="toc-unit">
@@ -577,6 +1066,8 @@
         </div>
       </div>
     </div>
+
+    </div><!-- /toc-body -->
   </aside>
 
   <!-- ━━━ 우측: 콘텐츠 영역 ━━━ -->
@@ -789,96 +1280,307 @@
 
       <!-- ▶ 자료 4: 엔트리 실습 -->
       <div class="material-panel" id="mat-entry">
-        <div class="step-header">
-          <div class="step-header-icon icon-entry">🟢</div>
-          <div>
-            <div class="step-header-title">엔트리 실습</div>
-            <div class="step-header-desc">블록 코딩으로 변수를 직접 만들어봐요</div>
-          </div>
-        </div>
-
-        <div class="practice-box">
-          <div class="practice-instr-title">📋 실습 지시사항</div>
-          <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
-            <div class="instr-num" style="background:var(--color-entry);">1</div>
-            <div style="font-size:13.5px;line-height:1.6;">엔트리에서 <strong>변수 블록</strong>을 사용해 이름(name), 나이(age) 변수를 생성하세요.</div>
-          </div>
-          <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
-            <div class="instr-num" style="background:var(--color-entry);">2</div>
-            <div style="font-size:13.5px;line-height:1.6;"><strong>말하기 블록</strong>을 연결해 "내 이름은 ○○○이고, 나이는 ○살입니다."를 출력하세요.</div>
-          </div>
-          <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
-            <div class="instr-num" style="background:var(--color-entry);">3</div>
-            <div style="font-size:13.5px;line-height:1.6;">완성 후 에디터의 <strong>[제출] 버튼</strong>을 눌러 제출하세요.</div>
-          </div>
-        </div>
-
-        <div class="editor-launch">
-          <div class="editor-launch-bar" style="background:var(--color-entry);">
-            <span>●</span> 엔트리 블록 에디터
-          </div>
-          <div class="editor-launch-body">
-            <div style="text-align:center;">
-              <div style="font-size:44px;margin-bottom:10px;">🟢</div>
-              <div style="color:#aaa;font-size:13px;margin-bottom:18px;">에디터를 열고 블록을 조립해보세요!</div>
-              <button class="launch-btn" style="background:var(--color-entry);" onclick="location.href='wfs03a_entry.html'">🟢 엔트리 에디터 열기 →</button>
+        <div class="tt-practice-wrap">
+          <!-- ━ 좌측 단계 패널 (wfs03a_entry.html과 동일) ━ -->
+          <aside class="tt-step-panel">
+            <div class="tt-panel-header" style="background:var(--color-entry);">
+              <div class="tt-mission-title">문제 이해</div>
             </div>
-          </div>
-        </div>
+            <div class="tt-panel-body">
 
-        <div class="submit-check" id="entry-check">
-          <span>📤</span>
-          <span style="flex:1;">에디터에서 실습을 완료하고 제출하면 자동으로 기록돼요.</span>
-          <button class="btn btn-ghost btn-sm" onclick="markDone('entry-check')">완료 표시</button>
-        </div>
+              <div class="understand-section">
+                <div class="understand-title">이름을 입력하면 인사하는 프로그램</div>
+                <div class="understand-body">
+                  이름을 입력하면 "OOO님 안녕하세요?"라고 인사하는 프로그램으로
+                  입력, 처리, 출력의 과정을 살펴보자.
+                </div>
+                <div class="understand-btns">
+                  <button class="preview-btn" onclick="alert('실행화면 이미지 (목업)')">실행화면 보기</button>
+                  <button class="preview-btn" onclick="alert('오브젝트 이미지 (목업)')">필요한 오브젝트</button>
+                </div>
+              </div>
+
+              <div class="inline-section-header">
+                <span>프로그래밍하기</span>
+                <div class="prog-stage-btns">
+                  <button class="prog-gnb-btn active" data-stage="1" onclick="ttSetProgStage(1)">1단계</button>
+                  <button class="prog-gnb-btn" data-stage="2" onclick="ttSetProgStage(2)">2단계</button>
+                  <button class="prog-gnb-btn" data-stage="3" onclick="ttSetProgStage(3)">3단계</button>
+                </div>
+              </div>
+
+              <!-- 1단계 -->
+              <div class="prog-panel p-active" id="tt-prog-1">
+                <div class="prog-step-desc">
+                  <span class="step-num">1️⃣</span>
+                  "이름을 입력하세요."라고 이름을 묻고 <strong>대답</strong>에 저장한다.
+                </div>
+                <div class="prog-warn-box">
+                  <div class="warn-label">⚠ 블록 연결 안내</div>
+                  <strong>[자료]</strong> ‑ [<strong>"안녕"을(를) 묻고 대답 기다리기</strong>] 블록을
+                  [<strong>시작하기 버튼을 클릭했을 때</strong>] 블록 아래에 연결한다.
+                </div>
+                <button class="code-view-btn" onclick="ttToggleCodeExpand('tt-expand-1', this)">💻 코드 보기 ▾</button>
+                <div class="code-expand" id="tt-expand-1">
+                  <img src="assets/img_code_step1.png" alt="1단계 코드"
+                    onerror="this.src='data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%22400%22 height%3D%22100%22%3E%3Crect width%3D%22400%22 height%3D%22100%22 fill%3D%22%23f1f5f9%22%2F%3E%3Ctext x%3D%22200%22 y%3D%2255%22 text-anchor%3D%22middle%22 font-family%3D%22sans-serif%22 font-size%3D%2212%22 fill%3D%22%23475569%22%3E1단계 코드 이미지%3C%2Ftext%3E%3C%2Fsvg%3E';this.onerror=null;">
+                </div>
+              </div>
+
+              <!-- 2단계 -->
+              <div class="prog-panel" id="tt-prog-2">
+                <div class="prog-step-desc">
+                  <span class="step-num">2️⃣</span>
+                  입력받은 <strong>대답</strong>에 "님 안녕하세요?" 글자를 합쳐 말한다.
+                </div>
+                <div class="prog-warn-box">
+                  <div class="warn-label">⚠ 블록 연결 안내</div>
+                  <strong>[계산]</strong> ‑ [<strong>"안녕"과(와) "엔트리"을(를) 합친 값</strong>] 블록을
+                  사용하여 <strong>[자료]</strong> ‑ [<strong>대답</strong>] 블록과
+                  "님 안녕하세요?" 글자를 입력하여 완성한다.
+                </div>
+                <button class="code-view-btn" onclick="ttToggleCodeExpand('tt-expand-2', this)">💻 코드 보기 ▾</button>
+                <div class="code-expand" id="tt-expand-2">
+                  <img src="assets/img_code_step2.png" alt="2단계 코드"
+                    onerror="this.src='data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%22400%22 height%3D%22100%22%3E%3Crect width%3D%22400%22 height%3D%22100%22 fill%3D%22%23f1f5f9%22%2F%3E%3Ctext x%3D%22200%22 y%3D%2255%22 text-anchor%3D%22middle%22 font-family%3D%22sans-serif%22 font-size%3D%2212%22 fill%3D%22%23475569%22%3E2단계 코드 이미지%3C%2Ftext%3E%3C%2Fsvg%3E';this.onerror=null;">
+                </div>
+              </div>
+
+              <!-- 3단계 -->
+              <div class="prog-panel" id="tt-prog-3">
+                <div class="prog-step-desc">
+                  <span class="step-num">3️⃣</span>
+                  오브젝트가 <strong>10만큼 이동</strong>하도록 블록을 추가하여 프로그램을 완성한다.
+                </div>
+                <div class="prog-warn-box">
+                  <div class="warn-label">⚠ 블록 연결 안내</div>
+                  <strong>[움직임]</strong> ‑ [<strong>10만큼 이동하기</strong>] 블록을
+                  말하기 블록 <strong>아래</strong>에 연결하여 오브젝트가 인사하며 움직이도록 완성한다.
+                </div>
+                <button class="code-view-btn" onclick="ttToggleCodeExpand('tt-expand-3', this)">💻 코드 보기 ▾</button>
+                <div class="code-expand" id="tt-expand-3">
+                  <img src="assets/img_code_step3.png" alt="3단계 코드"
+                    onerror="this.src='data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%22400%22 height%3D%22100%22%3E%3Crect width%3D%22400%22 height%3D%22100%22 fill%3D%22%23f1f5f9%22%2F%3E%3Ctext x%3D%22200%22 y%3D%2255%22 text-anchor%3D%22middle%22 font-family%3D%22sans-serif%22 font-size%3D%2212%22 fill%3D%22%23475569%22%3E3단계 코드 이미지%3C%2Ftext%3E%3C%2Fsvg%3E';this.onerror=null;">
+                </div>
+              </div>
+
+            </div>
+          </aside>
+
+          <!-- ━ 에디터 컬럼 ━ -->
+          <div class="tt-editor-col">
+            <!-- 엔트리 툴바 -->
+            <div class="tt-entry-toolbar">
+              <div class="tt-entry-logo-area">
+                <span class="tt-entry-logo-letter">e</span>
+                <span class="tt-entry-logo-letter">n</span>
+                <span class="tt-entry-logo-letter">t</span>
+                <span class="tt-entry-logo-letter">r</span>
+                <span class="tt-entry-logo-letter">y</span>
+              </div>
+              <div class="tt-tb-group">
+                <button class="tt-tb-btn" onclick="ttEntryNew()" title="새로 만들기">
+                  <svg viewBox="0 0 18 18"><rect x="3" y="2" width="10" height="14" rx="1.5"/><path d="M9 2v5h4"/><path d="M6 9h6M6 12h4" stroke-width="1.3"/></svg>
+                </button>
+                <button class="tt-tb-btn" onclick="ttEntrySave()" title="저장하기 (.ent)">
+                  <svg viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" rx="1.5"/><rect x="5" y="2" width="8" height="5" rx="0.5" stroke-width="1.3"/><rect x="4" y="9" width="10" height="6" rx="0.5" stroke-width="1.3"/></svg>
+                </button>
+              </div>
+              <div class="tt-tb-sep"></div>
+              <button class="tt-tb-round" title="실행취소 (Ctrl+Z)">
+                <svg viewBox="0 0 14 14"><path d="M2 7a5 5 0 1 1 1.5 3.5"/><polyline points="2,4 2,7 5,7"/></svg>
+              </button>
+              <button class="tt-tb-round" title="다시 실행" style="margin-left:3px;">
+                <svg viewBox="0 0 14 14"><path d="M12 7a5 5 0 1 0-1.5 3.5"/><polyline points="12,4 12,7 9,7"/></svg>
+              </button>
+            </div>
+            <!-- 엔트리 에디터 (지연 로드) -->
+            <div class="tt-editor-area" id="entry-iframe-wrap">
+              <div id="entry-placeholder" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f5f7fa;">
+                <div style="font-size:36px;margin-bottom:10px;">🟢</div>
+                <div style="font-size:13px;color:var(--color-gray);">이 탭을 선택하면 에디터가 로드됩니다</div>
+              </div>
+            </div>
+            <!-- 하단 채점 바 -->
+            <div class="tt-grade-bar">
+              <div class="tt-grade-btn-group">
+                <button class="btn btn-ghost btn-sm" onclick="ttEntryReset()" style="width:90px;">🔄 초기화</button>
+                <button class="btn btn-primary btn-sm" id="ttSubmitBtn"
+                  style="background:var(--color-entry);border-color:var(--color-entry);width:90px;"
+                  onclick="ttSubmitEntry()" disabled>📤 채점하기</button>
+              </div>
+              <div class="tt-grade-divider"></div>
+              <div class="tt-grade-result">
+                <div class="tt-score-display" id="ttScoreDisplay">
+                  <div class="tt-score-num" id="ttScoreNum" style="color:var(--color-entry);">--</div>
+                  <div class="tt-score-label">점<br><span style="font-size:10px;">/100</span></div>
+                </div>
+                <div class="tt-score-feedback" id="ttScoreFeedback" style="background:rgba(76,175,80,0.1);color:var(--color-ink);"></div>
+                <span class="tt-grade-empty" id="ttGradeEmpty">채점하기 버튼을 누르면 결과가 여기에 표시됩니다.</span>
+              </div>
+            </div>
+          </div><!-- /tt-editor-col -->
+        </div><!-- /tt-practice-wrap -->
       </div><!-- /mat-entry -->
 
 
       <!-- ▶ 자료 5: 파이썬 실습 -->
       <div class="material-panel" id="mat-python">
-        <div class="step-header">
-          <div class="step-header-icon icon-python">🐍</div>
-          <div>
-            <div class="step-header-title">파이썬 실습</div>
-            <div class="step-header-desc">텍스트 코딩으로 변수를 직접 작성해봐요</div>
-          </div>
-        </div>
-
-        <div class="practice-box">
-          <div class="practice-instr-title" style="margin-bottom:var(--space-sm);">💻 스타터 코드</div>
-          <div style="font-size:12px;color:var(--color-gray);margin-bottom:var(--space-sm);">아래 코드를 에디터에 붙여넣고 빈 칸을 채워보세요.</div>
-          <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13px;line-height:1.9;">
-            <span style="color:#546E7A"># 3차시: 변수와 자료형 실습</span><br>
-            <span style="color:#82AAFF">name</span>   = <span style="color:#C3E88D">""</span>    <span style="color:#546E7A"># 자신의 이름 (str)</span><br>
-            <span style="color:#82AAFF">age</span>    = <span style="color:#F78C6C">0</span>      <span style="color:#546E7A"># 자신의 나이 (int)</span><br>
-            <span style="color:#82AAFF">height</span> = <span style="color:#F78C6C">0.0</span>    <span style="color:#546E7A"># 자신의 키 (float)</span><br>
-            <br>
-            <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"이름:"</span>, <span style="color:#82AAFF">name</span>)<br>
-            <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"나이:"</span>, <span style="color:#82AAFF">age</span>)<br>
-            <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"키:"</span>, <span style="color:#82AAFF">height</span>)<br>
-            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">name</span>))<br>
-            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">age</span>))
-          </div>
-        </div>
-
-        <div class="editor-launch">
-          <div class="editor-launch-bar" style="background:var(--color-python);">
-            <span>🐍</span> 파이썬 코드 에디터
-          </div>
-          <div class="editor-launch-body">
-            <div style="text-align:center;">
-              <div style="font-size:44px;margin-bottom:10px;">🐍</div>
-              <div style="color:#aaa;font-size:13px;margin-bottom:18px;">에디터를 열고 코드를 작성해보세요!</div>
-              <button class="launch-btn" style="background:var(--color-python);" onclick="location.href='wfs03b_python.html'">🐍 파이썬 에디터 열기 →</button>
+        <div class="tt-practice-wrap">
+          <!-- ━ 좌측 단계 패널 ━ -->
+          <aside class="tt-step-panel">
+            <div class="tt-panel-header" style="background:var(--color-python);">
+              <div class="tt-unit-label">Ⅲ-2-02 · 파이썬 실습</div>
+              <div class="tt-mission-title">🐍 변수와 자료형 실습</div>
             </div>
-          </div>
-        </div>
+            <div class="tt-panel-body">
 
-        <div class="submit-check" id="python-check">
-          <span>📤</span>
-          <span style="flex:1;">에디터에서 코드를 작성하고 제출하면 자동으로 기록돼요.</span>
-          <button class="btn btn-ghost btn-sm" onclick="markDone('python-check')">완료 표시</button>
-        </div>
+              <!-- 미션 설명 -->
+              <div class="mission-desc">
+                <div class="desc-title">📋 해결할 과제</div>
+                <div class="desc-body">name, age, height 변수를 선언하고 print()로 출력하는 자기소개 프로그램을 완성해보자.</div>
+                <div class="io-example">
+                  <div class="io-label">출력 예시</div>
+                  <div class="io-out">이름: 김민준<br>나이: 15<br>키: 165.5</div>
+                </div>
+              </div>
+
+              <!-- 단계별 가이드 -->
+              <div class="steps-section">
+                <div class="steps-title">단계별 가이드</div>
+
+                <!-- 1단계: 완료 -->
+                <div class="py-step-item done">
+                  <div class="py-step-header" onclick="ttTogglePyStep(1)">
+                    <div class="py-step-dot">✓</div>
+                    <span class="py-step-label">변수 선언</span>
+                    <span class="py-step-arrow" id="tt-py-arrow-1">▶</span>
+                  </div>
+                  <div class="py-step-content" id="tt-py-content-1">
+                    <p>name, age, height에 자신의 정보를 저장하세요.</p>
+                    <div class="py-hint-box done">
+                      <div class="py-hint-title">✅ 완료</div>
+                      <div class="py-code-hint">name = "홍길동"<br>age = 16<br>height = 168.5</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2단계: 완료 -->
+                <div class="py-step-item done">
+                  <div class="py-step-header" onclick="ttTogglePyStep(2)">
+                    <div class="py-step-dot">✓</div>
+                    <span class="py-step-label">정수·실수 구분</span>
+                    <span class="py-step-arrow" id="tt-py-arrow-2">▶</span>
+                  </div>
+                  <div class="py-step-content" id="tt-py-content-2">
+                    <p>age는 int, height는 float 자료형을 사용하세요.</p>
+                    <div class="py-hint-box done">
+                      <div class="py-hint-title">✅ 완료</div>
+                      <div class="py-code-hint">age = 16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# int<br>height = 168.5  # float</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3단계: 현재 진행 -->
+                <div class="py-step-item active">
+                  <div class="py-step-header" onclick="ttTogglePyStep(3)">
+                    <div class="py-step-dot">3</div>
+                    <span class="py-step-label">print()로 출력</span>
+                    <span class="py-current-badge">현재</span>
+                    <span class="py-step-arrow open" id="tt-py-arrow-3">▶</span>
+                  </div>
+                  <div class="py-step-content open" id="tt-py-content-3">
+                    <p>print()를 사용해 각 변수를 레이블과 함께 출력하세요.</p>
+                    <div class="py-hint-box">
+                      <div class="py-hint-title">💡 힌트</div>
+                      <ol>
+                        <li>print("이름:", name)</li>
+                        <li>print("나이:", age)</li>
+                        <li>print("키:", height)</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4단계: 잠금 -->
+                <div class="py-step-item locked">
+                  <div class="py-step-header">
+                    <div class="py-step-dot">🔒</div>
+                    <span class="py-step-label">f-string 활용</span>
+                  </div>
+                </div>
+
+                <!-- 5단계: 잠금 -->
+                <div class="py-step-item locked">
+                  <div class="py-step-header">
+                    <div class="py-step-dot">🔒</div>
+                    <span class="py-step-label">type() 자료형 확인</span>
+                  </div>
+                </div>
+
+              </div><!-- /steps-section -->
+            </div><!-- /tt-panel-body -->
+          </aside>
+
+          <!-- ━ IDE 영역 ━ -->
+          <div class="tt-ide-area">
+            <!-- 툴바 -->
+            <div class="tt-ide-toolbar">
+              <div class="tt-file-tab">
+                <div class="tt-file-dot"></div>
+                solution.py
+              </div>
+              <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+                <span style="font-size:11px;color:rgba(255,255,255,0.35);">Ctrl+Enter로 실행</span>
+                <button class="tt-btn-run tt-btn-run-ghost" onclick="ttClearOutput()">🗑 지우기</button>
+                <button class="tt-btn-run tt-btn-run-primary" id="ttRunBtn" onclick="ttRunCode()">▶ 실행</button>
+              </div>
+            </div>
+            <!-- 에디터 + 출력 -->
+            <div class="tt-ide-body">
+              <div class="tt-editor-wrap">
+                <textarea id="ttCodeEditor"></textarea>
+              </div>
+              <div class="tt-output-panel">
+                <div class="tt-output-header">
+                  <div class="tt-traffic-dot" style="background:#ff6b6b;"></div>
+                  <div class="tt-traffic-dot" style="background:#ffd93d;"></div>
+                  <div class="tt-traffic-dot" style="background:#6bcb77;"></div>
+                  <span class="tt-output-title">출력 콘솔</span>
+                </div>
+                <div class="tt-output-body" id="ttOutputBody">
+                  <div class="tt-out-system">Python 3.11 — 정보 AI 실습 환경</div>
+                  <div class="tt-out-system">────────────────────────</div>
+                  <div class="tt-out-system" style="margin-top:6px;">&gt; 실행 버튼을 눌러 코드를 실행하세요.</div>
+                  <div class="tt-out-system"><span class="tt-output-cursor"></span></div>
+                </div>
+                <div class="tt-ai-feedback" id="ttAiFeedback">
+                  🤖 <strong>AI 피드백:</strong> <span id="ttAiFeedbackText"></span>
+                </div>
+              </div>
+            </div>
+            <!-- 채점 바 -->
+            <div class="tt-grade-bar">
+              <div style="display:flex;align-items:center;gap:var(--space-sm);font-size:12px;color:var(--color-gray);">
+                실행 상태
+                <span id="ttRunStatusBadge" class="badge badge-warn">대기 중</span>
+              </div>
+              <div class="tt-grade-result">
+                <div class="tt-score-display" id="ttPyScoreDisplay">
+                  <div class="tt-score-num" id="ttPyScoreNum" style="color:var(--color-python);">--</div>
+                  <div class="tt-score-label">점<br><span style="font-size:10px;">/100</span></div>
+                </div>
+                <div class="tt-score-feedback" id="ttPyScoreFeedback" style="background:rgba(55,118,171,0.1);color:var(--color-ink);"></div>
+              </div>
+              <div style="display:flex;gap:var(--space-sm);margin-left:auto;">
+                <button class="btn btn-ghost btn-sm" onclick="ttClearOutput()">🗑 초기화</button>
+                <button class="btn btn-primary btn-sm" id="ttPySubmitBtn"
+                  style="background:var(--color-python);border-color:var(--color-python);"
+                  onclick="ttSubmitCode()">📤 채점하기</button>
+              </div>
+            </div>
+          </div><!-- /tt-ide-area -->
+        </div><!-- /tt-practice-wrap -->
       </div><!-- /mat-python -->
 
 
@@ -967,20 +1669,18 @@
 
 <!-- ════════════════ 하단 학습 네비게이션 바 ════════════════ -->
 <div class="lesson-bottom-nav">
-  <div class="nav-progress-bar">
-    <div class="nav-progress-fill" id="nav-progress-fill" style="width:0%"></div>
-  </div>
   <div class="nav-controls">
-    <button class="btn btn-ghost btn-sm" id="btn-nav-prev" onclick="navPrev()" aria-label="이전 자료">← 이전 자료</button>
+    <button class="btn btn-ghost btn-sm" id="btn-nav-prev" onclick="navPrev()" aria-label="이전 자료">← 이전</button>
 
     <div class="nav-info">
-      <div class="nav-counter" id="nav-counter"></div>
+      <div class="nav-dots" id="nav-dots"></div>
+      <div class="nav-dot-label" id="nav-dot-label"></div>
       <div class="nav-complete-msg" id="nav-complete-msg">
-        ✅ 이번 차시 학습 완료! 좌측 목차에서 다음 차시를 선택하세요
+        ✅ 이번 차시 학습 완료!
       </div>
     </div>
 
-    <button class="btn btn-primary btn-sm" id="btn-nav-next" onclick="navNext()" aria-label="다음 자료">다음 자료 →</button>
+    <button class="btn btn-primary btn-sm" id="btn-nav-next" onclick="navNext()" aria-label="다음 자료">다음 →</button>
   </div>
 </div>
 
@@ -1020,12 +1720,229 @@
     var tocEl = document.getElementById(materials[idx].tocId);
     if (tocEl) tocEl.classList.add('active');
 
+    /* 엔트리 iframe 지연 로드 (처음 이 탭에 들어올 때만) */
+    if (materials[idx].id === 'mat-entry') {
+      var wrap = document.getElementById('entry-iframe-wrap');
+      if (wrap && !wrap.querySelector('iframe')) {
+        document.getElementById('entry-placeholder').style.display = 'none';
+        var efr = document.createElement('iframe');
+        efr.id = 'skeleton-editor-iframe';
+        efr.src = 'entry-editor.html';
+        efr.style.cssText = 'width:100%;height:100%;border:none;display:block;';
+        efr.title = '엔트리 시작 코드 미리보기';
+        wrap.appendChild(efr);
+      }
+    }
+
+    /* 파이썬: CodeMirror 초기화 및 코드 갱신 */
+    if (materials[idx].id === 'mat-python') {
+      setTimeout(ttInitPyEditor, 80);
+    }
+
     curIdx = idx;
     renderBottomNav();
 
     /* 콘텐츠 영역 스크롤 리셋 */
     var ca = document.getElementById('content-area');
     if (ca) ca.scrollTop = 0;
+  }
+
+  /* ══ 엔트리 프로그래밍하기 단계 전환 ══════════ */
+  function ttSetProgStage(n) {
+    document.querySelectorAll('#mat-entry .prog-gnb-btn').forEach(function(btn) {
+      btn.classList.toggle('active', parseInt(btn.dataset.stage) === n);
+    });
+    document.querySelectorAll('#mat-entry .prog-panel').forEach(function(p) {
+      p.classList.remove('p-active');
+    });
+    var panel = document.getElementById('tt-prog-' + n);
+    if (panel) panel.classList.add('p-active');
+  }
+
+  function ttTogglePyStep(n) {
+    var content = document.getElementById('tt-py-content-' + n);
+    var arrow   = document.getElementById('tt-py-arrow-' + n);
+    if (!content) return;
+    var open = content.classList.toggle('open');
+    if (arrow) arrow.classList.toggle('open', open);
+  }
+
+  function ttToggleCodeExpand(id, btn) {
+    var el   = document.getElementById(id);
+    if (!el) return;
+    var open = el.classList.toggle('open');
+    btn.textContent = open ? '💻 코드 닫기 ▴' : '💻 코드 보기 ▾';
+  }
+
+  /* ══ 엔트리 제어 ══════════════════════════ */
+  window.addEventListener('message', function(e) {
+    if (!e.data) return;
+    if (e.data.type === 'ENTRY_READY') {
+      var btn = document.getElementById('ttSubmitBtn');
+      if (btn) btn.disabled = false;
+    }
+    if (e.data.type === 'GRADE_RESULT') {
+      var score = (e.data.score != null) ? e.data.score : 85;
+      ttShowEntryScore(score);
+      var btn = document.getElementById('ttSubmitBtn');
+      if (btn) { btn.textContent = '📤 채점하기'; btn.disabled = false; }
+    }
+  });
+
+  function ttShowEntryScore(score) {
+    document.getElementById('ttScoreNum').textContent = score;
+    document.getElementById('ttScoreDisplay').classList.add('show');
+    document.getElementById('ttScoreFeedback').textContent =
+      score >= 90 ? '🎉 완벽해요! 미션 성공!' : score >= 75 ? '👍 잘 했어요!' : '💪 다시 도전해봐요!';
+    document.getElementById('ttScoreFeedback').classList.add('show');
+    var empty = document.getElementById('ttGradeEmpty');
+    if (empty) empty.style.display = 'none';
+  }
+
+  function ttSubmitEntry() {
+    var iframe = document.getElementById('skeleton-editor-iframe');
+    if (!iframe) return;
+    iframe.contentWindow.postMessage({ type: 'REQUEST_GRADE' }, '*');
+    var btn = document.getElementById('ttSubmitBtn');
+    if (btn) { btn.textContent = '채점 중...'; btn.disabled = true; }
+  }
+
+  function ttEntryNew() {
+    var iframe = document.getElementById('skeleton-editor-iframe');
+    if (!iframe || !confirm('새로 만들기하면 현재 작업이 사라집니다. 계속하시겠습니까?')) return;
+    iframe.contentWindow.postMessage({ type: 'ENTRY_NEW' }, '*');
+  }
+
+  function ttEntrySave() {
+    var iframe = document.getElementById('skeleton-editor-iframe');
+    if (iframe) iframe.contentWindow.postMessage({ type: 'REQUEST_SAVE' }, '*');
+  }
+
+  function ttEntryReset() {
+    var iframe = document.getElementById('skeleton-editor-iframe');
+    if (!iframe || !confirm('초기화하면 현재 작업이 사라집니다.')) return;
+    iframe.src = iframe.src;
+    var btn = document.getElementById('ttSubmitBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '📤 채점하기'; }
+    document.getElementById('ttScoreDisplay').classList.remove('show');
+    document.getElementById('ttScoreFeedback').classList.remove('show');
+    var empty = document.getElementById('ttGradeEmpty');
+    if (empty) empty.style.display = '';
+  }
+
+  /* ══ 파이썬 CodeMirror ════════════════════ */
+  var _ttPyEditor = null;
+
+  function ttInitPyEditor() {
+    if (_ttPyEditor) { ttLoadPyCode(); return; }
+    var el = document.getElementById('ttCodeEditor');
+    if (!el || typeof CodeMirror === 'undefined') return;
+    _ttPyEditor = CodeMirror.fromTextArea(el, {
+      mode: 'python', theme: 'dracula',
+      lineNumbers: true, indentUnit: 4, tabSize: 4, indentWithTabs: false,
+      extraKeys: {
+        'Tab': function(cm) { cm.replaceSelection('    '); },
+        'Ctrl-Enter': function() { ttRunCode(); }
+      }
+    });
+    _ttPyEditor.setSize('100%', '100%');
+    ttLoadPyCode();
+  }
+
+  function ttLoadPyCode() {
+    if (!_ttPyEditor) return;
+    var saved = localStorage.getItem('wf02_python_skeleton');
+    var def = '# 3차시: 변수와 자료형 실습\n# 아래 빈 칸을 채워 코드를 완성하세요.\n\n' +
+              '# ① 변수 선언\nname   = ""      # 자신의 이름 (문자열)\n' +
+              'age    = 0       # 자신의 나이 (정수)\nheight = 0.0     # 자신의 키 (실수)\n\n' +
+              '# ② 출력\nprint("이름:", name)\nprint("나이:", age)\nprint("키:", height)\n\n' +
+              '# ③ 자료형 확인\nprint(type(name))\nprint(type(age))\nprint(type(height))';
+    _ttPyEditor.setValue(saved || def);
+  }
+
+  var _ttScenarios = [
+    { lines: [
+        { cls:'tt-out-prompt', html:'&gt; 실행 중...' },
+        { cls:'tt-out-result', text:'이름: 김민준' },
+        { cls:'tt-out-result', text:'나이: 15' },
+        { cls:'tt-out-result', text:'키: 165.5' },
+        { cls:'tt-out-result', text:"<class 'str'>" },
+        { cls:'tt-out-result', text:"<class 'int'>" },
+        { cls:'tt-out-result', text:"<class 'float'>" },
+        { cls:'tt-out-time',   text:'> 실행 완료  (0.06초)' }
+      ], feedback: '변수와 type()이 모두 올바르게 출력됐어요! 🎉', score: 95 },
+    { lines: [
+        { cls:'tt-out-prompt', html:'&gt; 실행 중...' },
+        { cls:'tt-out-result', text:'이름: ' },
+        { cls:'tt-out-result', text:'나이: 0' },
+        { cls:'tt-out-result', text:'키: 0.0' },
+        { cls:'tt-out-time',   text:'> 실행 완료  (0.05초)' }
+      ], feedback: 'name에 자신의 이름을 넣어보세요! "" 안에 텍스트를 입력하면 돼요.', score: 60 }
+  ];
+  var _ttScenIdx = 0;
+  var _ttLastScore = null;
+
+  function ttRunCode() {
+    if (!_ttPyEditor) return;
+    var code = _ttPyEditor.getValue().trim();
+    if (!code) return;
+    var runBtn = document.getElementById('ttRunBtn');
+    document.getElementById('ttAiFeedback').style.display = 'none';
+    document.getElementById('ttOutputBody').innerHTML = '';
+    runBtn.disabled = true;
+    runBtn.textContent = '실행 중...';
+
+    var sc = _ttScenarios[_ttScenIdx % _ttScenarios.length];
+    _ttScenIdx++;
+    _ttLastScore = sc.score;
+
+    var delay = 0;
+    sc.lines.forEach(function(line, i) {
+      setTimeout(function() {
+        var div = document.createElement('div');
+        div.className = line.cls;
+        if (line.html) div.innerHTML = line.html; else div.textContent = line.text;
+        document.getElementById('ttOutputBody').appendChild(div);
+        document.getElementById('ttOutputBody').scrollTop = 9999;
+        if (i === sc.lines.length - 1) {
+          runBtn.disabled = false;
+          runBtn.textContent = '▶ 실행';
+          var badge = document.getElementById('ttRunStatusBadge');
+          if (badge) { badge.className = 'badge badge-ok'; badge.textContent = '실행됨'; }
+          setTimeout(function() {
+            document.getElementById('ttAiFeedbackText').textContent = sc.feedback;
+            document.getElementById('ttAiFeedback').style.display = 'block';
+          }, 400);
+        }
+      }, delay);
+      delay += 130;
+    });
+  }
+
+  function ttClearOutput() {
+    document.getElementById('ttOutputBody').innerHTML =
+      '<div class="tt-out-system">&gt; 출력이 지워졌습니다.</div>' +
+      '<div class="tt-out-system"><span class="tt-output-cursor"></span></div>';
+    document.getElementById('ttAiFeedback').style.display = 'none';
+    var badge = document.getElementById('ttRunStatusBadge');
+    if (badge) { badge.className = 'badge badge-warn'; badge.textContent = '대기 중'; }
+  }
+
+  function ttSubmitCode() {
+    var score = (_ttLastScore != null) ? _ttLastScore : 70;
+    var btn = document.getElementById('ttPySubmitBtn');
+    btn.textContent = '채점 중...'; btn.disabled = true;
+    setTimeout(function() {
+      document.getElementById('ttPyScoreNum').textContent = score;
+      document.getElementById('ttPyScoreDisplay').classList.add('show');
+      document.getElementById('ttPyScoreFeedback').textContent =
+        score >= 90 ? '🎉 완벽해요! 미션 성공!' : score >= 70 ? '👍 잘 했어요!' : '💪 다시 도전해봐요!';
+      document.getElementById('ttPyScoreFeedback').classList.add('show');
+      btn.textContent = '📤 채점하기'; btn.disabled = false;
+      var data = JSON.parse(localStorage.getItem('lms_scores') || '{}');
+      data.python = { score: score, timestamp: new Date().toISOString() };
+      localStorage.setItem('lms_scores', JSON.stringify(data));
+    }, 900);
   }
 
   function goToMaterialByToc(idx) { goToMaterial(idx); }
@@ -1041,15 +1958,15 @@
   /* ── 하단 네비 렌더 ──────────────────────── */
   function renderBottomNav() {
     var total = materials.length;
-    var pos   = curIdx + 1;
 
-    /* 진행률 바: 현재 인덱스 기준 */
-    document.getElementById('nav-progress-fill').style.width = (pos / total * 100) + '%';
+    /* 점 네비게이션 */
+    var dotsEl = document.getElementById('nav-dots');
+    dotsEl.innerHTML = materials.map(function(m, i) {
+      return '<div class="nav-dot' + (i === curIdx ? ' active' : '') + '" onclick="goToMaterial(' + i + ')" title="' + m.title + '"></div>';
+    }).join('');
 
-    /* 카운터 텍스트 */
-    document.getElementById('nav-counter').innerHTML =
-      '<strong>' + pos + '</strong>' +
-      '<span class="nav-count-total"> / ' + total + ' &nbsp;·&nbsp; ' + materials[curIdx].title + '</span>';
+    /* 현재 자료 이름 레이블 */
+    document.getElementById('nav-dot-label').textContent = materials[curIdx].title;
 
     /* 이전 버튼 */
     var prevBtn = document.getElementById('btn-nav-prev');
@@ -1060,18 +1977,214 @@
     /* 다음 버튼 / 완료 메시지 */
     var nextBtn     = document.getElementById('btn-nav-next');
     var completeMsg = document.getElementById('nav-complete-msg');
-    var counter     = document.getElementById('nav-counter');
+    var dotsWrap    = document.getElementById('nav-dots');
+    var dotLabel    = document.getElementById('nav-dot-label');
 
     if (curIdx === total - 1) {
       nextBtn.style.display     = 'none';
       completeMsg.style.display = 'block';
-      counter.style.display     = 'none';
+      dotsWrap.style.display    = 'none';
+      dotLabel.style.display    = 'none';
     } else {
       nextBtn.style.display     = '';
       completeMsg.style.display = 'none';
-      counter.style.display     = '';
+      dotsWrap.style.display    = '';
+      dotLabel.style.display    = '';
     }
   }
+
+  /* ── TOC 토글 ──────────────────────────── */
+  function toggleToc() {
+    var panel   = document.querySelector('.toc-panel');
+    var nav     = document.querySelector('.lesson-bottom-nav');
+    var showBtn = document.getElementById('toc-show-btn');
+    var isCollapsed = panel.classList.toggle('toc-collapsed');
+    nav.style.left = isCollapsed ? '0' : '230px';
+    showBtn.style.display = isCollapsed ? 'flex' : 'none';
+  }
+
+  /* ── FAB 교사 도구 ──────────────────────── */
+  function toggleFab() {
+    var menu = document.getElementById('fab-menu');
+    var btn  = document.getElementById('fab-main-btn');
+    var isOpen = menu.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+  }
+
+  var _lockActive = false;
+  function toggleStudentLock() {
+    _lockActive = !_lockActive;
+    var icon = document.getElementById('fab-lock-icon');
+    var btn  = document.getElementById('fab-lock-btn');
+    icon.textContent = _lockActive ? '🔒' : '⏸';
+    btn.classList.toggle('active-tool', _lockActive);
+    showToast(_lockActive ? '🔒 학생 화면이 잠금되었습니다' : '🔓 학생 화면 잠금이 해제되었습니다');
+  }
+
+  var _shareActive = false;
+  function toggleScreenShare() {
+    _shareActive = !_shareActive;
+    var icon = document.getElementById('fab-share-icon');
+    var btn  = document.getElementById('fab-share-btn');
+    icon.textContent = _shareActive ? '📡' : '📡';
+    btn.classList.toggle('active-tool', _shareActive);
+    showToast(_shareActive ? '📡 화면 공유 중 — 학생 화면이 동기화됩니다' : '📡 화면 공유가 종료되었습니다');
+  }
+
+  /* ── 타이머 ──────────────────────────────── */
+  var _timerSec     = 300;
+  var _timerDefault = 300;
+  var _timerRunning = false;
+  var _timerInterval = null;
+
+  function toggleTimerPanel() {
+    var panel = document.getElementById('teacher-timer-panel');
+    var icon  = document.getElementById('fab-timer-icon');
+    var isOpen = panel.classList.toggle('open');
+    document.getElementById('fab-timer-icon').closest('.fab-item').classList.toggle('active-tool', isOpen);
+  }
+
+  function setTimer(min, btn) {
+    resetTimer();
+    _timerSec = _timerDefault = min * 60;
+    updateTimerDisplay();
+    document.querySelectorAll('.timer-preset-btn').forEach(function(b) { b.classList.remove('sel'); });
+    if (btn) btn.classList.add('sel');
+  }
+
+  function toggleTimer() {
+    if (_timerRunning) {
+      clearInterval(_timerInterval);
+      _timerRunning = false;
+      document.getElementById('timer-start-btn').textContent = '▶ 재시작';
+    } else {
+      if (_timerSec <= 0) { _timerSec = _timerDefault; }
+      _timerRunning = true;
+      document.getElementById('timer-start-btn').textContent = '⏸ 일시정지';
+      _timerInterval = setInterval(function() {
+        _timerSec--;
+        updateTimerDisplay();
+        if (_timerSec <= 0) {
+          clearInterval(_timerInterval);
+          _timerRunning = false;
+          document.getElementById('timer-start-btn').textContent = '▶ 시작';
+          showToast('⏰ 시간이 종료되었습니다!');
+        }
+      }, 1000);
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(_timerInterval);
+    _timerRunning = false;
+    _timerSec = _timerDefault;
+    document.getElementById('timer-start-btn').textContent = '▶ 시작';
+    updateTimerDisplay();
+  }
+
+  function updateTimerDisplay() {
+    var m  = Math.floor(_timerSec / 60);
+    var s  = _timerSec % 60;
+    var el = document.getElementById('timer-display');
+    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    el.classList.toggle('warning', _timerSec <= 60 && _timerSec > 0);
+  }
+
+  /* ── 퀵뷰 ────────────────────────────────── */
+  function toggleQuickView() {
+    var panel = document.getElementById('teacher-quickview');
+    var isOpen = panel.classList.toggle('open');
+    document.getElementById('fab-qv-icon').closest('.fab-item').classList.toggle('active-tool', isOpen);
+  }
+
+  /* ── FAB 드래그 이동 ─────────────────────── */
+  window.addEventListener('load', function() {
+    var fab       = document.getElementById('fab-teacher');
+    var timer     = document.getElementById('teacher-timer-panel');
+    var quickview = document.getElementById('teacher-quickview');
+    if (!fab) return;
+
+    /* 페이지 로드 시 right/bottom → left/top 으로 한 번만 변환 */
+    var r = fab.getBoundingClientRect();
+    fab.style.left   = r.left + 'px';
+    fab.style.top    = r.top  + 'px';
+    fab.style.right  = 'auto';
+    fab.style.bottom = 'auto';
+
+    var dragging = false, wasDragged = false;
+    var sx, sy, ox, oy;
+
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)); }
+
+    function moveFab(left, top) {
+      left = clamp(left, 8, window.innerWidth  - fab.offsetWidth  - 8);
+      top  = clamp(top,  8, window.innerHeight - fab.offsetHeight - 8);
+      fab.style.left = left + 'px';
+      fab.style.top  = top  + 'px';
+      /* 열린 패널만 따라붙임 */
+      if (timer && timer.classList.contains('open')) {
+        timer.style.right  = 'auto'; timer.style.bottom = 'auto';
+        timer.style.left   = clamp(left - timer.offsetWidth - 10, 8, window.innerWidth - timer.offsetWidth - 8) + 'px';
+        timer.style.top    = top + 'px';
+      }
+      if (quickview && quickview.classList.contains('open')) {
+        quickview.style.right  = 'auto'; quickview.style.bottom = 'auto';
+        quickview.style.left   = clamp(left - quickview.offsetWidth - 10, 8, window.innerWidth - quickview.offsetWidth - 8) + 'px';
+        quickview.style.top    = clamp(top - quickview.offsetHeight - 8, 8, window.innerHeight - quickview.offsetHeight - 8) + 'px';
+      }
+    }
+
+    fab.addEventListener('mousedown', function(e) {
+      if (e.target.closest('#fab-menu')) return;
+      dragging = true; wasDragged = false;
+      sx = e.clientX; sy = e.clientY;
+      ox = parseFloat(fab.style.left);
+      oy = parseFloat(fab.style.top);
+      fab.classList.add('is-dragging');
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) wasDragged = true;
+      if (!wasDragged) return;
+      moveFab(ox + dx, oy + dy);
+    });
+
+    document.addEventListener('mouseup', function() {
+      if (!dragging) return;
+      dragging = false;
+      fab.classList.remove('is-dragging');
+    });
+
+    /* 드래그 후 click 이벤트가 toggleFab 호출하는 것을 차단 (캡처 단계) */
+    fab.addEventListener('click', function(e) {
+      if (wasDragged) { e.stopImmediatePropagation(); wasDragged = false; }
+    }, true);
+
+    /* 터치 지원 */
+    fab.addEventListener('touchstart', function(e) {
+      if (e.target.closest('#fab-menu')) return;
+      var t = e.touches[0];
+      dragging = true; wasDragged = false;
+      sx = t.clientX; sy = t.clientY;
+      ox = parseFloat(fab.style.left);
+      oy = parseFloat(fab.style.top);
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function(e) {
+      if (!dragging) return;
+      var t = e.touches[0];
+      var dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) wasDragged = true;
+      if (!wasDragged) return;
+      moveFab(ox + dx, oy + dy);
+    }, { passive: true });
+
+    document.addEventListener('touchend', function() { dragging = false; });
+  });
+
 
   /* ── TOC 유닛 토글 ───────────────────────── */
   function toggleUnit(header) {
@@ -1184,5 +2297,63 @@
     toastTimer = setTimeout(function() { el.classList.remove('show'); }, 2400);
   }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+
+<!-- TOC 접혔을 때 복원 버튼 -->
+<button class="toc-show-btn" id="toc-show-btn" onclick="toggleToc()" title="목차 열기">☰</button>
+
+<!-- ════════════════ 타이머 패널 ════════════════ -->
+<div class="teacher-timer-panel" id="teacher-timer-panel">
+  <div class="timer-display" id="timer-display">05:00</div>
+  <div class="timer-presets">
+    <button class="timer-preset-btn sel" onclick="setTimer(5,this)">5분</button>
+    <button class="timer-preset-btn" onclick="setTimer(10,this)">10분</button>
+    <button class="timer-preset-btn" onclick="setTimer(15,this)">15분</button>
+  </div>
+  <div class="timer-controls">
+    <button class="timer-start-btn" id="timer-start-btn" onclick="toggleTimer()">▶ 시작</button>
+    <button class="timer-reset-btn" onclick="resetTimer()" title="초기화">↺</button>
+  </div>
+</div>
+
+<!-- ════════════════ 제출 퀵뷰 ════════════════ -->
+<div class="teacher-quickview" id="teacher-quickview">
+  <div class="qv-title">제출 현황</div>
+  <div class="qv-bar-wrap">
+    <div class="qv-bar-fill" id="qv-bar" style="width:36%"></div>
+  </div>
+  <div class="qv-numbers">
+    <span class="qv-done" id="qv-done">9명 완료</span>
+    <span class="qv-total">전체 25명</span>
+  </div>
+</div>
+
+<!-- ════════════════ 교사 도구 FAB ════════════════ -->
+<div class="fab-teacher" id="fab-teacher">
+  <div class="fab-menu" id="fab-menu">
+    <button class="fab-item" onclick="toggleTimerPanel()">
+      <span class="fab-item-label">수업 타이머</span>
+      <div class="fab-item-icon" id="fab-timer-icon">⏱</div>
+    </button>
+    <button class="fab-item" onclick="toggleQuickView()">
+      <span class="fab-item-label">제출 퀵뷰</span>
+      <div class="fab-item-icon" id="fab-qv-icon">📊</div>
+    </button>
+    <button class="fab-item" id="fab-lock-btn" onclick="toggleStudentLock()">
+      <span class="fab-item-label">학생 화면 잠금</span>
+      <div class="fab-item-icon" id="fab-lock-icon">⏸</div>
+    </button>
+    <button class="fab-item" onclick="location.href='wf03_monitoring.html'">
+      <span class="fab-item-label">수업 모니터링</span>
+      <div class="fab-item-icon">👁</div>
+    </button>
+    <button class="fab-item" id="fab-share-btn" onclick="toggleScreenShare()">
+      <span class="fab-item-label">화면 공유</span>
+      <div class="fab-item-icon" id="fab-share-icon">📡</div>
+    </button>
+  </div>
+  <button class="fab-main" id="fab-main-btn" onclick="toggleFab()" title="교사 도구">🎛</button>
+</div>
 </body>
 </html>
