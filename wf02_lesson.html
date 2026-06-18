@@ -1843,7 +1843,7 @@
 <header class="gnb">
   <div class="gnb-logo">
     <span class="logo-badge">AI</span>
-    정보 코스웨어
+    정보 학습 플랫폼
   </div>
 
   <button class="gnb-back-btn" onclick="location.href='index.html'" aria-label="내 학급 목록으로 이동">← 내 학급</button>
@@ -1901,9 +1901,6 @@
 
       <div class="toolbar-divider"></div>
 
-      <button class="btn btn-ghost btn-sm" id="btn-quiz" onclick="openQuizModal()" aria-label="AI 퀴즈 자동 생성">
-        ✨ AI 퀴즈 생성
-      </button>
       <button class="btn btn-ghost btn-sm" onclick="saveLesson()" aria-label="수정 내용 저장">
         💾 수정 저장
       </button>
@@ -2202,7 +2199,6 @@
                 <div class="tab-desc">수업 전 선행학습 확인 / 수업 중 이해도 점검 · 5문항 · 총 10점</div>
               </div>
               <div class="flex gap-sm">
-                <button class="btn btn-ghost btn-sm" onclick="openQuizModal()">✨ AI 생성</button>
                 <button class="btn btn-ghost btn-sm">+ 문항 추가</button>
               </div>
             </div>
@@ -2567,7 +2563,7 @@
                   <span>🟢 시작 화면 편집 — 학생이 실습을 시작할 때 보게 될 초기 상태를 설정하세요</span>
                   <button onclick="resetSkeletonEditor()">↺ 초기화</button>
                 </div>
-                <iframe src="entry-editor.html" class="practice-iframe" id="skeleton-editor-iframe" title="시작 코드 에디터"></iframe>
+                <iframe src="entry-editor.html?lsKey=wf02_entry_skeleton" class="practice-iframe" id="skeleton-editor-iframe" title="시작 코드 에디터"></iframe>
                 <div class="pep-footer">
                   <span style="font-size:12px;color:var(--color-gray);">저장 후 학생이 실습 시작 시 이 상태로 로드됩니다</span>
                   <button class="btn btn-primary" onclick="saveSkeletonCode()">💾 시작 코드 저장</button>
@@ -2585,7 +2581,7 @@
                     <span>✅ 정답 코드 에디터 — AI 채점의 기준이 됩니다</span>
                     <button onclick="resetAnswerEditor()">↺ 초기화</button>
                   </div>
-                  <iframe src="entry-editor.html" class="practice-iframe" id="answer-editor-iframe" title="정답 코드 에디터"></iframe>
+                  <iframe src="entry-editor.html?lsKey=wf02_entry_answer" class="practice-iframe" id="answer-editor-iframe" title="정답 코드 에디터"></iframe>
                   <div style="padding:8px 12px;border-top:1px solid var(--color-border);background:var(--color-white);flex-shrink:0;">
                     <button class="btn btn-secondary btn-sm" style="width:100%;" onclick="saveAnswerCode()">💾 정답 코드 저장</button>
                   </div>
@@ -2957,106 +2953,6 @@ print(type(height))"></textarea>
   </main>
 </div><!-- /app-layout -->
 
-<!-- ━━━ AI 퀴즈 생성 모달 ━━━ -->
-<div class="modal-overlay" id="quiz-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-title">
-        <span>✨</span> AI 퀴즈 생성
-        <span class="badge badge-mid" style="font-size:11px;">3차시: 변수와 자료형</span>
-      </div>
-      <button class="modal-close" onclick="closeQuizModal()" aria-label="모달 닫기">✕</button>
-    </div>
-
-    <div class="modal-body">
-      <!-- 로딩 상태 -->
-      <div class="ai-loading" id="quiz-loading">
-        <div class="ai-spinner"></div>
-        <div class="ai-loading-text">AI가 퀴즈를 생성하고 있습니다<span class="ai-loading-dots"></span></div>
-        <div class="text-sm text-gray">학습 목표와 설명 내용을 분석 중</div>
-      </div>
-
-      <!-- 생성 결과 -->
-      <div id="quiz-result" style="display:none">
-        <div class="alert alert-info mb-md">
-          <span>💡</span>
-          <span>학습 내용 기반으로 <strong>4문항</strong>을 생성했습니다. 원하는 문항을 선택해 추가하세요.</span>
-        </div>
-
-        <div class="quiz-gen-item">
-          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;">
-            <input type="checkbox" checked style="margin-top:2px;accent-color:var(--color-mid);" aria-label="문항 1 선택">
-            <div style="flex:1">
-              <div class="quiz-gen-q">변수(Variable)에 대한 설명으로 올바른 것은?</div>
-              <div class="quiz-gen-opts">
-                <label class="quiz-gen-opt"><input type="radio" name="gq1"> 한 번 저장하면 값을 바꿀 수 없다</label>
-                <label class="quiz-gen-opt correct"><input type="radio" name="gq1" checked> 데이터를 저장하는 메모리 공간이다</label>
-                <label class="quiz-gen-opt"><input type="radio" name="gq1"> 반드시 숫자형 데이터만 저장한다</label>
-                <label class="quiz-gen-opt"><input type="radio" name="gq1"> 파이썬에서만 사용되는 개념이다</label>
-              </div>
-              <div class="quiz-gen-answer">✅ 정답: ② — 변수는 데이터를 저장하는 메모리 공간입니다</div>
-            </div>
-          </label>
-        </div>
-
-        <div class="quiz-gen-item">
-          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;">
-            <input type="checkbox" checked style="margin-top:2px;accent-color:var(--color-mid);" aria-label="문항 2 선택">
-            <div style="flex:1">
-              <div class="quiz-gen-q"><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">score = "100"</code>에서 score의 자료형은?</div>
-              <div class="quiz-gen-opts">
-                <label class="quiz-gen-opt"><input type="radio" name="gq2"> int</label>
-                <label class="quiz-gen-opt"><input type="radio" name="gq2"> float</label>
-                <label class="quiz-gen-opt correct"><input type="radio" name="gq2" checked> str</label>
-                <label class="quiz-gen-opt"><input type="radio" name="gq2"> bool</label>
-              </div>
-              <div class="quiz-gen-answer">✅ 정답: ③ — 따옴표로 감싸면 숫자도 문자열(str)입니다</div>
-            </div>
-          </label>
-        </div>
-
-        <div class="quiz-gen-item">
-          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;">
-            <input type="checkbox" checked style="margin-top:2px;accent-color:var(--color-mid);" aria-label="문항 3 선택">
-            <div style="flex:1">
-              <div class="quiz-gen-q">다음 코드의 실행 결과로 올바른 것은? <code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">x = 5; x = x + 3; print(x)</code></div>
-              <div class="quiz-gen-opts">
-                <label class="quiz-gen-opt"><input type="radio" name="gq3"> 5</label>
-                <label class="quiz-gen-opt"><input type="radio" name="gq3"> x + 3</label>
-                <label class="quiz-gen-opt correct"><input type="radio" name="gq3" checked> 8</label>
-                <label class="quiz-gen-opt"><input type="radio" name="gq3"> 오류 발생</label>
-              </div>
-              <div class="quiz-gen-answer">✅ 정답: ③ — 변수 x에 5를 저장 후 3을 더해 8이 됩니다</div>
-            </div>
-          </label>
-        </div>
-
-        <div class="quiz-gen-item">
-          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;">
-            <input type="checkbox" style="margin-top:2px;accent-color:var(--color-mid);" aria-label="문항 4 선택">
-            <div style="flex:1">
-              <div class="quiz-gen-q">변수 이름으로 사용할 수 없는 것을 모두 고르시오. (복수 선택)</div>
-              <div class="quiz-gen-opts">
-                <label class="quiz-gen-opt correct"><input type="checkbox" checked> 2nd_name</label>
-                <label class="quiz-gen-opt"><input type="checkbox"> student_name</label>
-                <label class="quiz-gen-opt correct"><input type="checkbox" checked> my score</label>
-                <label class="quiz-gen-opt"><input type="checkbox"> _private</label>
-              </div>
-              <div class="quiz-gen-answer">✅ 정답: ①③ — 숫자 시작, 공백 포함 불가</div>
-            </div>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeQuizModal()">취소</button>
-      <button class="btn btn-secondary" onclick="regenerateQuiz()">🔄 재생성</button>
-      <button class="btn btn-primary" id="btn-add-quiz" style="display:none" onclick="addQuiz()">선택 문항 추가 (3)</button>
-    </div>
-  </div>
-</div>
-
 <!-- 저장 토스트 -->
 <div class="toast" id="save-toast">✅ 수정 사항이 저장되었습니다</div>
 
@@ -3232,7 +3128,7 @@ print(type(height))"></textarea>
     showToast('✅ ' + keys.length + '개 자료가 추가되었습니다');
   }
 
-  document.getElementById('add-mat-overlay').addEventListener('click', function(e) {
+  (document.getElementById('add-mat-overlay') || document.createElement('div')).addEventListener('click', function(e) {
     if (e.target === this) closeAddModal();
   });
 
@@ -3290,7 +3186,7 @@ print(type(height))"></textarea>
     showToast('🗑 삭제되었습니다');
   }
 
-  document.getElementById('del-confirm-overlay').addEventListener('click', function(e) {
+  (document.getElementById('del-confirm-overlay') || document.createElement('div')).addEventListener('click', function(e) {
     if (e.target === this) closeDelConfirm();
   });
 
@@ -3536,56 +3432,6 @@ print(type(height))"></textarea>
     arrow.textContent   = open ? '▶' : '▼';
   }
 
-  /* ── AI 퀴즈 모달 ───────────────────────────── */
-  function openQuizModal() {
-    var modal   = document.getElementById('quiz-modal');
-    var loading = document.getElementById('quiz-loading');
-    var result  = document.getElementById('quiz-result');
-    var addBtn  = document.getElementById('btn-add-quiz');
-
-    loading.style.display = 'flex';
-    result.style.display  = 'none';
-    addBtn.style.display  = 'none';
-
-    modal.classList.add('open');
-
-    setTimeout(function () {
-      loading.style.display = 'none';
-      result.style.display  = 'block';
-      addBtn.style.display  = 'inline-flex';
-    }, 1800);
-  }
-
-  function closeQuizModal() {
-    document.getElementById('quiz-modal').classList.remove('open');
-  }
-
-  function regenerateQuiz() {
-    var loading = document.getElementById('quiz-loading');
-    var result  = document.getElementById('quiz-result');
-    var addBtn  = document.getElementById('btn-add-quiz');
-
-    loading.style.display = 'flex';
-    result.style.display  = 'none';
-    addBtn.style.display  = 'none';
-
-    setTimeout(function () {
-      loading.style.display = 'none';
-      result.style.display  = 'block';
-      addBtn.style.display  = 'inline-flex';
-    }, 1500);
-  }
-
-  function addQuiz() {
-    closeQuizModal();
-    showToast('✅ 퀴즈 3문항이 수업 자료에 추가되었습니다');
-  }
-
-  /* ── 모달 외부 클릭으로 닫기 ────────────────── */
-  document.getElementById('quiz-modal').addEventListener('click', function (e) {
-    if (e.target === this) closeQuizModal();
-  });
-
   /* ── 저장 / 배포 ────────────────────────────── */
   function saveLesson() {
     showToast('💾 수정 사항이 저장되었습니다');
@@ -3610,6 +3456,45 @@ print(type(height))"></textarea>
   /* ── 엔트리 실습 편집 ──────────────────────── */
   var _entryRubric = [];
   var _answerSaved = false;
+  var _pendingSave = null;           // 'skeleton' | 'answer'
+  var _skeletonReady = false;
+  var _answerReady   = false;
+  var _pendingSkeletonProject = null; // ENTRY_READY 왔지만 탭이 숨겨져 있을 때 대기
+  var _pendingAnswerProject   = null;
+
+  /* ── 엔트리 iframe postMessage 통신 ── */
+  window.addEventListener('message', function(e) {
+    if (!e.data || !e.data.type) return;
+    var skeletonIframe = document.getElementById('skeleton-editor-iframe');
+    var answerIframe   = document.getElementById('answer-editor-iframe');
+
+    if (e.data.type === 'ENTRY_READY') {
+      var matchSkeleton = skeletonIframe && e.source === skeletonIframe.contentWindow;
+      var matchAnswer   = answerIframe   && e.source === answerIframe.contentWindow;
+      if (matchSkeleton) { _skeletonReady = true; }
+      if (matchAnswer)   { _answerReady   = true; }
+    }
+
+    if (e.data.type === 'SAVE_DATA') {
+      if (_pendingSave === 'skeleton') {
+        if (e.data.project) {
+          localStorage.setItem('wf02_entry_skeleton', JSON.stringify(e.data.project));
+          showToast('💾 시작 코드가 저장되었습니다');
+        } else {
+          showToast('⚠️ 저장할 프로젝트 데이터가 없습니다');
+        }
+      } else if (_pendingSave === 'answer') {
+        if (e.data.project) {
+          localStorage.setItem('wf02_entry_answer', JSON.stringify(e.data.project));
+          _answerSaved = true;
+          showToast('💾 정답 코드가 저장되었습니다');
+        } else {
+          showToast('⚠️ 저장할 프로젝트 데이터가 없습니다');
+        }
+      }
+      _pendingSave = null;
+    }
+  });
 
   /* 소탭 전환 */
   function switchEntryTab(tabId) {
@@ -3619,6 +3504,21 @@ print(type(height))"></textarea>
     document.querySelectorAll('#tab-entry .entry-sub-content').forEach(function(c) {
       c.classList.toggle('active', c.id === 'etab-' + tabId);
     });
+    // 탭이 보이게 됐을 때 대기 중이던 프로젝트 로드
+    if (tabId === 'skeleton' && _pendingSkeletonProject) {
+      var iframe = document.getElementById('skeleton-editor-iframe');
+      if (iframe && iframe.contentWindow) {
+        try { iframe.contentWindow.postMessage({ type: 'ENTRY_LOAD', project: _pendingSkeletonProject }, '*'); } catch(_) {}
+      }
+      _pendingSkeletonProject = null;
+    }
+    if (tabId === 'answer' && _pendingAnswerProject) {
+      var iframe2 = document.getElementById('answer-editor-iframe');
+      if (iframe2 && iframe2.contentWindow) {
+        try { iframe2.contentWindow.postMessage({ type: 'ENTRY_LOAD', project: _pendingAnswerProject }, '*'); } catch(_) {}
+      }
+      _pendingAnswerProject = null;
+    }
   }
 
   /* 단계 편집 미니탭 전환 */
@@ -3635,20 +3535,37 @@ print(type(height))"></textarea>
   }
 
   function saveSkeletonCode() {
-    showToast('💾 시작 코드가 저장되었습니다');
+    if (!_skeletonReady) {
+      showToast('⏳ 에디터 로딩 중입니다. 잠시 후 다시 시도해주세요');
+      return;
+    }
+    var iframe = document.getElementById('skeleton-editor-iframe');
+    _pendingSave = 'skeleton';
+    showToast('저장 중...');
+    iframe.contentWindow.postMessage({ type: 'REQUEST_SAVE' }, '*');
   }
 
   function saveAnswerCode() {
-    _answerSaved = true;
-    showToast('💾 정답 코드가 저장되었습니다');
+    if (!_answerReady) {
+      showToast('⏳ 에디터 로딩 중입니다. 잠시 후 다시 시도해주세요');
+      return;
+    }
+    var iframe = document.getElementById('answer-editor-iframe');
+    _pendingSave = 'answer';
+    showToast('저장 중...');
+    iframe.contentWindow.postMessage({ type: 'REQUEST_SAVE' }, '*');
   }
 
   function resetSkeletonEditor() {
+    if (!confirm('시작 코드를 초기화하면 저장된 내용이 삭제됩니다. 계속하시겠습니까?')) return;
+    localStorage.removeItem('wf02_entry_skeleton');
     var iframe = document.getElementById('skeleton-editor-iframe');
     if (iframe) { iframe.src = iframe.src; }
   }
 
   function resetAnswerEditor() {
+    if (!confirm('정답 코드를 초기화하면 저장된 내용이 삭제됩니다. 계속하시겠습니까?')) return;
+    localStorage.removeItem('wf02_entry_answer');
     var iframe = document.getElementById('answer-editor-iframe');
     if (iframe) { iframe.src = iframe.src; }
     _answerSaved = false;

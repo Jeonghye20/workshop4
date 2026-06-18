@@ -102,7 +102,26 @@
           exportObjectEnable: false,
           blockSaveImageEnable: false,
         });
-        Entry.loadProject();
+        // 부모 DOM에서 자기 iframe id를 읽어 localStorage 키를 결정
+        var _lsKey = null;
+        try {
+          var _frames = window.parent.document.querySelectorAll('iframe');
+          for (var _i = 0; _i < _frames.length; _i++) {
+            if (_frames[_i].contentWindow === window) {
+              var _keyMap = {
+                'skeleton-editor-iframe': 'wf02_entry_skeleton',
+                'answer-editor-iframe':   'wf02_entry_answer'
+              };
+              _lsKey = _keyMap[_frames[_i].id] || null;
+              break;
+            }
+          }
+        } catch(_e) {}
+        var _initProject = null;
+        if (_lsKey) {
+          try { _initProject = JSON.parse(localStorage.getItem(_lsKey) || 'null'); } catch(_e) {}
+        }
+        Entry.loadProject(_initProject);
 
         document.getElementById('entry-loading').style.display = 'none';
         window.parent.postMessage({ type: 'ENTRY_READY' }, '*');
