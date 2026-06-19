@@ -238,10 +238,24 @@ project/
 | 세션 9 | `teacher_textbook.html` 세부 수정 — 파이썬 실습 좌측 패널 wfs03b 동일 구조로 교체 / TOC 토글·스크롤바 / 하단 nav 점 네비게이션·버튼명·위치 / 교사 도구 FAB(타이머·퀵뷰·잠금·공유·모니터링) / FAB 드래그 이동 / TOC 하단 색상 수정 | ✅ 완료 |
 | 세션 10 | `index.html` 자료실 탭 — 과목별 2단계 구조(내가 만든 과목/공유받은 과목 카드 그리드 → 자료 목록 테이블) + 과목 CRUD + 공유 권한 분기 | ✅ 완료 |
 | 세션 11 | `wf01~wf05` GNB 1줄 구조 통일 — 학급 전환은 index 경유, [← 홈] 버튼·학급명 텍스트·교사 프로필(이름+아바타) | ✅ 완료 |
-| 세션 12~ | 기타 화면 세부 수정 또는 신규 기능 | - |
+| 세션 12 | GitHub 배포(`Jeonghye20/workshop4`) + Vercel 자동배포 연결 + vercel.json(images/ rewrite) + 전체 wf-nav에 teacher_textbook·wfs_lesson 링크 추가 | ✅ 완료 |
+| 세션 13~ | 기타 화면 세부 수정 또는 신규 기능 | - |
 
-각 세션 시작 시: "CLAUDE.md와 이전 세션의 styles.css를 읽고 [WF-XX]를 만들어줘" 형태로 지시.
+각 세션 시작 시: "메모리 읽고 이어서 작업하자" 또는 "CLAUDE.md 읽고 [작업내용] 해줘" 형태로 지시.
 세션 완료 후 위 표의 상태를 `✅ 완료`로 업데이트할 것.
+
+---
+
+## 배포 방법
+
+- **저장소**: `https://github.com/Jeonghye20/workshop4`
+- **배포**: Vercel 자동배포 — `main` 브랜치에 push하면 1~2분 내 반영
+- **로컬 서버**: `npx serve . -p 8080` → `http://localhost:8080`
+- **워크플로**:
+  1. 코드 수정 → `git commit` (로컬 저장만)
+  2. 로컬에서 테스트
+  3. **"배포해 줘"** 라고 하면 `git push` → Vercel 자동 반영
+  - ※ 배포된 사이트는 외부에 공개된 상태이므로 테스트 전 push 금지
 
 ---
 
