@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/images/:path*", "destination": "/entry-lib/@entrylabs/entry/images/:path*" }
+  ]
+}
