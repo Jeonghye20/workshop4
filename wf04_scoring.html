@@ -295,13 +295,16 @@
 </nav>
 
 <header class="gnb">
-  <div class="gnb-logo"><span class="logo-badge">AI</span>정보 학습 플랫폼</div>
-  <button class="gnb-back-btn" onclick="location.href='index.html'" aria-label="내 학급 목록으로 이동">← 내 학급</button>
-  <button class="gnb-class-btn" onclick="openClassModal()" aria-label="학급 선택">1학년 3반 ▾</button>
+  <div class="gnb-logo gnb-logo-compact"><span class="logo-badge">AI</span>정보 학습 플랫폼</div>
+  <button class="gnb-back-btn" onclick="location.href='index.html'" aria-label="홈으로 이동">← 홈</button>
+  <span class="gnb-class-label">1학년 3반</span>
+  <div class="gnb-spacer"></div>
   <div class="gnb-actions">
     <button class="gnb-icon-btn" aria-label="알림">🔔<span class="gnb-badge"></span></button>
-    <button class="gnb-icon-btn" aria-label="설정">⚙️</button>
-    <div class="gnb-avatar" title="김지현 선생님">김</div>
+    <div class="gnb-teacher">
+      <span class="gnb-teacher-name">김지현</span>
+      <div class="gnb-avatar" title="김지현 선생님">김</div>
+    </div>
   </div>
 </header>
 

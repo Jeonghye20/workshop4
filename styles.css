@@ -579,13 +579,13 @@ tbody tr:hover { background: rgba(6,90,130,0.03); }
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 10px;
-  border: 1px solid var(--color-border);
+  padding: 5px 12px;
+  border: 1px solid var(--color-mid);
   border-radius: 6px;
-  background: var(--color-light);
+  background: var(--color-mid);
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-mid);
+  color: var(--color-white);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   white-space: nowrap;
@@ -593,30 +593,42 @@ tbody tr:hover { background: rgba(6,90,130,0.03); }
 }
 
 .gnb-back-btn:hover {
-  background: rgba(6,90,130,0.08);
-  border-color: var(--color-mid);
+  background: #054a6b;
+  border-color: #054a6b;
 }
 
-.gnb-class-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: 6px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background: var(--color-white);
+/* wf01~05 공통: 로고 바로 뒤에 back-btn 붙이기 */
+.gnb-logo-compact {
+  margin-right: 0;
+}
+
+/* 학급명 표시 텍스트 (클릭 불가) */
+.gnb-class-label {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-ink);
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  padding: 0 var(--space-xs);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.gnb-class-btn:hover {
-  border-color: var(--color-mid);
-  background: var(--color-light);
+/* GNB 좌우 분리 스페이서 */
+.gnb-spacer {
+  flex: 1;
+}
+
+/* 우측 교사 프로필 래퍼 */
+.gnb-teacher {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.gnb-teacher-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray);
+  white-space: nowrap;
 }
 
 /* =========================================================
