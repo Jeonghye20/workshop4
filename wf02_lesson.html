@@ -1797,6 +1797,87 @@
       min-height: 72px;
     }
 
+    /* ── 엔트리 탭 전체화면 모드 (공통) ──────────── */
+    .entry-sub-content.fullscreen-mode {
+      position: fixed !important;
+      inset: 0;
+      z-index: 500;
+      display: flex !important;
+      flex-direction: column;
+      overflow: hidden !important;
+    }
+    .entry-sub-content.fullscreen-mode .entry-full-editor {
+      flex: 1;
+      overflow: hidden;
+    }
+    /* 미리보기 탭 전체화면 시 scale 제거 */
+    .entry-sub-content.fullscreen-mode .iframe-scale-wrap iframe {
+      width: 100%;
+      height: 100%;
+      transform: none;
+    }
+
+    /* ── 엔트리 정답·채점 사이드 드로어 ──────────── */
+    #etab-answer {
+      position: relative;
+      overflow: hidden;
+    }
+    .entry-rubric-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.28);
+      z-index: 10;
+    }
+    .entry-rubric-backdrop.open { display: block; }
+
+    .entry-rubric-drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 320px;
+      background: var(--color-white);
+      border-left: 1px solid var(--color-border);
+      box-shadow: -4px 0 20px rgba(0,0,0,0.14);
+      z-index: 11;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .entry-rubric-drawer.open { transform: translateX(0); }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-light);
+      flex-shrink: 0;
+    }
+    .drawer-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-ink);
+    }
+    .drawer-close-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: var(--color-border);
+      color: var(--color-gray);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .drawer-close-btn:hover { background: var(--color-mid); color: white; }
+
     /* ── 저장 토스트 ─────────────────────────────── */
     .toast {
       position: fixed;
@@ -1918,7 +1999,7 @@
         <div class="toc-header">
           목차
           <div style="display:flex;align-items:center;gap:4px;">
-            <span class="text-sm" style="font-weight:400;text-transform:none;letter-spacing:0">3학년 1학기</span>
+            <span class="text-sm" style="font-weight:400;text-transform:none;letter-spacing:0"></span>
             <button class="toc-action-btn" onclick="addUnit()" title="대단원 추가" style="font-size:14px;width:20px;height:20px;background:var(--color-light);border-radius:4px;">＋</button>
           </div>
         </div>
@@ -2565,72 +2646,79 @@
                   <button onclick="resetSkeletonEditor()">↺ 초기화</button>
                 </div>
                 <iframe src="entry-editor.html?lsKey=wf02_entry_skeleton" class="practice-iframe" id="skeleton-editor-iframe" title="시작 코드 에디터"></iframe>
-                <div class="pep-footer">
-                  <span style="font-size:12px;color:var(--color-gray);">저장 후 학생이 실습 시작 시 이 상태로 로드됩니다</span>
-                  <button class="btn btn-primary" onclick="saveSkeletonCode()">💾 시작 코드 저장</button>
+                <div style="padding:8px 12px;border-top:1px solid var(--color-border);background:var(--color-white);flex-shrink:0;display:flex;gap:8px;align-items:center;">
+                  <button class="btn btn-primary btn-sm" onclick="saveSkeletonCode()">💾 시작 코드 저장</button>
+                  <button class="btn btn-ghost btn-sm" id="skeleton-fullscreen-btn" onclick="toggleEntryFullscreen('etab-skeleton','skeleton-fullscreen-btn')" style="margin-left:auto;">⛶ 전체화면</button>
                 </div>
               </div>
             </div><!-- /etab-skeleton -->
 
             <!-- ── 소탭 3: 정답·채점 ── -->
             <div class="entry-sub-content" id="etab-answer">
-              <div class="practice-split">
 
-                <!-- 왼쪽: 정답 코드 Entry 에디터 -->
-                <div class="practice-preview" style="flex-direction:column;">
-                  <div class="practice-preview-bar entry">
-                    <span>✅ 정답 코드 에디터 — AI 채점의 기준이 됩니다</span>
-                    <button onclick="resetAnswerEditor()">↺ 초기화</button>
-                  </div>
-                  <iframe src="entry-editor.html?lsKey=wf02_entry_answer" class="practice-iframe" id="answer-editor-iframe" title="정답 코드 에디터"></iframe>
-                  <div style="padding:8px 12px;border-top:1px solid var(--color-border);background:var(--color-white);flex-shrink:0;">
-                    <button class="btn btn-secondary btn-sm" style="width:100%;" onclick="saveAnswerCode()">💾 정답 코드 저장</button>
-                  </div>
+              <!-- 에디터 전체 너비 -->
+              <div class="entry-full-editor">
+                <div class="practice-preview-bar entry">
+                  <span>✅ 정답 코드 에디터 — AI 채점의 기준이 됩니다</span>
+                  <button onclick="resetAnswerEditor()">↺ 초기화</button>
                 </div>
+                <iframe src="entry-editor.html?lsKey=wf02_entry_answer" class="practice-iframe" id="answer-editor-iframe" title="정답 코드 에디터"></iframe>
+                <div style="padding:8px 12px;border-top:1px solid var(--color-border);background:var(--color-white);flex-shrink:0;display:flex;gap:8px;align-items:center;">
+                  <button class="btn btn-secondary btn-sm" onclick="saveAnswerCode()">💾 정답 코드 저장</button>
+                  <button class="btn btn-ghost btn-sm" onclick="openEntryRubricDrawer()">📊 채점 기준</button>
+                  <button class="btn btn-ghost btn-sm" id="answer-fullscreen-btn" onclick="toggleAnswerFullscreen()" style="margin-left:auto;">⛶ 전체화면</button>
+                </div>
+              </div>
 
-                <!-- 오른쪽: AI 채점 기준 -->
-                <div class="practice-edit-panel">
-                  <div class="practice-edit-scroll">
+              <!-- 드로어 배경 -->
+              <div class="entry-rubric-backdrop" id="entry-rubric-backdrop" onclick="closeEntryRubricDrawer()"></div>
 
-                    <div class="pep-section">
-                      <div class="pep-section-title">🤖 AI 채점 기준</div>
-                      <p style="font-size:12px;color:var(--color-gray);line-height:1.6;margin-bottom:10px;">
-                        왼쪽 에디터에 정답 코드를 완성 후 저장하면<br>AI가 채점 기준표를 자동 생성합니다.
-                      </p>
-                      <button class="btn btn-primary btn-sm" style="width:100%;" onclick="generateEntryRubric()">
-                        🤖 AI 채점 기준 생성
-                      </button>
-                    </div>
+              <!-- 사이드 드로어 -->
+              <div class="entry-rubric-drawer" id="entry-rubric-drawer">
+                <div class="drawer-header">
+                  <span class="drawer-title">📊 AI 채점 기준</span>
+                  <button class="drawer-close-btn" onclick="closeEntryRubricDrawer()" aria-label="닫기">✕</button>
+                </div>
+                <div class="practice-edit-scroll" style="flex:1;overflow-y:auto;">
 
-                    <!-- AI 로딩 -->
-                    <div class="pep-section" id="entry-rubric-loading" style="display:none;">
-                      <div class="pep-ai-loading">
-                        <span class="ai-spinner">🤖</span>
-                        정답 코드를 분석 중입니다...
-                      </div>
-                    </div>
-
-                    <!-- 루브릭 -->
-                    <div class="pep-section" id="entry-rubric-section" style="display:none;">
-                      <div class="pep-section-title">
-                        📊 채점 기준표
-                        <span class="pep-badge ok">AI 생성</span>
-                        <button class="toc-action-btn" onclick="addEntryRubricRow()" title="기준 추가" style="margin-left:auto;width:20px;height:20px;font-size:13px;">＋</button>
-                      </div>
-                      <div id="entry-rubric-rows"></div>
-                      <div class="rubric-total-row">
-                        총 <strong id="entry-rubric-total" style="color:var(--color-mid);margin:0 2px;">10</strong>점
-                      </div>
-                    </div>
-
-                  </div><!-- /practice-edit-scroll -->
-                  <div class="pep-footer">
-                    <span></span>
-                    <button class="btn btn-primary" onclick="deployEntry()" style="padding:8px 20px;">🚀 학생에게 배포</button>
+                  <div class="pep-section">
+                    <div class="pep-section-title">🤖 AI 채점 기준</div>
+                    <p style="font-size:12px;color:var(--color-gray);line-height:1.6;margin-bottom:10px;">
+                      왼쪽 에디터에 정답 코드를 완성 후 저장하면<br>AI가 채점 기준표를 자동 생성합니다.
+                    </p>
+                    <button class="btn btn-primary btn-sm" style="width:100%;" onclick="generateEntryRubric()">
+                      🤖 AI 채점 기준 생성
+                    </button>
                   </div>
-                </div><!-- /practice-edit-panel -->
 
-              </div><!-- /practice-split -->
+                  <!-- AI 로딩 -->
+                  <div class="pep-section" id="entry-rubric-loading" style="display:none;">
+                    <div class="pep-ai-loading">
+                      <span class="ai-spinner">🤖</span>
+                      정답 코드를 분석 중입니다...
+                    </div>
+                  </div>
+
+                  <!-- 루브릭 -->
+                  <div class="pep-section" id="entry-rubric-section" style="display:none;">
+                    <div class="pep-section-title">
+                      📊 채점 기준표
+                      <span class="pep-badge ok">AI 생성</span>
+                      <button class="toc-action-btn" onclick="addEntryRubricRow()" title="기준 추가" style="margin-left:auto;width:20px;height:20px;font-size:13px;">＋</button>
+                    </div>
+                    <div id="entry-rubric-rows"></div>
+                    <div class="rubric-total-row">
+                      총 <strong id="entry-rubric-total" style="color:var(--color-mid);margin:0 2px;">10</strong>점
+                    </div>
+                  </div>
+
+                </div><!-- /practice-edit-scroll -->
+                <div class="pep-footer">
+                  <span></span>
+                  <button class="btn btn-primary" onclick="deployEntry()" style="padding:8px 20px;">🚀 학생에게 배포</button>
+                </div>
+              </div><!-- /entry-rubric-drawer -->
+
             </div><!-- /etab-answer -->
 
             <!-- ── 소탭 4: 미리보기 ── -->
@@ -2638,6 +2726,7 @@
               <div class="entry-full-editor">
                 <div class="practice-preview-bar entry">
                   <span>👁 미리보기 — 실습 내용 + 시작 화면이 합쳐진 학생 화면</span>
+                  <button id="preview-fullscreen-btn" onclick="toggleEntryFullscreen('etab-preview','preview-fullscreen-btn')">⛶ 전체화면</button>
                   <button onclick="window.open('wfs03a_entry.html','_blank')">새 창에서 열기 ↗</button>
                 </div>
                 <div class="iframe-scale-wrap">
@@ -3562,6 +3651,42 @@ print(type(height))"></textarea>
     localStorage.removeItem('wf02_entry_skeleton');
     var iframe = document.getElementById('skeleton-editor-iframe');
     if (iframe) { iframe.src = iframe.src; }
+  }
+
+  var _entryFsTabs = [
+    { tabId: 'etab-skeleton', btnId: 'skeleton-fullscreen-btn' },
+    { tabId: 'etab-answer',   btnId: 'answer-fullscreen-btn' },
+    { tabId: 'etab-preview',  btnId: 'preview-fullscreen-btn' },
+  ];
+  function toggleEntryFullscreen(tabId, btnId) {
+    var panel = document.getElementById(tabId);
+    var btn   = document.getElementById(btnId);
+    var isFs  = panel.classList.toggle('fullscreen-mode');
+    btn.textContent = isFs ? '✕ 원래대로' : '⛶ 전체화면';
+    if (tabId === 'etab-answer' && isFs) { closeEntryRubricDrawer(); }
+  }
+  function toggleAnswerFullscreen() {
+    toggleEntryFullscreen('etab-answer', 'answer-fullscreen-btn');
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Escape') return;
+    _entryFsTabs.forEach(function(t) {
+      var panel = document.getElementById(t.tabId);
+      if (panel && panel.classList.contains('fullscreen-mode')) {
+        panel.classList.remove('fullscreen-mode');
+        var btn = document.getElementById(t.btnId);
+        if (btn) btn.textContent = '⛶ 전체화면';
+      }
+    });
+  });
+
+  function openEntryRubricDrawer() {
+    document.getElementById('entry-rubric-drawer').classList.add('open');
+    document.getElementById('entry-rubric-backdrop').classList.add('open');
+  }
+  function closeEntryRubricDrawer() {
+    document.getElementById('entry-rubric-drawer').classList.remove('open');
+    document.getElementById('entry-rubric-backdrop').classList.remove('open');
   }
 
   function resetAnswerEditor() {
