@@ -219,9 +219,9 @@
 
     /* 출력 패널 — 하단 배치 */
     .output-panel {
-      height: 200px;
+      height: 240px;
       flex-shrink: 0;
-      min-height: 60px;
+      min-height: 90px;
       border-top: 1px solid rgba(255,255,255,0.07);
       background: #12121f; display: flex; flex-direction: column; overflow: hidden;
     }
@@ -558,16 +558,16 @@
             <div class="ai-feedback" id="aiFeedback">
               🤖 <strong>AI 피드백:</strong> <span id="aiFeedbackText"></span>
             </div>
-          </div>
 
-          <!-- 버튼 바 -->
-          <div class="ide-btn-bar">
-            <button class="btn-run btn-run-primary" id="runBtn" onclick="runCode()">▶ 실행</button>
-            <button class="btn-run" id="submitBtn"
-              style="background:var(--color-python);color:white;border:none;"
-              onclick="submitCode()">📤 채점하기</button>
-            <button class="btn-run btn-run-ghost" onclick="clearOutput()">🗑 지우기</button>
-            <span class="score-result" id="scoreResult"></span>
+            <!-- 버튼 바 — 콘솔 내부 하단 -->
+            <div class="ide-btn-bar">
+              <button class="btn-run btn-run-primary" id="runBtn" onclick="runCode()">▶ 실행</button>
+              <button class="btn-run" id="submitBtn"
+                style="background:var(--color-python);color:white;border:none;"
+                onclick="submitCode()">📤 채점하기</button>
+              <button class="btn-run btn-run-ghost" onclick="clearOutput()">🗑 지우기</button>
+              <span class="score-result" id="scoreResult"></span>
+            </div>
           </div>
 
         </div><!-- /.ide-body -->
