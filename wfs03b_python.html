@@ -371,6 +371,7 @@
     <a href="wfs03a_entry.html">S03a 엔트리실습</a>
     <a href="wfs03a_entry_v2.html">S03a 엔트리실습 v2</a>
     <a href="wfs03b_python.html" class="active">S03b 파이썬실습</a>
+    <a href="wfs02_dashboard.html">학생대시보드</a>
   </nav>
 
   <!-- GNB (학생용) -->
@@ -546,9 +547,20 @@
               <div class="traffic-dot" style="background:#ff6b6b;"></div>
               <div class="traffic-dot" style="background:#ffd93d;"></div>
               <div class="traffic-dot" style="background:#6bcb77;"></div>
-              <span class="output-title">출력 콘솔</span>
+              <span class="output-title">실행 결과</span>
               <span id="runStatus" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.3);"></span>
             </div>
+
+            <!-- 버튼 바 — 결과 영역 위 -->
+            <div class="ide-btn-bar">
+              <button class="btn-run btn-run-primary" id="runBtn" onclick="runCode()">▶ 실행</button>
+              <button class="btn-run" id="submitBtn"
+                style="background:var(--color-python);color:white;border:none;"
+                onclick="submitCode()">📤 채점하기</button>
+              <button class="btn-run btn-run-ghost" onclick="clearOutput()">🗑 지우기</button>
+              <span class="score-result" id="scoreResult"></span>
+            </div>
+
             <div class="output-body" id="outputBody">
               <div class="out-system">Python 3.11 — 정보 AI 실습 환경</div>
               <div class="out-system">────────────────────────</div>
@@ -557,16 +569,6 @@
             </div>
             <div class="ai-feedback" id="aiFeedback">
               🤖 <strong>AI 피드백:</strong> <span id="aiFeedbackText"></span>
-            </div>
-
-            <!-- 버튼 바 — 콘솔 내부 하단 -->
-            <div class="ide-btn-bar">
-              <button class="btn-run btn-run-primary" id="runBtn" onclick="runCode()">▶ 실행</button>
-              <button class="btn-run" id="submitBtn"
-                style="background:var(--color-python);color:white;border:none;"
-                onclick="submitCode()">📤 채점하기</button>
-              <button class="btn-run btn-run-ghost" onclick="clearOutput()">🗑 지우기</button>
-              <span class="score-result" id="scoreResult"></span>
             </div>
           </div>
 
