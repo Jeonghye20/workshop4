@@ -38,9 +38,36 @@
       background: var(--color-python);
       color: white;
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
     }
+    .step-panel-header:hover { filter: brightness(1.1); }
     .step-panel-header .unit-label { font-size: 11px; opacity: 0.8; margin-bottom: 4px; }
     .step-panel-header .mission-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
+    .understand-arrow { font-size: 14px; opacity: 0.85; margin-left: auto; flex-shrink: 0; transition: transform 0.2s; }
+    .understand-arrow.collapsed { transform: rotate(-90deg); }
+    #understandContent.collapsed { display: none; }
+    .inline-section-header {
+      background: var(--color-python);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px var(--space-md);
+      margin: 0 calc(-1 * var(--space-md));
+      flex-shrink: 0;
+    }
+    .ide-btn-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 10px 14px;
+      background: #1e1e35;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+    .score-result { margin-left: auto; font-size: 13px; font-weight: 700; }
 
     .step-panel-body {
       flex: 1;
@@ -167,9 +194,9 @@
     .btn-run-ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
     .btn-run-ghost:hover { background: rgba(255,255,255,0.14); color: white; }
 
-    .ide-body { flex: 1; display: flex; overflow: hidden; }
+    .ide-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-    .editor-wrap { flex: 1; overflow: hidden; position: relative; }
+    .editor-wrap { flex: 1; overflow: hidden; position: relative; min-height: 80px; }
 
     .CodeMirror {
       height: 100% !important;
@@ -179,10 +206,23 @@
     }
     .editor-wrap .CodeMirror-scroll { height: 100%; }
 
-    /* 출력 패널 */
+    /* 세로 리사이즈 핸들 */
+    .ide-row-resize {
+      height: 5px;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.08);
+      cursor: row-resize;
+      transition: background 0.15s;
+    }
+    .ide-row-resize:hover,
+    .ide-row-resize.dragging { background: var(--color-python); }
+
+    /* 출력 패널 — 하단 배치 */
     .output-panel {
-      width: 320px; flex-shrink: 0;
-      border-left: 1px solid rgba(255,255,255,0.07);
+      height: 200px;
+      flex-shrink: 0;
+      min-height: 60px;
+      border-top: 1px solid rgba(255,255,255,0.07);
       background: #12121f; display: flex; flex-direction: column; overflow: hidden;
     }
 
@@ -361,14 +401,18 @@
 
       <!-- ── 좌측 단계 패널 ── -->
       <aside class="step-panel">
-        <div class="step-panel-header">
-          <div class="unit-label">Ⅲ-2-02 · 파이썬 실습</div>
-          <div class="mission-title">🐍 두 수 사칙연산</div>
+        <div class="step-panel-header" onclick="toggleUnderstand()" aria-expanded="true" aria-controls="understandContent">
+          <div>
+            <div class="unit-label">Ⅲ-2-02 · 파이썬 실습</div>
+            <div class="mission-title">문제 이해</div>
+          </div>
+          <span class="understand-arrow" id="understandArrow">▾</span>
         </div>
 
         <div class="step-panel-body">
 
-          <!-- 미션 설명 -->
+          <!-- 문제 이해 내용 (접기 가능) -->
+          <div id="understandContent">
           <div class="mission-desc">
             <div class="desc-title">📋 해결할 과제</div>
             <div class="desc-body">
@@ -381,6 +425,11 @@
               </div>
             </div>
           </div>
+
+          </div><!-- /#understandContent -->
+
+          <!-- 프로그래밍하기 -->
+          <div class="inline-section-header">프로그래밍하기</div>
 
           <!-- 단계별 가이드 -->
           <div class="steps-section">
@@ -480,11 +529,7 @@
             <div class="file-tab-dot"></div>
             solution.py
           </div>
-          <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
-            <span style="font-size:11px;color:rgba(255,255,255,0.35);">Ctrl+Enter로 실행</span>
-            <button class="btn-run btn-run-ghost" onclick="clearOutput()">🗑 지우기</button>
-            <button class="btn-run btn-run-primary" id="runBtn" onclick="runCode()">▶ 실행</button>
-          </div>
+          <span style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.35);">Ctrl+Enter로 실행</span>
         </div>
 
         <!-- 에디터 + 출력 -->
@@ -492,6 +537,9 @@
           <div class="editor-wrap">
             <textarea id="codeEditor"></textarea>
           </div>
+
+          <!-- 세로 리사이즈 핸들 -->
+          <div class="ide-row-resize" id="ideRowResize"></div>
 
           <div class="output-panel">
             <div class="output-header">
@@ -511,35 +559,21 @@
               🤖 <strong>AI 피드백:</strong> <span id="aiFeedbackText"></span>
             </div>
           </div>
-        </div>
 
-      </div>
+          <!-- 버튼 바 -->
+          <div class="ide-btn-bar">
+            <button class="btn-run btn-run-primary" id="runBtn" onclick="runCode()">▶ 실행</button>
+            <button class="btn-run" id="submitBtn"
+              style="background:var(--color-python);color:white;border:none;"
+              onclick="submitCode()">📤 채점하기</button>
+            <button class="btn-run btn-run-ghost" onclick="clearOutput()">🗑 지우기</button>
+            <span class="score-result" id="scoreResult"></span>
+          </div>
+
+        </div><!-- /.ide-body -->
+
+      </div><!-- /.ide-area -->
     </div><!-- /.practice-main -->
-
-    <!-- ── 하단 채점 바 ── -->
-    <div class="grade-bar">
-      <div class="editor-status">
-        실행 상태
-        <span id="runStatusBadge" class="badge badge-warn">대기 중</span>
-      </div>
-
-      <div class="grade-result-area">
-        <div class="score-display" id="scoreDisplay">
-          <div class="score-num" id="scoreNum">--</div>
-          <div class="score-label">점<br><span style="color:var(--color-gray);font-size:10px;">/100</span></div>
-        </div>
-        <div class="score-feedback" id="scoreFeedback"></div>
-      </div>
-
-      <div class="grade-btn-group">
-        <button class="btn btn-ghost btn-sm" onclick="clearOutput()">🗑 초기화</button>
-        <button class="btn btn-primary" id="submitBtn"
-          style="background:var(--color-python);border-color:var(--color-python);padding:8px 20px;"
-          onclick="submitCode()">
-          📤 채점하기
-        </button>
-      </div>
-    </div>
 
   </div><!-- /.practice-wrap -->
 
@@ -663,8 +697,6 @@ print(f"{a} + {b} = {a + b}")
           if (i === sc.lines.length - 1) {
             runBtn.disabled = false;
             runBtn.textContent = '▶ 실행';
-            document.getElementById('runStatusBadge').className = 'badge badge-ok';
-            document.getElementById('runStatusBadge').textContent = '실행됨';
 
             setTimeout(function() {
               document.getElementById('aiFeedbackText').textContent = sc.feedback;
@@ -680,8 +712,7 @@ print(f"{a} + {b} = {a + b}")
       document.getElementById('outputBody').innerHTML =
         '<div class="out-system">&gt; 출력이 지워졌습니다.</div><div class="out-system"><span class="output-cursor"></span></div>';
       document.getElementById('aiFeedback').style.display = 'none';
-      document.getElementById('runStatusBadge').className = 'badge badge-warn';
-      document.getElementById('runStatusBadge').textContent = '대기 중';
+      document.getElementById('scoreResult').textContent = '';
     }
 
     function submitCode() {
@@ -691,20 +722,15 @@ print(f"{a} + {b} = {a + b}")
       btn.disabled = true;
 
       setTimeout(function() {
-        // 점수 표시
-        const scoreEl = document.getElementById('scoreNum');
-        const display = document.getElementById('scoreDisplay');
-        const feedback = document.getElementById('scoreFeedback');
-        scoreEl.textContent = score;
-        display.classList.add('show');
-        feedback.textContent = score >= 90 ? '🎉 완벽해요! 미션 성공!' :
-                               score >= 70 ? '👍 잘 했어요! 조금만 더 다듬어봐요.' :
-                                             '💪 다시 한 번 도전해봐요!';
-        feedback.classList.add('show');
+        const scoreResult = document.getElementById('scoreResult');
+        const msg = score >= 90 ? '🎉 ' + score + '점 — 완벽해요!' :
+                    score >= 70 ? '👍 ' + score + '점 — 잘 했어요!' :
+                                  '💪 ' + score + '점 — 다시 도전!';
+        scoreResult.textContent = msg;
+        scoreResult.style.color = score >= 90 ? '#a9dc76' : score >= 70 ? '#ffd93d' : '#ff6b6b';
         btn.textContent = '📤 채점하기';
         btn.disabled = false;
 
-        // localStorage 저장
         const data = JSON.parse(localStorage.getItem('lms_scores') || '{}');
         data.python = {
           score: score,
@@ -714,6 +740,16 @@ print(f"{a} + {b} = {a + b}")
         };
         localStorage.setItem('lms_scores', JSON.stringify(data));
       }, 900);
+    }
+
+    // 문제 이해 접기/펼치기
+    function toggleUnderstand() {
+      var content = document.getElementById('understandContent');
+      var arrow   = document.getElementById('understandArrow');
+      var header  = document.querySelector('.step-panel-header');
+      var collapsed = content.classList.toggle('collapsed');
+      arrow.classList.toggle('collapsed', collapsed);
+      header.setAttribute('aria-expanded', String(!collapsed));
     }
 
     // 단계 토글
@@ -757,6 +793,37 @@ print(f"{a} + {b} = {a + b}")
         aiIdx++;
       }, 400);
     }
+
+    // ── 출력 패널 세로 리사이즈 ──────────────────
+    (function() {
+      var handle  = document.getElementById('ideRowResize');
+      var panel   = document.querySelector('.output-panel');
+      var ideBody = document.querySelector('.ide-body');
+      var isDragging = false;
+      var startY, startH;
+
+      handle.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        startY = e.clientY;
+        startH = panel.offsetHeight;
+        handle.classList.add('dragging');
+        document.body.style.cursor = 'row-resize';
+        document.body.style.userSelect = 'none';
+      });
+      document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        var delta  = startY - e.clientY;
+        var newH   = Math.max(60, Math.min(ideBody.offsetHeight - 100, startH + delta));
+        panel.style.height = newH + 'px';
+      });
+      document.addEventListener('mouseup', function() {
+        if (!isDragging) return;
+        isDragging = false;
+        handle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      });
+    })();
 
     // 타이머
     let secs = 18 * 60 + 30;
