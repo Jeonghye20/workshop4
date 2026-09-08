@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WF-S03a 엔트리 실습 v2 — 정보 AI 학습 플랫폼</title>
+  <title>엔트리 실습 — 정보 AI 학습 플랫폼</title>
   <link rel="stylesheet" href="styles.css">
   <style>
     /* ── 전체 레이아웃 ───────────────────────────── */
@@ -12,7 +12,7 @@
     .practice-wrap {
       display: flex;
       flex-direction: column;
-      height: calc(100vh - var(--nav-height) - var(--gnb-height));
+      height: calc(100vh - var(--gnb-height));
     }
 
     .practice-main {
@@ -627,38 +627,22 @@
 </head>
 <body>
 
-  <!-- WF 네비게이션 -->
-  <nav class="wf-nav">
-    <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-right:2px;">교사 ▸</span>
-    <a href="wf01_dashboard.html">WF-01 홈</a>
-    <a href="wf02_lesson.html">WF-02 수업설계</a>
-    <a href="wf03_monitoring.html">WF-03 모니터링</a>
-    <a href="wf04_scoring.html">WF-04 AI채점</a>
-    <a href="wf05_result.html">WF-05 결과</a>
-    <a href="teacher_textbook.html">교사 교과서</a>
-    <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
-    <a href="wfs_lesson.html">학습화면</a>
-    <a href="wfs03a_entry.html">S03a 엔트리실습</a>
-    <a href="wfs03a_entry_v2.html" class="active">S03a 엔트리실습 v2</a>
-    <a href="wfs03b_python.html">S03b 파이썬실습</a>
-    <a href="wfs02_dashboard.html">학생대시보드</a>
-  </nav>
-
-  <!-- GNB (학생용) -->
-  <header class="gnb">
-    <div class="gnb-unit-nav">
-      <span class="gnb-unit-text">
-        <span style="font-size:11px;font-weight:400;opacity:0.6;">Ⅲ-2-01. 프로그래밍 시작하기</span><br>
-        <span style="font-size:13px;font-weight:700;">[실습] 이름을 입력하면 인사하는 프로그램</span>
-      </span>
+  <!-- GNB -->
+  <header class="gnb" style="position:fixed;top:0;left:0;right:0;z-index:150;">
+    <div class="gnb-logo gnb-logo-compact">
+      <span class="logo-badge" style="background:var(--color-entry);">AI</span>
+      정보 AI 학습 플랫폼
     </div>
-    <div class="gnb-actions" style="margin-left:auto;">
+    <button class="gnb-back-btn" onclick="location.href='wfs_lesson.html'" aria-label="수업으로 이동">← 수업</button>
+    <span style="font-size:13px;color:var(--color-gray);margin-left:8px;border-left:1px solid var(--color-border);padding-left:12px;">Ⅲ-2-01 · <strong style="color:var(--color-ink);">[실습2] 이름을 입력하면 인사하는 프로그램</strong></span>
+    <div class="gnb-spacer"></div>
+    <div class="gnb-actions">
       <button class="btn-submit" onclick="submitWork()" aria-label="제출하기">제출하기</button>
-      <div style="display:flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--color-warn);">
-        ⏱ <span id="timer">23:45</span>
+      <div style="display:flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--color-warn);">⏱ <span id="timer">23:45</span></div>
+      <div class="gnb-teacher">
+        <span class="gnb-teacher-name">김민준</span>
+        <div class="gnb-avatar" style="background:var(--color-entry);" title="김민준">민</div>
       </div>
-      <div class="gnb-avatar" style="background:var(--color-entry);">민</div>
-      <span style="font-size:13px;font-weight:600;">김민준</span>
     </div>
   </header>
 

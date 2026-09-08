@@ -13,7 +13,7 @@
     /* ── 전체 2단 레이아웃 ─────────────────────── */
     .tt-layout {
       position: fixed;
-      top: var(--nav-height);
+      top: var(--gnb-height);
       left: 0; right: 0;
       bottom: 0;
       display: flex;
@@ -55,7 +55,7 @@
     /* TOC 접혔을 때 고정 복원 버튼 */
     .toc-show-btn {
       position: fixed;
-      top: calc(var(--nav-height) + 8px);
+      top: calc(var(--gnb-height) + 8px);
       left: 4px;
       z-index: 300;
       display: none;
@@ -912,22 +912,22 @@
 </head>
 <body>
 
-<!-- 개발용 네비게이션 -->
-<nav class="wf-nav">
-  <a href="wf01_dashboard.html">홈</a>
-  <a href="wf02_lesson.html">교과서</a>
-  <a href="wf03_monitoring.html">모니터링</a>
-  <a href="wf04_scoring.html">AI채점</a>
-  <a href="wf05_result.html">결과</a>
-  <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">교사 ▸</span>
-  <a href="teacher_textbook.html" class="active">교사 교과서</a>
-  <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
-  <a href="wfs_lesson.html">S 학습화면</a>
-  <a href="wfs03a_entry.html">S03a 엔트리실습</a>
-  <a href="wfs03a_entry_v2.html">S03a 엔트리실습 v2</a>
-  <a href="wfs03b_python.html">파이썬</a>
-  <a href="wfs02_dashboard.html">학생대시보드</a>
-</nav>
+<!-- GNB -->
+<header class="gnb" style="position:fixed;top:0;left:0;right:0;z-index:150;">
+  <div class="gnb-logo gnb-logo-compact">
+    <span class="logo-badge">AI</span>
+    정보 AI 학습 플랫폼
+  </div>
+  <button class="gnb-back-btn" onclick="location.href='teacher_home.html'" aria-label="홈으로 이동">← 홈</button>
+  <span class="gnb-class-label" style="font-size:13px;color:var(--color-gray);margin-left:8px;">Ⅲ-2. 프로그래밍하기 · 교과서 뷰어</span>
+  <div class="gnb-spacer"></div>
+  <div class="gnb-actions">
+    <div class="gnb-teacher">
+      <span class="gnb-teacher-name">김지현</span>
+      <div class="gnb-avatar" title="김지현 선생님">김</div>
+    </div>
+  </div>
+</header>
 
 <!-- ════════════════ 2단 레이아웃 ════════════════ -->
 <div class="tt-layout">

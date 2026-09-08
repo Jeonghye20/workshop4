@@ -178,7 +178,8 @@ project/
 ├── CLAUDE.md                  ← 이 파일
 ├── styles.css                 ← 공통 CSS (디자인 시스템 변수 + 컴포넌트)
 ├── vercel.json                ← /images/ rewrite 설정
-├── index.html                 ← 교사 홈 (내 학급/자료실/공지/설정 탭)
+├── index.html                 ← 랜딩 페이지 (선생님/학생 모드 선택)
+├── teacher_home.html          ← 교사 홈 (내 학급/자료실/공지/설정 탭)
 ├── wf01_dashboard.html        ← 1학년 3반 대시보드
 ├── wf02_lesson.html           ← 수업 설계 (엔트리·파이썬 실습 탭)
 ├── wf03_monitoring.html       ← 실시간 모니터링
@@ -187,6 +188,7 @@ project/
 ├── teacher_textbook.html      ← 교사 수업 중 교과서 뷰어
 ├── wfs_lesson.html            ← 학생 수업 화면
 ├── wfs03a_entry.html          ← 학생 엔트리 실습 (원본)
+├── wfs02_dashboard.html       ← 학생 대시보드 (좌측 사이드바 + 카드 레이아웃)
 ├── wfs03a_entry_v2.html       ← 학생 엔트리 실습 v2 (UI/UX 개선)
 ├── wfs03b_python.html         ← 학생 파이썬 실습
 ├── entry-editor.html          ← 실제 Entry.js 로드 (iframe src)
@@ -251,7 +253,10 @@ project/
 | 세션 14 | `index.html` 내 학급 탭 — 담당 학급 카드 4개를 탭 최상단으로 이동 | ✅ 완료 |
 | 세션 15 | `wfs03a_entry_v2.html` 신규 생성 — 엔트리 실습 UI/UX 개선 비교 버전 (문제 이해 토글, 목표 스텝 nav, 하단 바 개편, 원본 ↔ v2 nav 연결) | ✅ 완료 |
 | 세션 16 | 전체 wf-nav에 `S03a 엔트리실습 v2` 링크 추가 + `S03a 엔트리실습` 레이블 통일 + Vercel 배포 | ✅ 완료 |
-| 세션 17~ | 기타 화면 세부 수정 또는 신규 기능 | - |
+| 세션 17 | `wfs02_dashboard.html` 신규 생성 — 학생 대시보드 테스트 목업 (4개 통계 카드 + 6탭) + 전체 wf-nav에 학생대시보드 링크 추가 + `wfs03b_python.html` 콘솔 개선 (버튼 위로, '실행 결과' 용어) | ✅ 완료 |
+| 세션 18 | 랜딩 페이지(`index.html`) 신규 생성 — 선생님/학생 모드 선택 / 현 `index.html` → `teacher_home.html` 이동 / 전체 파일(13개) wf-nav 제거 + GNB top 수정 + 페이지 타이틀 정리 / 학생 GNB에 탭 네비게이션(대시보드·수업·엔트리·파이썬) 추가 | ✅ 완료 |
+| 세션 19 | `wfs02_dashboard.html` 전면 재설계 — 좌측 사이드바(나의 학습·나의 교실) + 선생님 대시보드와 동일한 카드 레이아웃 + [수업 시작] 버튼(→ wfs_lesson.html) / `index.html`을 랜딩 선택 페이지로 유지 | ✅ 완료 |
+| 세션 20~ | 기타 화면 세부 수정 또는 신규 기능 | - |
 
 각 세션 시작 시: "메모리 읽고 이어서 작업하자" 또는 "CLAUDE.md 읽고 [작업내용] 해줘" 형태로 지시.
 세션 완료 후 위 표의 상태를 `✅ 완료`로 업데이트할 것.

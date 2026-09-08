@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WF-S03b 파이썬 실습 — 정보 AI 학습 플랫폼</title>
+  <title>파이썬 실습 — 정보 AI 학습 플랫폼</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
@@ -13,7 +13,7 @@
     .practice-wrap {
       display: flex;
       flex-direction: column;
-      height: calc(100vh - var(--nav-height) - var(--gnb-height));
+      height: calc(100vh - var(--gnb-height));
     }
 
     .practice-main {
@@ -357,41 +357,21 @@
 </head>
 <body>
 
-  <!-- WF 네비게이션 -->
-  <nav class="wf-nav">
-    <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-right:2px;">교사 ▸</span>
-    <a href="wf01_dashboard.html">WF-01 홈</a>
-    <a href="wf02_lesson.html">WF-02 수업설계</a>
-    <a href="wf03_monitoring.html">WF-03 모니터링</a>
-    <a href="wf04_scoring.html">WF-04 AI채점</a>
-    <a href="wf05_result.html">WF-05 결과</a>
-    <a href="teacher_textbook.html">교사 교과서</a>
-    <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
-    <a href="wfs_lesson.html">학습화면</a>
-    <a href="wfs03a_entry.html">S03a 엔트리실습</a>
-    <a href="wfs03a_entry_v2.html">S03a 엔트리실습 v2</a>
-    <a href="wfs03b_python.html" class="active">S03b 파이썬실습</a>
-    <a href="wfs02_dashboard.html">학생대시보드</a>
-  </nav>
-
-  <!-- GNB (학생용) -->
-  <header class="gnb">
-    <div class="gnb-logo">
+  <!-- GNB -->
+  <header class="gnb" style="position:fixed;top:0;left:0;right:0;z-index:150;">
+    <div class="gnb-logo gnb-logo-compact">
       <span class="logo-badge" style="background:var(--color-python);">AI</span>
-      정보 AI 학습플랫폼
-      <span class="badge badge-mid" style="font-size:10px;margin-left:4px;">학생</span>
+      정보 AI 학습 플랫폼
     </div>
-    <div style="display:flex;align-items:center;gap:var(--space-sm);font-size:13px;color:var(--color-gray);margin-left:var(--space-lg);">
-      <span>🐍</span>
-      <span><strong style="color:var(--color-ink);">Ⅲ-2-02</strong> 두 수 사칙연산</span>
-      <span class="badge badge-mid">파이썬 실습</span>
-    </div>
-    <div class="gnb-actions" style="margin-left:auto;">
-      <div style="display:flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--color-warn);">
-        ⏱ <span id="timer">18:30</span>
+    <button class="gnb-back-btn" onclick="location.href='wfs_lesson.html'" aria-label="수업으로 이동">← 수업</button>
+    <span style="font-size:13px;color:var(--color-gray);margin-left:8px;border-left:1px solid var(--color-border);padding-left:12px;">Ⅲ-2-02 · <strong style="color:var(--color-ink);">[실습] 두 수 사칙연산</strong></span>
+    <div class="gnb-spacer"></div>
+    <div class="gnb-actions">
+      <div style="display:flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--color-warn);">⏱ <span id="timer">18:30</span></div>
+      <div class="gnb-teacher">
+        <span class="gnb-teacher-name">이서연</span>
+        <div class="gnb-avatar" style="background:var(--color-python);" title="이서연">서</div>
       </div>
-      <div class="gnb-avatar" style="background:var(--color-python);">서</div>
-      <span style="font-size:13px;font-weight:600;">이서연</span>
     </div>
   </header>
 

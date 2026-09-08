@@ -3,206 +3,289 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>학생 수업 — 변수와 자료형 이해하기</title>
+  <title>수업 — 변수와 자료형 이해하기 — 정보 AI 학습 플랫폼</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    body { background: #F8FAFC; }
+    body { background: #F8FAFC; overflow: hidden; }
 
-    /* ── 학생 헤더 (고정) ─────────────────────── */
-    .student-header {
-      position: fixed;
-      top: var(--nav-height);
-      left: 0; right: 0;
-      z-index: 200;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .student-gnb {
-      height: 52px;
+    /* ── GNB 학생용 ─────────────────────────────── */
+    .s-gnb-inner {
       display: flex;
       align-items: center;
-      padding: 0 var(--space-xl);
+      width: 100%;
       gap: var(--space-md);
-      background: var(--color-mid);
     }
 
-    .gnb-s-logo {
-      font-size: 13px;
-      font-weight: 800;
-      color: white;
-      display: flex;
+    .s-back-btn {
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .gnb-s-lesson {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .gnb-s-sub {
-      font-size: 10px;
-      color: rgba(255,255,255,0.65);
-    }
-
-    .gnb-s-title {
-      font-size: 13.5px;
-      font-weight: 700;
-      color: white;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .gnb-s-chip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 20px;
-      padding: 4px 12px;
+      gap: 4px;
+      padding: 5px 12px;
+      border: 1px solid var(--color-pre);
+      border-radius: 6px;
+      background: var(--color-pre);
       font-size: 12px;
       font-weight: 600;
       color: white;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .s-back-btn:hover { background: #0b7a70; }
+
+    .s-gnb-lesson-info {
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--color-border);
+      padding-left: var(--space-md);
+      flex-shrink: 0;
+    }
+    .s-gnb-lesson-sub  { font-size: 11px; color: var(--color-gray); }
+    .s-gnb-lesson-title { font-size: 13px; font-weight: 700; color: var(--color-ink); }
+
+    .s-nav-tabs {
+      display: flex;
+      gap: 4px;
+      margin: 0 var(--space-md);
+    }
+    .s-nav-tab {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 6px;
+      color: var(--color-gray);
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .s-nav-tab:hover { background: var(--color-light); color: var(--color-ink); }
+    .s-nav-tab.active { background: var(--color-pre); color: white; }
+
+    .s-avatar-wrap {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-left: auto;
+    }
+    .s-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--color-pre); color: white;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── 전체 2단 레이아웃 ───────────────────────── */
+    .sl-layout {
+      position: fixed;
+      top: var(--gnb-height);
+      left: 0; right: 0; bottom: 0;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── 좌측 목차 패널 ──────────────────────────── */
+    .sl-toc {
+      width: 240px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--color-border);
+      background: var(--color-white);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: width 0.25s ease;
+    }
+    .sl-toc.collapsed { width: 0; }
+
+    .sl-toc-header {
+      padding: var(--space-md);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: var(--color-white);
+    }
+
+    .toc-toggle-btn {
+      width: 22px; height: 22px; border-radius: 4px;
+      border: 1px solid var(--color-border);
+      background: transparent; color: var(--color-gray);
+      font-size: 12px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .toc-toggle-btn:hover { background: var(--color-light); color: var(--color-ink); }
+
+    /* TOC 복원 버튼 (접혔을 때) */
+    .toc-show-btn {
+      position: fixed;
+      top: calc(var(--gnb-height) + 8px);
+      left: 4px;
+      z-index: 300;
+      display: none;
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--color-white);
+      color: var(--color-ink);
+      font-size: 14px; cursor: pointer;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      align-items: center; justify-content: center;
+    }
+    .toc-show-btn:hover { background: var(--color-light); }
+
+    .sl-toc-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .sl-toc-body::-webkit-scrollbar { width: 4px; }
+    .sl-toc-body::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+    /* 단원 헤더 */
+    .toc-unit-hd {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 9px var(--space-md);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--color-ink);
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid var(--color-border);
+      transition: background 0.15s;
+    }
+    .toc-unit-hd:hover { background: var(--color-light); }
+
+    .toc-caret {
+      font-size: 10px; width: 14px; text-align: center;
+      color: var(--color-gray);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .toc-caret.open { transform: rotate(90deg); }
+
+    .toc-children { display: none; flex-direction: column; }
+    .toc-children.open { display: flex; }
+
+    /* 차시 행 */
+    .toc-lesson-hd {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 8px var(--space-md) 8px 28px;
+      font-size: 12.5px;
+      color: var(--color-gray);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .toc-lesson-hd:hover { background: var(--color-light); color: var(--color-ink); }
+    .toc-lesson-hd.current {
+      background: rgba(6,90,130,0.06);
+      color: var(--color-mid);
+      font-weight: 700;
+      border-left-color: var(--color-mid);
+    }
+    .toc-lesson-hd.locked { opacity: 0.45; cursor: default; }
+    .toc-lesson-hd.locked:hover { background: none; }
+
+    .toc-lesson-steps { display: flex; flex-direction: column; }
+
+    /* 단계 행 */
+    .toc-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px var(--space-md) 6px 44px;
+      font-size: 12px;
+      color: var(--color-gray);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .toc-step:hover { background: var(--color-light); color: var(--color-ink); }
+    .toc-step.active {
+      background: rgba(6,90,130,0.07);
+      color: var(--color-mid);
+      font-weight: 600;
+      border-left-color: var(--color-mid);
+    }
+    .toc-step.done { color: var(--color-ok); }
+    .toc-step.done:hover { background: var(--color-light); }
+
+    .toc-step-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .toc-step.active .toc-step-dot { border-color: var(--color-mid); background: var(--color-mid); color: white; }
+    .toc-step.done   .toc-step-dot { border-color: var(--color-ok);  background: var(--color-ok);  color: white; }
+
+    /* TOC 하단 섹션 */
+    .sl-toc-footer {
+      padding: var(--space-sm) var(--space-md);
+      border-top: 1px solid var(--color-border);
+      font-size: 11px;
+      color: var(--color-gray);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
       flex-shrink: 0;
     }
 
-    .gnb-s-avatar {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    /* ── 단계 진행 바 ─────────────────────────── */
-    .lesson-steps-bar {
-      padding: 10px var(--space-xl);
-      display: flex;
-      align-items: flex-start;
-      gap: 0;
-      background: var(--color-white);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .step-nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
+    /* ── 우측 콘텐츠 영역 ────────────────────────── */
+    .sl-content {
       flex: 1;
+      overflow-y: auto;
+      height: 100%;
       position: relative;
-      cursor: pointer;
+      padding-bottom: 63px;
     }
 
-    .step-nav-item::after {
-      content: '';
-      position: absolute;
-      top: 15px;
-      left: calc(50% + 16px);
-      right: calc(-50% + 16px);
-      height: 2px;
-      background: var(--color-border);
-      transition: background 0.3s;
-    }
-
-    .step-nav-item:last-child::after { display: none; }
-    .step-nav-item.done::after { background: var(--color-ok); }
-
-    .step-nav-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      background: var(--color-light);
-      border: 2px solid var(--color-border);
-      position: relative;
-      z-index: 1;
-      transition: all 0.25s;
-    }
-
-    .step-nav-item.done .step-nav-icon {
-      background: var(--color-ok);
-      border-color: var(--color-ok);
-      color: white;
-      font-size: 11px;
-    }
-
-    .step-nav-item.active .step-nav-icon {
-      background: var(--color-mid);
-      border-color: var(--color-mid);
-      box-shadow: 0 0 0 3px rgba(6,90,130,0.18);
-    }
-
-    .step-nav-item.locked { cursor: default; opacity: 0.45; }
-
-    .step-nav-label {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--color-gray);
-      white-space: nowrap;
-    }
-
-    .step-nav-item.done .step-nav-label   { color: var(--color-ok); }
-    .step-nav-item.active .step-nav-label { color: var(--color-mid); }
-
-    /* ── 메인 ─────────────────────────────────── */
-    .student-main {
-      padding-top: calc(var(--nav-height) + 52px + 66px + 24px);
-      padding-bottom: 80px;
+    .sl-content-inner {
       max-width: 720px;
       margin: 0 auto;
-      padding-left: var(--space-xl);
-      padding-right: var(--space-xl);
+      padding: var(--space-xl);
     }
 
     .step-panel { display: none; }
     .step-panel.active { display: block; }
 
-    /* ── 단계 헤더 ───────────────────────────── */
+    /* ── 단계 헤더 ───────────────────────────────── */
     .step-header {
       display: flex;
       align-items: center;
       gap: var(--space-md);
       margin-bottom: var(--space-lg);
     }
-
     .step-header-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
     }
-
     .icon-quiz   { background: rgba(6,90,130,0.08); }
     .icon-concept{ background: rgba(13,148,136,0.08); }
     .icon-video  { background: rgba(30,39,97,0.08); }
     .icon-entry  { background: rgba(76,175,80,0.1); }
     .icon-python { background: rgba(55,118,171,0.1); }
     .icon-eval   { background: rgba(217,119,6,0.08); }
+    .step-header-title { font-size: 18px; font-weight: 800; color: var(--color-ink); margin-bottom: 2px; }
+    .step-header-desc  { font-size: 13px; color: var(--color-gray); }
 
-    .step-header-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--color-ink);
-      margin-bottom: 2px;
-    }
-
-    .step-header-desc { font-size: 13px; color: var(--color-gray); }
-
-    /* ── 퀴즈 카드 ──────────────────────────── */
+    /* ── 퀴즈 ───────────────────────────────────── */
     .s-quiz-card {
       background: var(--color-white);
       border: 1.5px solid var(--color-border);
@@ -211,366 +294,117 @@
       margin-bottom: var(--space-md);
       transition: border-color 0.2s;
     }
-
     .s-quiz-card.answered { border-color: var(--color-ok); }
-
-    .s-q-text {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--color-ink);
-      margin-bottom: var(--space-md);
-      line-height: 1.6;
-      display: flex;
-      gap: 6px;
-    }
-
-    .s-q-num { color: var(--color-mid); flex-shrink: 0; }
-
-    .s-opts { display: flex; flex-direction: column; gap: 8px; }
-
+    .s-q-text { font-size: 14px; font-weight: 700; color: var(--color-ink); margin-bottom: var(--space-md); line-height: 1.6; display: flex; gap: 6px; }
+    .s-q-num  { color: var(--color-mid); flex-shrink: 0; }
+    .s-opts   { display: flex; flex-direction: column; gap: 8px; }
     .s-opt {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 1.5px solid var(--color-border);
-      background: var(--color-white);
-      font-size: 13.5px;
-      color: var(--color-ink);
-      cursor: pointer;
-      transition: all 0.15s;
-      text-align: left;
-      width: 100%;
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: 10px 14px; border-radius: 8px;
+      border: 1.5px solid var(--color-border); background: var(--color-white);
+      font-size: 13.5px; color: var(--color-ink);
+      cursor: pointer; transition: all 0.15s; text-align: left; width: 100%;
     }
-
     .s-opt:hover { border-color: var(--color-mid); background: rgba(6,90,130,0.03); }
     .s-opt.correct { border-color: var(--color-ok); background: rgba(13,148,136,0.07); color: var(--color-ok); font-weight: 600; }
     .s-opt.wrong   { border-color: var(--color-danger); background: rgba(239,68,68,0.05); color: var(--color-danger); }
-
     .s-opt-num {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--color-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      flex-shrink: 0;
-      transition: all 0.15s;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--color-light); display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0; transition: all 0.15s;
     }
-
-    .s-opt.correct .s-opt-num { background: var(--color-ok); color: white; }
-    .s-opt.wrong   .s-opt-num { background: var(--color-danger); color: white; }
-
-    .s-feedback {
-      margin-top: 10px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 12.5px;
-      display: none;
-    }
-
+    .s-opt.correct .s-opt-num { background: var(--color-ok);     color: white; }
+    .s-opt.wrong   .s-opt-num { background: var(--color-danger);  color: white; }
+    .s-feedback { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 12.5px; display: none; }
     .s-feedback.ok  { background: rgba(13,148,136,0.08); color: var(--color-ok); }
     .s-feedback.err { background: rgba(239,68,68,0.06); color: var(--color-danger); }
 
-    /* 퀴즈 결과 */
     .quiz-result {
-      background: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: var(--space-xl);
-      text-align: center;
-      margin-top: var(--space-md);
-      display: none;
+      background: var(--color-white); border: 1px solid var(--color-border); border-radius: 12px;
+      padding: var(--space-xl); text-align: center; margin-top: var(--space-md); display: none;
     }
-
     .score-circle {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+      width: 80px; height: 80px; border-radius: 50%;
       background: linear-gradient(135deg, var(--color-mid), var(--color-pre));
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      color: white; display: flex; flex-direction: column; align-items: center; justify-content: center;
       margin: 0 auto var(--space-md);
     }
-
     .score-num { font-size: 24px; font-weight: 800; line-height: 1; }
     .score-sub { font-size: 10px; opacity: 0.8; }
 
-    /* ── 개념자료 ─────────────────────────────── */
+    /* ── 개념자료 ────────────────────────────────── */
     .concept-card {
-      background: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      padding: var(--space-xl);
-      margin-bottom: var(--space-md);
+      background: var(--color-white); border: 1px solid var(--color-border);
+      border-radius: 10px; padding: var(--space-xl); margin-bottom: var(--space-md);
     }
-
     .concept-h {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--color-ink);
-      margin-bottom: var(--space-md);
-      padding-bottom: var(--space-sm);
-      border-bottom: 2px solid var(--color-mid);
-      display: inline-block;
+      font-size: 15px; font-weight: 700; color: var(--color-ink);
+      margin-bottom: var(--space-md); padding-bottom: var(--space-sm);
+      border-bottom: 2px solid var(--color-mid); display: inline-block;
     }
+    .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); margin-top: var(--space-md); }
+    .type-chip { border-radius: 8px; padding: var(--space-md); }
 
-    .type-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-sm);
-      margin-top: var(--space-md);
-    }
-
-    .type-chip {
-      border-radius: 8px;
-      padding: var(--space-md);
-    }
-
-    /* ── 영상 ─────────────────────────────────── */
-    .video-card {
-      background: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: var(--space-md);
-    }
-
+    /* ── 영상 ────────────────────────────────────── */
+    .video-card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; margin-bottom: var(--space-md); }
     .video-thumb {
-      height: 300px;
+      height: 280px;
       background: linear-gradient(135deg,#1a1a2e,#0f3460);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: relative; cursor: pointer;
     }
-
     .video-play {
-      width: 64px;
-      height: 64px;
-      background: rgba(255,255,255,0.9);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      transition: transform 0.15s;
-      margin-bottom: 14px;
+      width: 64px; height: 64px; background: rgba(255,255,255,0.9); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; transition: transform 0.15s; margin-bottom: 14px;
     }
-
     .video-play:hover { transform: scale(1.08); }
-
-    .video-prog {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 4px;
-      background: rgba(255,255,255,0.2);
-      display: none;
-    }
-
-    .video-prog-fill {
-      height: 100%;
-      background: #e53935;
-      width: 0%;
-      transition: width 0.4s;
-    }
-
+    .video-prog { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.2); display: none; }
+    .video-prog-fill { height: 100%; background: #e53935; width: 0%; transition: width 0.4s; }
     .video-meta { padding: var(--space-lg); }
     .video-meta-title { font-size: 14px; font-weight: 700; color: var(--color-ink); margin-bottom: 6px; }
     .video-meta-desc  { font-size: 13px; color: var(--color-gray); line-height: 1.6; }
 
-    /* ── 실습 ─────────────────────────────────── */
+    /* ── 실습 ────────────────────────────────────── */
     .practice-box {
-      background: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      padding: var(--space-xl);
-      margin-bottom: var(--space-md);
+      background: var(--color-white); border: 1px solid var(--color-border);
+      border-radius: 10px; padding: var(--space-xl); margin-bottom: var(--space-md);
     }
-
-    .practice-instr-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--color-ink);
-      margin-bottom: var(--space-md);
-    }
-
-    .instr-row {
-      display: flex;
-      align-items: flex-start;
-      gap: var(--space-sm);
-      padding: 10px var(--space-md);
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-
-    .instr-num {
-      width: 22px;
-      height: 22px;
-      border-radius: 4px;
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .editor-launch {
-      border-radius: 10px;
-      overflow: hidden;
-      margin: var(--space-lg) 0 var(--space-md);
-    }
-
-    .editor-launch-bar {
-      padding: 10px var(--space-lg);
-      font-size: 13px;
-      font-weight: 700;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-    }
-
-    .editor-launch-body {
-      background: var(--color-dark);
-      padding: var(--space-xl);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 140px;
-    }
-
-    .launch-btn {
-      padding: 11px 28px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-      font-weight: 700;
-      color: white;
-      cursor: pointer;
-      transition: transform 0.15s, opacity 0.15s;
-    }
-
+    .practice-instr-title { font-size: 14px; font-weight: 700; color: var(--color-ink); margin-bottom: var(--space-md); }
+    .instr-row { display: flex; align-items: flex-start; gap: var(--space-sm); padding: 10px var(--space-md); border-radius: 8px; margin-bottom: 8px; }
+    .instr-num { width: 22px; height: 22px; border-radius: 4px; color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .editor-launch { border-radius: 10px; overflow: hidden; margin: var(--space-lg) 0 var(--space-md); }
+    .editor-launch-bar { padding: 10px var(--space-lg); font-size: 13px; font-weight: 700; color: white; display: flex; align-items: center; gap: var(--space-sm); }
+    .editor-launch-body { background: var(--color-dark); padding: var(--space-xl); display: flex; align-items: center; justify-content: center; min-height: 140px; }
+    .launch-btn { padding: 11px 28px; border-radius: 8px; border: none; font-size: 14px; font-weight: 700; color: white; cursor: pointer; transition: transform 0.15s, opacity 0.15s; }
     .launch-btn:hover { transform: translateY(-1px); opacity: 0.88; }
-
-    .submit-check {
-      display: flex;
-      align-items: center;
-      gap: var(--space-md);
-      padding: var(--space-md);
-      background: var(--color-light);
-      border-radius: 8px;
-      font-size: 13px;
-      color: var(--color-gray);
-    }
-
+    .submit-check { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--color-light); border-radius: 8px; font-size: 13px; color: var(--color-gray); }
     .submit-check.done { background: rgba(13,148,136,0.08); color: var(--color-ok); font-weight: 600; }
 
-    /* ── 평가형 ───────────────────────────────── */
-    .eval-card {
-      background: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      padding: var(--space-xl);
-      margin-bottom: var(--space-md);
-    }
-
-    .eval-q-row {
-      display: flex;
-      align-items: flex-start;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-md);
-    }
-
-    .eval-num {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: var(--color-warn);
-      color: white;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .eval-badge {
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-weight: 600;
-      white-space: nowrap;
-      margin-top: 4px;
-    }
-
+    /* ── 평가형 ──────────────────────────────────── */
+    .eval-card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: 10px; padding: var(--space-xl); margin-bottom: var(--space-md); }
+    .eval-q-row { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); }
+    .eval-num { width: 30px; height: 30px; border-radius: 50%; background: var(--color-warn); color: white; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .eval-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; white-space: nowrap; margin-top: 4px; }
     .eval-badge-code { background: rgba(55,118,171,0.12); color: var(--color-python); }
     .eval-badge-fix  { background: rgba(217,119,6,0.12);  color: var(--color-warn); }
     .eval-badge-fill { background: rgba(30,39,97,0.10);   color: var(--color-post); }
-
     .eval-q-text { font-size: 14px; font-weight: 700; color: var(--color-ink); line-height: 1.5; flex: 1; }
-
     .code-area {
-      width: 100%;
-      background: var(--color-dark);
-      color: #abb2bf;
-      font-family: 'Courier New', 'D2Coding', monospace;
-      font-size: 13px;
-      padding: var(--space-md);
-      border-radius: 8px;
-      border: none;
-      resize: vertical;
-      min-height: 110px;
-      line-height: 1.7;
-      margin-top: var(--space-sm);
+      width: 100%; background: var(--color-dark); color: #abb2bf;
+      font-family: 'Courier New', 'D2Coding', monospace; font-size: 13px;
+      padding: var(--space-md); border-radius: 8px; border: none; resize: vertical; min-height: 110px; line-height: 1.7; margin-top: var(--space-sm);
     }
-
     .code-area:focus { outline: 2px solid var(--color-warn); }
 
-    /* ── 단계 CTA ─────────────────────────────── */
-    .step-cta {
-      margin-top: var(--space-lg);
-      padding: var(--space-lg);
-      background: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      text-align: center;
-    }
-
+    /* ── CTA / 힌트 ──────────────────────────────── */
+    .step-cta { margin-top: var(--space-lg); padding: var(--space-lg); background: var(--color-white); border: 1px solid var(--color-border); border-radius: 10px; text-align: center; }
     .step-cta-msg { font-size: 13px; color: var(--color-gray); margin-bottom: var(--space-md); }
-
-    /* ── AI 힌트 버튼 ─────────────────────────── */
     .hint-row { display: flex; justify-content: flex-end; margin-bottom: var(--space-sm); }
-
-    .hint-btn {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 12px;
-      color: var(--color-mid);
-      border: 1px solid rgba(6,90,130,0.2);
-      border-radius: 20px;
-      padding: 4px 12px;
-      background: rgba(6,90,130,0.04);
-      cursor: pointer;
-    }
-
+    .hint-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-mid); border: 1px solid rgba(6,90,130,0.2); border-radius: 20px; padding: 4px 12px; background: rgba(6,90,130,0.04); cursor: pointer; }
     .hint-btn:hover { background: rgba(6,90,130,0.1); }
 
-    /* ── 하단 네비게이션 ──────────────────────── */
+    /* ── 하단 네비게이션 ─────────────────────────── */
     .bottom-nav {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -585,493 +419,553 @@
       box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
     }
 
-    .step-dots {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .s-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 4px;
-      background: var(--color-border);
-      transition: all 0.25s;
-      cursor: pointer;
-    }
-
+    .step-dots { display: flex; gap: 8px; align-items: center; }
+    .s-dot { width: 8px; height: 8px; border-radius: 4px; background: var(--color-border); transition: all 0.25s; cursor: pointer; }
     .s-dot.done   { background: var(--color-ok); }
     .s-dot.active { background: var(--color-mid); width: 22px; }
 
-    /* ── 완료 토스트 ──────────────────────────── */
+    /* ── 토스트 ──────────────────────────────────── */
     .s-toast {
-      position: fixed;
-      bottom: 72px;
-      left: 50%;
+      position: fixed; bottom: 72px; left: 50%;
       transform: translateX(-50%) translateY(6px);
-      background: var(--color-ok);
-      color: white;
-      padding: 10px 24px;
-      border-radius: 24px;
-      font-size: 13.5px;
-      font-weight: 600;
-      z-index: 300;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s;
-      white-space: nowrap;
+      background: var(--color-ok); color: white;
+      padding: 10px 24px; border-radius: 24px; font-size: 13.5px; font-weight: 600;
+      z-index: 300; opacity: 0; pointer-events: none;
+      transition: all 0.3s; white-space: nowrap;
     }
-
     .s-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
 
-<!-- 개발용 네비게이션 -->
-<nav class="wf-nav">
-  <a href="wf01_dashboard.html">홈</a>
-  <a href="wf02_lesson.html">교과서</a>
-  <a href="wf03_monitoring.html">모니터링</a>
-  <a href="wf04_scoring.html">AI채점</a>
-  <a href="wf05_result.html">결과</a>
-  <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">교사 ▸</span>
-  <a href="teacher_textbook.html">교사 교과서</a>
-  <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:12px;margin-right:2px;">학생 ▸</span>
-  <a href="wfs_lesson.html" class="active">S 학습화면</a>
-  <a href="wfs03a_entry.html">S03a 엔트리실습</a>
-  <a href="wfs03a_entry_v2.html">S03a 엔트리실습 v2</a>
-  <a href="wfs03b_python.html">파이썬실습</a>
-  <a href="wfs02_dashboard.html">학생대시보드</a>
-</nav>
-
-<!-- 학생 헤더 고정 영역 -->
-<div class="student-header">
-  <div class="student-gnb">
-    <div class="gnb-s-logo">
-      <span style="background:rgba(255,255,255,0.25);border-radius:6px;padding:2px 7px;font-size:11px;">AI</span>
-      정보 코스웨어
-    </div>
-    <div class="gnb-s-lesson">
-      <div class="gnb-s-sub">Ⅲ-2-01 프로그래밍 시작하기 · 3차시</div>
-      <div class="gnb-s-title">변수와 자료형 이해하기</div>
-    </div>
-    <div class="gnb-s-chip">
-      <div class="gnb-s-avatar">김</div>
-      김민준 · 1학년 3반
+<!-- GNB -->
+<header class="gnb" style="position:fixed;top:0;left:0;right:0;z-index:150;">
+  <div class="gnb-logo gnb-logo-compact">
+    <span class="logo-badge" style="background:var(--color-pre);">AI</span>
+    정보 AI 학습 플랫폼
+  </div>
+  <button class="gnb-back-btn" onclick="location.href='wfs02_dashboard.html'" aria-label="대시보드로 이동">← 홈</button>
+  <span style="font-size:13px;color:var(--color-gray);margin-left:8px;border-left:1px solid var(--color-border);padding-left:12px;">Ⅲ-2-01 프로그래밍 시작하기 · 변수와 자료형 이해하기</span>
+  <div class="gnb-spacer"></div>
+  <div class="gnb-actions">
+    <div class="gnb-teacher">
+      <span class="gnb-teacher-name">이서연</span>
+      <div class="gnb-avatar" style="background:var(--color-pre);" title="이서연">이</div>
     </div>
   </div>
+</header>
 
-  <!-- 단계 진행 -->
-  <div class="lesson-steps-bar">
-    <div class="step-nav-item done" id="snav-1" onclick="goToStep(1)">
-      <div class="step-nav-icon">✓</div>
-      <div class="step-nav-label">선행퀴즈</div>
-    </div>
-    <div class="step-nav-item active" id="snav-2" onclick="goToStep(2)">
-      <div class="step-nav-icon">📖</div>
-      <div class="step-nav-label">개념자료</div>
-    </div>
-    <div class="step-nav-item locked" id="snav-3">
-      <div class="step-nav-icon">🎬</div>
-      <div class="step-nav-label">영상</div>
-    </div>
-    <div class="step-nav-item locked" id="snav-4">
-      <div class="step-nav-icon">🟢</div>
-      <div class="step-nav-label">엔트리실습</div>
-    </div>
-    <div class="step-nav-item locked" id="snav-5">
-      <div class="step-nav-icon">🐍</div>
-      <div class="step-nav-label">파이썬실습</div>
-    </div>
-    <div class="step-nav-item locked" id="snav-6">
-      <div class="step-nav-icon">📝</div>
-      <div class="step-nav-label">평가</div>
-    </div>
-  </div>
-</div>
+<!-- 목차 복원 버튼 -->
+<button class="toc-show-btn" id="toc-show-btn" onclick="toggleToc()" aria-label="목차 열기">▶</button>
 
-<!-- ════════════════ 메인 콘텐츠 ════════════════ -->
-<main class="student-main">
+<!-- ── 2단 레이아웃 ────────────────────────────────── -->
+<div class="sl-layout">
 
-  <!-- ▶ STEP 1: 선행 퀴즈 -->
-  <div class="step-panel" id="step-1">
-    <div class="step-header">
-      <div class="step-header-icon icon-quiz">❓</div>
+  <!-- 좌측 목차 -->
+  <aside class="sl-toc" id="sl-toc">
+    <div class="sl-toc-header">
+      <span>목차</span>
+      <button class="toc-toggle-btn" onclick="toggleToc()" aria-label="목차 접기">◀</button>
+    </div>
+
+    <div class="sl-toc-body">
+
+      <!-- 단원 Ⅲ-2 -->
       <div>
-        <div class="step-header-title">선행 퀴즈</div>
-        <div class="step-header-desc">오늘 배울 내용을 얼마나 알고 있는지 확인해요 · 5문항</div>
+        <div class="toc-unit-hd" onclick="toggleUnit(this)">
+          <span class="toc-caret open">▶</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Ⅲ-2. 프로그래밍하기</span>
+        </div>
+        <div class="toc-children open">
+
+          <!-- 차시 1: 현재 수업 -->
+          <div class="toc-lesson-hd current">
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4;">Ⅲ-2-01 변수와 자료형 이해하기</span>
+          </div>
+          <div class="toc-lesson-steps" id="toc-steps">
+            <div class="toc-step done" data-step="1" onclick="goToStep(1)">
+              <div class="toc-step-dot">✓</div>
+              <span>선행 퀴즈</span>
+            </div>
+            <div class="toc-step active" data-step="2" onclick="goToStep(2)">
+              <div class="toc-step-dot">2</div>
+              <span>개념자료</span>
+            </div>
+            <div class="toc-step" data-step="3" onclick="goToStep(3)">
+              <div class="toc-step-dot">3</div>
+              <span>영상 학습</span>
+            </div>
+            <div class="toc-step" data-step="4" onclick="location.href='wfs03a_entry.html'">
+              <div class="toc-step-dot">4</div>
+              <span>엔트리 실습 1</span>
+            </div>
+            <div class="toc-step" data-step="5" onclick="location.href='wfs03a_entry_v2.html'">
+              <div class="toc-step-dot">5</div>
+              <span>엔트리 실습 2</span>
+            </div>
+            <div class="toc-step" data-step="6" onclick="location.href='wfs03b_python.html'">
+              <div class="toc-step-dot">6</div>
+              <span>파이썬 실습</span>
+            </div>
+            <div class="toc-step" data-step="7" onclick="goToStep(7)">
+              <div class="toc-step-dot">7</div>
+              <span>평가형 문제</span>
+            </div>
+          </div>
+
+          <!-- 차시 2 (잠금) -->
+          <div class="toc-lesson-hd locked">
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4;">🔒 Ⅲ-2-02 두 수 사칙연산</span>
+          </div>
+
+          <!-- 차시 3 (잠금) -->
+          <div class="toc-lesson-hd locked">
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4;">🔒 Ⅲ-2-03 반복문 기초</span>
+          </div>
+
+        </div>
       </div>
-    </div>
 
-    <div class="hint-row">
-      <button class="hint-btn" onclick="alert('AI 힌트: 파이썬 기본 문법 관련 문제입니다. (목업)')">✨ AI 힌트</button>
-    </div>
-
-    <!-- Q1 -->
-    <div class="s-quiz-card" id="sq1">
-      <div class="s-q-text"><span class="s-q-num">Q1.</span>파이썬에서 변수에 값을 저장할 때 사용하는 기호는?</div>
-      <div class="s-opts">
-        <button class="s-opt" onclick="pickOpt(this,'sq1',false)"><span class="s-opt-num">①</span> == (같음 비교)</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq1',true)"><span class="s-opt-num">②</span> = (할당)</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq1',false)"><span class="s-opt-num">③</span> := (바다코끼리)</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq1',false)"><span class="s-opt-num">④</span> ← (화살표)</button>
-      </div>
-      <div class="s-feedback ok"  id="sq1-ok">✅ 정답이에요! 파이썬은 = 으로 값을 저장합니다.</div>
-      <div class="s-feedback err" id="sq1-err">❌ 아쉬워요. 정답은 ② = (할당) 입니다.</div>
-    </div>
-
-    <!-- Q2 -->
-    <div class="s-quiz-card" id="sq2">
-      <div class="s-q-text"><span class="s-q-num">Q2.</span><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">x = 3.14</code> 일 때 <code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">type(x)</code>의 결과는?</div>
-      <div class="s-opts">
-        <button class="s-opt" onclick="pickOpt(this,'sq2',false)"><span class="s-opt-num">①</span> &lt;class 'int'&gt;</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq2',true)"><span class="s-opt-num">②</span> &lt;class 'float'&gt;</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq2',false)"><span class="s-opt-num">③</span> &lt;class 'str'&gt;</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq2',false)"><span class="s-opt-num">④</span> &lt;class 'double'&gt;</button>
-      </div>
-      <div class="s-feedback ok"  id="sq2-ok">✅ 정답이에요! 소수점이 있으면 float입니다.</div>
-      <div class="s-feedback err" id="sq2-err">❌ 아쉬워요. 소수점이 있으면 float! 정답은 ②입니다.</div>
-    </div>
-
-    <!-- Q3 -->
-    <div class="s-quiz-card" id="sq3">
-      <div class="s-q-text"><span class="s-q-num">Q3.</span>다음 중 파이썬에서 올바른 변수 이름은?</div>
-      <div class="s-opts">
-        <button class="s-opt" onclick="pickOpt(this,'sq3',false)"><span class="s-opt-num">①</span> 1score</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq3',false)"><span class="s-opt-num">②</span> my score</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq3',true)"><span class="s-opt-num">③</span> my_score</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq3',false)"><span class="s-opt-num">④</span> my-score</button>
-      </div>
-      <div class="s-feedback ok"  id="sq3-ok">✅ 정답이에요! 밑줄(_)은 변수 이름에 사용 가능해요.</div>
-      <div class="s-feedback err" id="sq3-err">❌ 아쉬워요. 숫자로 시작하거나 공백·하이픈은 불가! 정답은 ③입니다.</div>
-    </div>
-
-    <!-- Q4 -->
-    <div class="s-quiz-card" id="sq4">
-      <div class="s-q-text"><span class="s-q-num">Q4.</span>다음 코드를 실행하면 출력 결과는?</div>
-      <div style="background:var(--color-dark);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-family:monospace;font-size:13px;line-height:1.8;">
-        <span style="color:#82AAFF">x</span> = <span style="color:#F78C6C">5</span><br>
-        <span style="color:#82AAFF">x</span> = <span style="color:#82AAFF">x</span> + <span style="color:#F78C6C">3</span><br>
-        <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">x</span>)
-      </div>
-      <div class="s-opts">
-        <button class="s-opt" onclick="pickOpt(this,'sq4',false)"><span class="s-opt-num">①</span> 5</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq4',false)"><span class="s-opt-num">②</span> x + 3</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq4',true)"><span class="s-opt-num">③</span> 8</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq4',false)"><span class="s-opt-num">④</span> 오류 발생</button>
-      </div>
-      <div class="s-feedback ok"  id="sq4-ok">✅ 정답이에요! x=5에서 3을 더하면 8이 됩니다.</div>
-      <div class="s-feedback err" id="sq4-err">❌ 아쉬워요. x가 5+3=8로 바뀌어 8이 출력됩니다.</div>
-    </div>
-
-    <!-- Q5 -->
-    <div class="s-quiz-card" id="sq5">
-      <div class="s-q-text"><span class="s-q-num">Q5.</span><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">score = "100"</code> 일 때 score의 자료형은?</div>
-      <div class="s-opts">
-        <button class="s-opt" onclick="pickOpt(this,'sq5',false)"><span class="s-opt-num">①</span> int</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq5',false)"><span class="s-opt-num">②</span> float</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq5',true)"><span class="s-opt-num">③</span> str</button>
-        <button class="s-opt" onclick="pickOpt(this,'sq5',false)"><span class="s-opt-num">④</span> bool</button>
-      </div>
-      <div class="s-feedback ok"  id="sq5-ok">✅ 정답이에요! 따옴표로 감싸면 숫자도 str이 됩니다.</div>
-      <div class="s-feedback err" id="sq5-err">❌ 아쉬워요. 따옴표로 감싸면 str! 정답은 ③입니다.</div>
-    </div>
-
-    <div style="text-align:center;margin-top:var(--space-lg);">
-      <button class="btn btn-primary" id="btn-quiz-submit" onclick="submitQuiz()">📝 퀴즈 제출하기</button>
-    </div>
-
-    <div class="quiz-result" id="quiz-result">
-      <div class="score-circle">
-        <div class="score-num" id="score-num">-</div>
-        <div class="score-sub">/ 5점</div>
-      </div>
-      <div style="font-size:16px;font-weight:800;color:var(--color-ink);margin-bottom:6px;" id="score-msg">수고했어요!</div>
-      <div style="font-size:13px;color:var(--color-gray);margin-bottom:var(--space-lg);" id="score-sub">개념자료에서 내용을 확인해보세요.</div>
-      <button class="btn btn-primary" onclick="completeStep(1)">다음 단계로 → 개념자료</button>
-    </div>
-  </div><!-- /step-1 -->
-
-
-  <!-- ▶ STEP 2: 개념자료 -->
-  <div class="step-panel active" id="step-2">
-    <div class="step-header">
-      <div class="step-header-icon icon-concept">📖</div>
+      <!-- 단원 Ⅲ-3 (잠금) -->
       <div>
-        <div class="step-header-title">개념자료</div>
-        <div class="step-header-desc">변수와 자료형의 핵심 개념을 학습해요</div>
-      </div>
-    </div>
-
-    <div class="concept-card">
-      <div class="concept-h">📌 변수(Variable)란?</div>
-      <p style="font-size:14px;line-height:1.9;color:var(--color-ink);margin-bottom:var(--space-md);">
-        <strong>변수</strong>는 데이터를 저장하는 공간입니다.
-        상자에 물건을 담듯이, 변수에 값을 넣어두면 나중에 꺼내 쓸 수 있어요.<br><br>
-        파이썬에서는 <code style="background:var(--color-light);padding:2px 6px;border-radius:3px;font-family:monospace;">=</code> 기호로 변수에 값을 저장합니다.
-        변수 이름은 <strong>영문자·숫자·밑줄(_)</strong>로 구성하되, <strong>숫자로 시작할 수 없어요.</strong>
-      </p>
-      <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13.5px;line-height:1.9;">
-        <span style="color:#82AAFF">name</span> = <span style="color:#C3E88D">"김민준"</span>  <span style="color:#546E7A"># 변수 name에 문자열 저장</span><br>
-        <span style="color:#82AAFF">age</span>  = <span style="color:#F78C6C">15</span>           <span style="color:#546E7A"># 변수 age에 숫자 저장</span><br>
-        <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">name</span>)        <span style="color:#546E7A"># 출력: 김민준</span><br>
-        <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">age</span> + <span style="color:#F78C6C">1</span>)     <span style="color:#546E7A"># 출력: 16</span>
-      </div>
-    </div>
-
-    <div class="concept-card">
-      <div class="concept-h">🗂 자료형(Data Type) 4가지</div>
-      <p style="font-size:14px;line-height:1.7;color:var(--color-ink);margin-bottom:var(--space-md);">
-        변수에 저장되는 값의 <strong>종류</strong>를 자료형이라고 합니다.
-        <code style="background:var(--color-light);padding:2px 6px;border-radius:3px;font-family:monospace;">type()</code> 함수로 확인할 수 있어요.
-      </p>
-      <div class="type-grid">
-        <div class="type-chip" style="background:rgba(6,90,130,0.06);">
-          <div style="font-size:12px;font-weight:700;color:var(--color-mid);margin-bottom:4px;">int (정수)</div>
-          <code style="font-family:monospace;font-size:13px;">age = 15</code>
-          <div style="font-size:12px;color:var(--color-gray);margin-top:4px;">소수점 없는 숫자</div>
-        </div>
-        <div class="type-chip" style="background:rgba(13,148,136,0.06);">
-          <div style="font-size:12px;font-weight:700;color:var(--color-ok);margin-bottom:4px;">float (실수)</div>
-          <code style="font-family:monospace;font-size:13px;">height = 165.5</code>
-          <div style="font-size:12px;color:var(--color-gray);margin-top:4px;">소수점 있는 숫자</div>
-        </div>
-        <div class="type-chip" style="background:rgba(30,39,97,0.06);">
-          <div style="font-size:12px;font-weight:700;color:var(--color-post);margin-bottom:4px;">str (문자열)</div>
-          <code style="font-family:monospace;font-size:13px;">name = "김민준"</code>
-          <div style="font-size:12px;color:var(--color-gray);margin-top:4px;">따옴표로 감싼 텍스트</div>
-        </div>
-        <div class="type-chip" style="background:rgba(217,119,6,0.06);">
-          <div style="font-size:12px;font-weight:700;color:var(--color-warn);margin-bottom:4px;">bool (논리)</div>
-          <code style="font-family:monospace;font-size:13px;">is_ok = True</code>
-          <div style="font-size:12px;color:var(--color-gray);margin-top:4px;">True 또는 False</div>
+        <div class="toc-unit-hd locked" style="opacity:0.45;cursor:default;" onclick="">
+          <span class="toc-caret">▶</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🔒 Ⅲ-3. 문제 해결과 알고리즘</span>
         </div>
       </div>
-      <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13px;line-height:1.9;margin-top:var(--space-md);">
-        <span style="color:#82AAFF">name</span>       = <span style="color:#C3E88D">"김민준"</span>  <span style="color:#546E7A"># str</span><br>
-        <span style="color:#82AAFF">age</span>        = <span style="color:#F78C6C">15</span>          <span style="color:#546E7A"># int</span><br>
-        <span style="color:#82AAFF">height</span>     = <span style="color:#F78C6C">165.5</span>       <span style="color:#546E7A"># float</span><br>
-        <span style="color:#82AAFF">is_student</span> = <span style="color:#C792EA">True</span>        <span style="color:#546E7A"># bool</span><br>
-        <br>
-        <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">name</span>))    <span style="color:#546E7A"># &lt;class 'str'&gt;</span><br>
-        <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">age</span>))     <span style="color:#546E7A"># &lt;class 'int'&gt;</span><br>
-        <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">height</span>))  <span style="color:#546E7A"># &lt;class 'float'&gt;</span>
-      </div>
+
+    </div><!-- /sl-toc-body -->
+
+    <div class="sl-toc-footer">
+      <span>📊</span>
+      <span id="toc-progress-text">진행률 <strong>68%</strong></span>
     </div>
+  </aside>
 
-    <div class="step-cta">
-      <div class="step-cta-msg">개념을 모두 읽었나요? 이해가 됐으면 다음으로 이동하세요.</div>
-      <button class="btn btn-primary" onclick="completeStep(2)">✅ 이해했어요 — 다음: 영상</button>
-    </div>
-  </div><!-- /step-2 -->
+  <!-- 우측 콘텐츠 -->
+  <div class="sl-content">
+    <div class="sl-content-inner">
 
-
-  <!-- ▶ STEP 3: 영상 -->
-  <div class="step-panel" id="step-3">
-    <div class="step-header">
-      <div class="step-header-icon icon-video">🎬</div>
-      <div>
-        <div class="step-header-title">영상 학습</div>
-        <div class="step-header-desc">강의 영상으로 개념을 한 번 더 확인해요 · 약 8분 42초</div>
-      </div>
-    </div>
-
-    <div class="video-card">
-      <div class="video-thumb" onclick="playVideo()">
-        <div class="video-play" id="video-play-btn">▶</div>
-        <div style="color:white;font-size:14px;font-weight:700;margin-bottom:4px;">파이썬 변수와 자료형 완벽 정리 | 중학교 정보</div>
-        <div style="color:rgba(255,255,255,0.6);font-size:12px;">📺 YouTube · 08:42</div>
-        <div class="video-prog" id="video-prog">
-          <div class="video-prog-fill" id="video-fill"></div>
+      <!-- ▶ STEP 1: 선행 퀴즈 -->
+      <div class="step-panel" id="step-1">
+        <div class="step-header">
+          <div class="step-header-icon icon-quiz">❓</div>
+          <div>
+            <div class="step-header-title">선행 퀴즈</div>
+            <div class="step-header-desc">오늘 배울 내용을 얼마나 알고 있는지 확인해요 · 5문항</div>
+          </div>
         </div>
-      </div>
-      <div class="video-meta">
-        <div class="video-meta-title">📌 이 영상에서 배울 내용</div>
-        <div class="video-meta-desc">파이썬 변수의 개념과 int, float, str, bool 네 가지 기본 자료형을 설명합니다. 개념자료에서 본 내용을 영상으로 한 번 더 확인해보세요.</div>
-      </div>
-    </div>
 
-    <div class="step-cta" id="step3-cta">
-      <div class="step-cta-msg">영상을 끝까지 시청했나요?</div>
-      <button class="btn btn-primary" onclick="completeStep(3)">✅ 시청 완료 — 다음: 엔트리 실습</button>
-    </div>
-  </div><!-- /step-3 -->
-
-
-  <!-- ▶ STEP 4: 엔트리 실습 -->
-  <div class="step-panel" id="step-4">
-    <div class="step-header">
-      <div class="step-header-icon icon-entry">🟢</div>
-      <div>
-        <div class="step-header-title">엔트리 실습</div>
-        <div class="step-header-desc">블록 코딩으로 변수를 직접 만들어봐요</div>
-      </div>
-    </div>
-
-    <div class="practice-box">
-      <div class="practice-instr-title">📋 실습 지시사항</div>
-      <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
-        <div class="instr-num" style="background:var(--color-entry);">1</div>
-        <div style="font-size:13.5px;line-height:1.6;">엔트리에서 <strong>변수 블록</strong>을 사용해 이름(name), 나이(age) 변수를 생성하세요.</div>
-      </div>
-      <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
-        <div class="instr-num" style="background:var(--color-entry);">2</div>
-        <div style="font-size:13.5px;line-height:1.6;"><strong>말하기 블록</strong>을 연결해 "내 이름은 ○○○이고, 나이는 ○살입니다."를 출력하세요.</div>
-      </div>
-      <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
-        <div class="instr-num" style="background:var(--color-entry);">3</div>
-        <div style="font-size:13.5px;line-height:1.6;">완성 후 에디터의 <strong>[제출] 버튼</strong>을 눌러 제출하세요.</div>
-      </div>
-    </div>
-
-    <div class="editor-launch">
-      <div class="editor-launch-bar" style="background:var(--color-entry);">
-        <span>●</span> 엔트리 블록 에디터
-      </div>
-      <div class="editor-launch-body">
-        <div style="text-align:center;">
-          <div style="font-size:44px;margin-bottom:10px;">🟢</div>
-          <div style="color:#aaa;font-size:13px;margin-bottom:18px;">에디터를 열고 블록을 조립해보세요!</div>
-          <button class="launch-btn" style="background:var(--color-entry);" onclick="location.href='wfs03a_entry.html'">🟢 엔트리 에디터 열기 →</button>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="alert('AI 힌트: 파이썬 기본 문법 관련 문제입니다. (목업)')">✨ AI 힌트</button>
         </div>
-      </div>
-    </div>
 
-    <div class="submit-check" id="entry-check">
-      <span>📤</span>
-      <span style="flex:1;">에디터에서 실습을 완료하고 제출하면 자동으로 기록돼요.</span>
-      <button class="btn btn-ghost btn-sm" onclick="markDone('entry-check',3,4)">완료 표시</button>
-    </div>
-  </div><!-- /step-4 -->
-
-
-  <!-- ▶ STEP 5: 파이썬 실습 -->
-  <div class="step-panel" id="step-5">
-    <div class="step-header">
-      <div class="step-header-icon icon-python">🐍</div>
-      <div>
-        <div class="step-header-title">파이썬 실습</div>
-        <div class="step-header-desc">텍스트 코딩으로 변수를 직접 작성해봐요</div>
-      </div>
-    </div>
-
-    <div class="practice-box">
-      <div class="practice-instr-title" style="margin-bottom:var(--space-sm);">💻 스타터 코드</div>
-      <div style="font-size:12px;color:var(--color-gray);margin-bottom:var(--space-sm);">아래 코드를 에디터에 붙여넣고 빈 칸을 채워보세요.</div>
-      <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13px;line-height:1.9;">
-        <span style="color:#546E7A"># 3차시: 변수와 자료형 실습</span><br>
-        <span style="color:#82AAFF">name</span>   = <span style="color:#C3E88D">""</span>    <span style="color:#546E7A"># 자신의 이름 (str)</span><br>
-        <span style="color:#82AAFF">age</span>    = <span style="color:#F78C6C">0</span>      <span style="color:#546E7A"># 자신의 나이 (int)</span><br>
-        <span style="color:#82AAFF">height</span> = <span style="color:#F78C6C">0.0</span>    <span style="color:#546E7A"># 자신의 키 (float)</span><br>
-        <br>
-        <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"이름:"</span>, <span style="color:#82AAFF">name</span>)<br>
-        <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"나이:"</span>, <span style="color:#82AAFF">age</span>)<br>
-        <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"키:"</span>, <span style="color:#82AAFF">height</span>)<br>
-        <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">name</span>))<br>
-        <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">age</span>))
-      </div>
-    </div>
-
-    <div class="editor-launch">
-      <div class="editor-launch-bar" style="background:var(--color-python);">
-        <span>🐍</span> 파이썬 코드 에디터
-      </div>
-      <div class="editor-launch-body">
-        <div style="text-align:center;">
-          <div style="font-size:44px;margin-bottom:10px;">🐍</div>
-          <div style="color:#aaa;font-size:13px;margin-bottom:18px;">에디터를 열고 코드를 작성해보세요!</div>
-          <button class="launch-btn" style="background:var(--color-python);" onclick="location.href='wfs03b_python.html'">🐍 파이썬 에디터 열기 →</button>
+        <div class="s-quiz-card" id="sq1">
+          <div class="s-q-text"><span class="s-q-num">Q1.</span>파이썬에서 변수에 값을 저장할 때 사용하는 기호는?</div>
+          <div class="s-opts">
+            <button class="s-opt" onclick="pickOpt(this,'sq1',false)"><span class="s-opt-num">①</span> == (같음 비교)</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq1',true)"><span class="s-opt-num">②</span> = (할당)</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq1',false)"><span class="s-opt-num">③</span> := (바다코끼리)</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq1',false)"><span class="s-opt-num">④</span> ← (화살표)</button>
+          </div>
+          <div class="s-feedback ok"  id="sq1-ok">✅ 정답이에요! 파이썬은 = 으로 값을 저장합니다.</div>
+          <div class="s-feedback err" id="sq1-err">❌ 아쉬워요. 정답은 ② = (할당) 입니다.</div>
         </div>
-      </div>
-    </div>
 
-    <div class="submit-check" id="python-check">
-      <span>📤</span>
-      <span style="flex:1;">에디터에서 코드를 작성하고 제출하면 자동으로 기록돼요.</span>
-      <button class="btn btn-ghost btn-sm" onclick="markDone('python-check',4,5)">완료 표시</button>
-    </div>
-  </div><!-- /step-5 -->
+        <div class="s-quiz-card" id="sq2">
+          <div class="s-q-text"><span class="s-q-num">Q2.</span><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">x = 3.14</code> 일 때 <code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">type(x)</code>의 결과는?</div>
+          <div class="s-opts">
+            <button class="s-opt" onclick="pickOpt(this,'sq2',false)"><span class="s-opt-num">①</span> &lt;class 'int'&gt;</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq2',true)"><span class="s-opt-num">②</span> &lt;class 'float'&gt;</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq2',false)"><span class="s-opt-num">③</span> &lt;class 'str'&gt;</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq2',false)"><span class="s-opt-num">④</span> &lt;class 'double'&gt;</button>
+          </div>
+          <div class="s-feedback ok"  id="sq2-ok">✅ 정답이에요! 소수점이 있으면 float입니다.</div>
+          <div class="s-feedback err" id="sq2-err">❌ 아쉬워요. 소수점이 있으면 float! 정답은 ②입니다.</div>
+        </div>
+
+        <div class="s-quiz-card" id="sq3">
+          <div class="s-q-text"><span class="s-q-num">Q3.</span>다음 중 파이썬에서 올바른 변수 이름은?</div>
+          <div class="s-opts">
+            <button class="s-opt" onclick="pickOpt(this,'sq3',false)"><span class="s-opt-num">①</span> 1score</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq3',false)"><span class="s-opt-num">②</span> my score</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq3',true)"><span class="s-opt-num">③</span> my_score</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq3',false)"><span class="s-opt-num">④</span> my-score</button>
+          </div>
+          <div class="s-feedback ok"  id="sq3-ok">✅ 정답이에요! 밑줄(_)은 변수 이름에 사용 가능해요.</div>
+          <div class="s-feedback err" id="sq3-err">❌ 아쉬워요. 숫자로 시작하거나 공백·하이픈은 불가! 정답은 ③입니다.</div>
+        </div>
+
+        <div class="s-quiz-card" id="sq4">
+          <div class="s-q-text"><span class="s-q-num">Q4.</span>다음 코드를 실행하면 출력 결과는?</div>
+          <div style="background:var(--color-dark);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-family:monospace;font-size:13px;line-height:1.8;">
+            <span style="color:#82AAFF">x</span> = <span style="color:#F78C6C">5</span><br>
+            <span style="color:#82AAFF">x</span> = <span style="color:#82AAFF">x</span> + <span style="color:#F78C6C">3</span><br>
+            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">x</span>)
+          </div>
+          <div class="s-opts">
+            <button class="s-opt" onclick="pickOpt(this,'sq4',false)"><span class="s-opt-num">①</span> 5</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq4',false)"><span class="s-opt-num">②</span> x + 3</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq4',true)"><span class="s-opt-num">③</span> 8</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq4',false)"><span class="s-opt-num">④</span> 오류 발생</button>
+          </div>
+          <div class="s-feedback ok"  id="sq4-ok">✅ 정답이에요! x=5에서 3을 더하면 8이 됩니다.</div>
+          <div class="s-feedback err" id="sq4-err">❌ 아쉬워요. x가 5+3=8로 바뀌어 8이 출력됩니다.</div>
+        </div>
+
+        <div class="s-quiz-card" id="sq5">
+          <div class="s-q-text"><span class="s-q-num">Q5.</span><code style="font-family:monospace;background:var(--color-light);padding:1px 5px;border-radius:3px;">score = "100"</code> 일 때 score의 자료형은?</div>
+          <div class="s-opts">
+            <button class="s-opt" onclick="pickOpt(this,'sq5',false)"><span class="s-opt-num">①</span> int</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq5',false)"><span class="s-opt-num">②</span> float</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq5',true)"><span class="s-opt-num">③</span> str</button>
+            <button class="s-opt" onclick="pickOpt(this,'sq5',false)"><span class="s-opt-num">④</span> bool</button>
+          </div>
+          <div class="s-feedback ok"  id="sq5-ok">✅ 정답이에요! 따옴표로 감싸면 숫자도 str이 됩니다.</div>
+          <div class="s-feedback err" id="sq5-err">❌ 아쉬워요. 따옴표로 감싸면 str! 정답은 ③입니다.</div>
+        </div>
+
+        <div style="text-align:center;margin-top:var(--space-lg);">
+          <button class="btn btn-primary" id="btn-quiz-submit" onclick="submitQuiz()">📝 퀴즈 제출하기</button>
+        </div>
+
+        <div class="quiz-result" id="quiz-result">
+          <div class="score-circle">
+            <div class="score-num" id="score-num">-</div>
+            <div class="score-sub">/ 5점</div>
+          </div>
+          <div style="font-size:16px;font-weight:800;color:var(--color-ink);margin-bottom:6px;" id="score-msg">수고했어요!</div>
+          <div style="font-size:13px;color:var(--color-gray);margin-bottom:var(--space-lg);" id="score-sub">개념자료에서 내용을 확인해보세요.</div>
+          <button class="btn btn-primary" onclick="completeStep(1)">다음 단계로 → 개념자료</button>
+        </div>
+      </div><!-- /step-1 -->
 
 
-  <!-- ▶ STEP 6: 평가형 문제 -->
-  <div class="step-panel" id="step-6">
-    <div class="step-header">
-      <div class="step-header-icon icon-eval">📝</div>
-      <div>
-        <div class="step-header-title">평가형 문제</div>
-        <div class="step-header-desc">오늘 배운 내용을 정리해요 · 3문항 · 30점</div>
-      </div>
-    </div>
+      <!-- ▶ STEP 2: 개념자료 -->
+      <div class="step-panel active" id="step-2">
+        <div class="step-header">
+          <div class="step-header-icon icon-concept">📖</div>
+          <div>
+            <div class="step-header-title">개념자료</div>
+            <div class="step-header-desc">변수와 자료형의 핵심 개념을 학습해요</div>
+          </div>
+        </div>
 
-    <div class="hint-row">
-      <button class="hint-btn" onclick="alert('AI 힌트 기능은 실제 서비스에서 활성화됩니다. (목업)')">✨ AI 힌트</button>
-    </div>
+        <div class="concept-card">
+          <div class="concept-h">📌 변수(Variable)란?</div>
+          <p style="font-size:14px;line-height:1.9;color:var(--color-ink);margin-bottom:var(--space-md);">
+            <strong>변수</strong>는 데이터를 저장하는 공간입니다.
+            상자에 물건을 담듯이, 변수에 값을 넣어두면 나중에 꺼내 쓸 수 있어요.<br><br>
+            파이썬에서는 <code style="background:var(--color-light);padding:2px 6px;border-radius:3px;font-family:monospace;">=</code> 기호로 변수에 값을 저장합니다.
+            변수 이름은 <strong>영문자·숫자·밑줄(_)</strong>로 구성하되, <strong>숫자로 시작할 수 없어요.</strong>
+          </p>
+          <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13.5px;line-height:1.9;">
+            <span style="color:#82AAFF">name</span> = <span style="color:#C3E88D">"이서연"</span>  <span style="color:#546E7A"># 변수 name에 문자열 저장</span><br>
+            <span style="color:#82AAFF">age</span>  = <span style="color:#F78C6C">15</span>           <span style="color:#546E7A"># 변수 age에 숫자 저장</span><br>
+            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">name</span>)        <span style="color:#546E7A"># 출력: 이서연</span><br>
+            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">age</span> + <span style="color:#F78C6C">1</span>)     <span style="color:#546E7A"># 출력: 16</span>
+          </div>
+        </div>
 
-    <!-- P1 -->
-    <div class="eval-card">
-      <div class="eval-q-row">
-        <div class="eval-num">P1</div>
-        <span class="eval-badge eval-badge-code">코드 작성</span>
-        <div class="eval-q-text">다음 조건을 만족하는 파이썬 프로그램을 작성하시오. (10점)</div>
-      </div>
-      <div style="background:var(--color-light);border-radius:8px;padding:var(--space-md);font-size:13px;line-height:1.9;color:var(--color-ink);">
-        <strong>[조건]</strong><br>
-        ① 자신의 이름(str), 나이(int), 키(float)를 변수에 저장하시오.<br>
-        ② print()로 "나는 ○○이고, 나이는 ○살이며, 키는 ○cm입니다."를 출력하시오.<br>
-        ③ type()으로 각 변수의 자료형을 출력하시오.
-      </div>
-      <textarea class="code-area" placeholder="# 여기에 코드를 작성하세요" aria-label="P1 답안"></textarea>
-    </div>
+        <div class="concept-card">
+          <div class="concept-h">🗂 자료형(Data Type) 4가지</div>
+          <p style="font-size:14px;line-height:1.7;color:var(--color-ink);margin-bottom:var(--space-md);">
+            변수에 저장되는 값의 <strong>종류</strong>를 자료형이라고 합니다.
+            <code style="background:var(--color-light);padding:2px 6px;border-radius:3px;font-family:monospace;">type()</code> 함수로 확인할 수 있어요.
+          </p>
+          <div class="type-grid">
+            <div class="type-chip" style="background:rgba(6,90,130,0.06);">
+              <div style="font-size:12px;font-weight:700;color:var(--color-mid);margin-bottom:4px;">int (정수)</div>
+              <code style="font-family:monospace;font-size:13px;">age = 15</code>
+              <div style="font-size:12px;color:var(--color-gray);margin-top:4px;">소수점 없는 숫자</div>
+            </div>
+            <div class="type-chip" style="background:rgba(13,148,136,0.06);">
+              <div style="font-size:12px;font-weight:700;color:var(--color-ok);margin-bottom:4px;">float (실수)</div>
+              <code style="font-family:monospace;font-size:13px;">height = 165.5</code>
+              <div style="font-size:12px;color:var(--color-gray);margin-top:4px;">소수점 있는 숫자</div>
+            </div>
+            <div class="type-chip" style="background:rgba(30,39,97,0.06);">
+              <div style="font-size:12px;font-weight:700;color:var(--color-post);margin-bottom:4px;">str (문자열)</div>
+              <code style="font-family:monospace;font-size:13px;">name = "이서연"</code>
+              <div style="font-size:12px;color:var(--color-gray);margin-top:4px;">따옴표로 감싼 텍스트</div>
+            </div>
+            <div class="type-chip" style="background:rgba(217,119,6,0.06);">
+              <div style="font-size:12px;font-weight:700;color:var(--color-warn);margin-bottom:4px;">bool (논리)</div>
+              <code style="font-family:monospace;font-size:13px;">is_ok = True</code>
+              <div style="font-size:12px;color:var(--color-gray);margin-top:4px;">True 또는 False</div>
+            </div>
+          </div>
+          <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13px;line-height:1.9;margin-top:var(--space-md);">
+            <span style="color:#82AAFF">name</span>       = <span style="color:#C3E88D">"이서연"</span>  <span style="color:#546E7A"># str</span><br>
+            <span style="color:#82AAFF">age</span>        = <span style="color:#F78C6C">15</span>          <span style="color:#546E7A"># int</span><br>
+            <span style="color:#82AAFF">height</span>     = <span style="color:#F78C6C">165.5</span>       <span style="color:#546E7A"># float</span><br>
+            <span style="color:#82AAFF">is_student</span> = <span style="color:#C792EA">True</span>        <span style="color:#546E7A"># bool</span><br>
+            <br>
+            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">name</span>))    <span style="color:#546E7A"># &lt;class 'str'&gt;</span><br>
+            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">age</span>))     <span style="color:#546E7A"># &lt;class 'int'&gt;</span><br>
+            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">height</span>))  <span style="color:#546E7A"># &lt;class 'float'&gt;</span>
+          </div>
+        </div>
 
-    <!-- P2 -->
-    <div class="eval-card">
-      <div class="eval-q-row">
-        <div class="eval-num">P2</div>
-        <span class="eval-badge eval-badge-fix">오류 수정</span>
-        <div class="eval-q-text">다음 코드의 오류를 찾아 수정하고, 올바른 실행 결과를 작성하시오. (10점)</div>
-      </div>
-      <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13px;line-height:1.9;margin-bottom:var(--space-sm);">
-        <span style="color:#82AAFF">1score</span> = <span style="color:#F78C6C">95</span><br>
-        <span style="color:#82AAFF">student name</span> = <span style="color:#C3E88D">"이서연"</span><br>
-        <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">student name</span>, <span style="color:#C3E88D">"의 점수:"</span>, <span style="color:#82AAFF">1score</span>)
-      </div>
-      <textarea class="code-area" placeholder="# 수정된 코드를 작성하세요" aria-label="P2 답안" style="min-height:80px;"></textarea>
-    </div>
+        <div class="step-cta">
+          <div class="step-cta-msg">개념을 모두 읽었나요? 이해가 됐으면 다음으로 이동하세요.</div>
+          <button class="btn btn-primary" onclick="completeStep(2)">✅ 이해했어요 — 다음: 영상</button>
+        </div>
+      </div><!-- /step-2 -->
 
-    <!-- P3 -->
-    <div class="eval-card">
-      <div class="eval-q-row">
-        <div class="eval-num">P3</div>
-        <span class="eval-badge eval-badge-fill">프로그램 완성</span>
-        <div class="eval-q-text">아래 스타터 코드를 완성하여 가격 계산 프로그램을 만드시오. (10점)</div>
-      </div>
-      <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13px;line-height:1.9;margin-bottom:var(--space-sm);">
-        <span style="color:#546E7A"># 가격 계산 프로그램</span><br>
-        <span style="color:#82AAFF">item_name</span> = <span style="color:#C3E88D">"연필"</span><br>
-        <span style="color:#82AAFF">price</span>     = ___  <span style="color:#546E7A"># 단가 (int)</span><br>
-        <span style="color:#82AAFF">quantity</span>  = ___  <span style="color:#546E7A"># 수량 (int)</span><br>
-        <span style="color:#82AAFF">total</span>     = ___  <span style="color:#546E7A"># price × quantity</span><br>
-        <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"총액:"</span>, ___, <span style="color:#C3E88D">"원"</span>)
-      </div>
-      <textarea class="code-area" placeholder="# 완성된 코드를 작성하세요" aria-label="P3 답안"></textarea>
-    </div>
 
-    <!-- 최종 제출 -->
-    <div id="final-area" style="text-align:center;padding:var(--space-xl);background:var(--color-white);border:1px solid var(--color-border);border-radius:10px;margin-top:var(--space-md);">
-      <div style="font-size:15px;font-weight:700;color:var(--color-ink);margin-bottom:6px;">모든 문제를 풀었나요?</div>
-      <div style="font-size:13px;color:var(--color-gray);margin-bottom:var(--space-lg);">제출하면 AI가 채점하고 선생님께 전달돼요.</div>
-      <button class="btn btn-primary" style="padding:12px 36px;font-size:15px;" onclick="finalSubmit()">📝 최종 제출하기</button>
-    </div>
+      <!-- ▶ STEP 3: 영상 -->
+      <div class="step-panel" id="step-3">
+        <div class="step-header">
+          <div class="step-header-icon icon-video">🎬</div>
+          <div>
+            <div class="step-header-title">영상 학습</div>
+            <div class="step-header-desc">강의 영상으로 개념을 한 번 더 확인해요 · 약 8분 42초</div>
+          </div>
+        </div>
 
-    <div id="done-area" style="display:none;text-align:center;padding:var(--space-xl);background:rgba(13,148,136,0.06);border:2px solid var(--color-ok);border-radius:12px;margin-top:var(--space-md);">
-      <div style="font-size:40px;margin-bottom:12px;">🎉</div>
-      <div style="font-size:18px;font-weight:800;color:var(--color-ok);margin-bottom:8px;">수업 완료! 수고했어요.</div>
-      <div style="font-size:13px;color:var(--color-gray);margin-bottom:var(--space-lg);">AI 채점 결과는 선생님이 확인 후 알려드릴 거예요.</div>
-      <button class="btn btn-ghost" onclick="location.href='wf01_dashboard.html'">← 홈으로 돌아가기</button>
-    </div>
-  </div><!-- /step-6 -->
+        <div class="video-card">
+          <div class="video-thumb" onclick="playVideo()">
+            <div class="video-play" id="video-play-btn">▶</div>
+            <div style="color:white;font-size:14px;font-weight:700;margin-bottom:4px;">파이썬 변수와 자료형 완벽 정리 | 중학교 정보</div>
+            <div style="color:rgba(255,255,255,0.6);font-size:12px;">📺 YouTube · 08:42</div>
+            <div class="video-prog" id="video-prog">
+              <div class="video-prog-fill" id="video-fill"></div>
+            </div>
+          </div>
+          <div class="video-meta">
+            <div class="video-meta-title">📌 이 영상에서 배울 내용</div>
+            <div class="video-meta-desc">파이썬 변수의 개념과 int, float, str, bool 네 가지 기본 자료형을 설명합니다. 개념자료에서 본 내용을 영상으로 한 번 더 확인해보세요.</div>
+          </div>
+        </div>
 
-</main>
+        <div class="step-cta" id="step3-cta">
+          <div class="step-cta-msg">영상을 끝까지 시청했나요?</div>
+          <button class="btn btn-primary" onclick="completeStep(3)">✅ 시청 완료 — 다음: 엔트리 실습 1</button>
+        </div>
+      </div><!-- /step-3 -->
+
+
+      <!-- ▶ STEP 4: 엔트리 실습 1 -->
+      <div class="step-panel" id="step-4">
+        <div class="step-header">
+          <div class="step-header-icon icon-entry">🟢</div>
+          <div>
+            <div class="step-header-title">엔트리 실습 1</div>
+            <div class="step-header-desc">블록 코딩으로 변수를 직접 만들어봐요 (기본 버전)</div>
+          </div>
+        </div>
+
+        <div class="practice-box">
+          <div class="practice-instr-title">📋 실습 지시사항</div>
+          <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
+            <div class="instr-num" style="background:var(--color-entry);">1</div>
+            <div style="font-size:13.5px;line-height:1.6;">엔트리에서 <strong>변수 블록</strong>을 사용해 이름(name), 나이(age) 변수를 생성하세요.</div>
+          </div>
+          <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
+            <div class="instr-num" style="background:var(--color-entry);">2</div>
+            <div style="font-size:13.5px;line-height:1.6;"><strong>말하기 블록</strong>을 연결해 "내 이름은 ○○○이고, 나이는 ○살입니다."를 출력하세요.</div>
+          </div>
+          <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
+            <div class="instr-num" style="background:var(--color-entry);">3</div>
+            <div style="font-size:13.5px;line-height:1.6;">완성 후 에디터의 <strong>[제출] 버튼</strong>을 눌러 제출하세요.</div>
+          </div>
+        </div>
+
+        <div class="editor-launch">
+          <div class="editor-launch-bar" style="background:var(--color-entry);">
+            <span>●</span> 엔트리 블록 에디터
+          </div>
+          <div class="editor-launch-body">
+            <div style="text-align:center;">
+              <div style="font-size:44px;margin-bottom:10px;">🟢</div>
+              <div style="color:#aaa;font-size:13px;margin-bottom:18px;">에디터를 열고 블록을 조립해보세요!</div>
+              <button class="launch-btn" style="background:var(--color-entry);" onclick="location.href='wfs03a_entry.html'">🟢 엔트리 에디터 열기 →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-check" id="entry1-check">
+          <span>📤</span>
+          <span style="flex:1;">에디터에서 실습을 완료하고 제출하면 자동으로 기록돼요.</span>
+          <button class="btn btn-ghost btn-sm" onclick="markDone('entry1-check',4,5)">완료 표시</button>
+        </div>
+      </div><!-- /step-4 -->
+
+
+      <!-- ▶ STEP 5: 엔트리 실습 2 -->
+      <div class="step-panel" id="step-5">
+        <div class="step-header">
+          <div class="step-header-icon icon-entry">🟢</div>
+          <div>
+            <div class="step-header-title">엔트리 실습 2</div>
+            <div class="step-header-desc">개선된 UI로 더 다양한 블록 코딩을 경험해봐요 (v2)</div>
+          </div>
+        </div>
+
+        <div class="practice-box">
+          <div class="practice-instr-title">📋 실습 지시사항</div>
+          <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
+            <div class="instr-num" style="background:var(--color-entry);">1</div>
+            <div style="font-size:13.5px;line-height:1.6;">엔트리 v2 에디터에서 <strong>조건문 블록</strong>을 사용해 if/else 구조를 만들어보세요.</div>
+          </div>
+          <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
+            <div class="instr-num" style="background:var(--color-entry);">2</div>
+            <div style="font-size:13.5px;line-height:1.6;"><strong>점수 입력 → 합격/불합격 판별</strong> 프로그램을 완성하세요. (기준: 60점 이상)</div>
+          </div>
+          <div class="instr-row" style="background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.15);">
+            <div class="instr-num" style="background:var(--color-entry);">3</div>
+            <div style="font-size:13.5px;line-height:1.6;">완성 후 에디터의 <strong>[제출] 버튼</strong>을 눌러 제출하세요.</div>
+          </div>
+        </div>
+
+        <div class="editor-launch">
+          <div class="editor-launch-bar" style="background:var(--color-entry);">
+            <span>●</span> 엔트리 블록 에디터 v2
+          </div>
+          <div class="editor-launch-body">
+            <div style="text-align:center;">
+              <div style="font-size:44px;margin-bottom:10px;">🟢</div>
+              <div style="color:#aaa;font-size:13px;margin-bottom:18px;">v2 에디터를 열고 블록을 조립해보세요!</div>
+              <button class="launch-btn" style="background:var(--color-entry);" onclick="location.href='wfs03a_entry_v2.html'">🟢 엔트리 에디터 v2 열기 →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-check" id="entry2-check">
+          <span>📤</span>
+          <span style="flex:1;">에디터에서 실습을 완료하고 제출하면 자동으로 기록돼요.</span>
+          <button class="btn btn-ghost btn-sm" onclick="markDone('entry2-check',5,6)">완료 표시</button>
+        </div>
+      </div><!-- /step-5 -->
+
+
+      <!-- ▶ STEP 6: 파이썬 실습 -->
+      <div class="step-panel" id="step-6">
+        <div class="step-header">
+          <div class="step-header-icon icon-python">🐍</div>
+          <div>
+            <div class="step-header-title">파이썬 실습</div>
+            <div class="step-header-desc">텍스트 코딩으로 변수를 직접 작성해봐요</div>
+          </div>
+        </div>
+
+        <div class="practice-box">
+          <div class="practice-instr-title" style="margin-bottom:var(--space-sm);">💻 스타터 코드</div>
+          <div style="font-size:12px;color:var(--color-gray);margin-bottom:var(--space-sm);">아래 코드를 에디터에 붙여넣고 빈 칸을 채워보세요.</div>
+          <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13px;line-height:1.9;">
+            <span style="color:#546E7A"># 3차시: 변수와 자료형 실습</span><br>
+            <span style="color:#82AAFF">name</span>   = <span style="color:#C3E88D">""</span>    <span style="color:#546E7A"># 자신의 이름 (str)</span><br>
+            <span style="color:#82AAFF">age</span>    = <span style="color:#F78C6C">0</span>      <span style="color:#546E7A"># 자신의 나이 (int)</span><br>
+            <span style="color:#82AAFF">height</span> = <span style="color:#F78C6C">0.0</span>    <span style="color:#546E7A"># 자신의 키 (float)</span><br>
+            <br>
+            <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"이름:"</span>, <span style="color:#82AAFF">name</span>)<br>
+            <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"나이:"</span>, <span style="color:#82AAFF">age</span>)<br>
+            <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"키:"</span>, <span style="color:#82AAFF">height</span>)<br>
+            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">name</span>))<br>
+            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">type</span>(<span style="color:#82AAFF">age</span>))
+          </div>
+        </div>
+
+        <div class="editor-launch">
+          <div class="editor-launch-bar" style="background:var(--color-python);">
+            <span>🐍</span> 파이썬 코드 에디터
+          </div>
+          <div class="editor-launch-body">
+            <div style="text-align:center;">
+              <div style="font-size:44px;margin-bottom:10px;">🐍</div>
+              <div style="color:#aaa;font-size:13px;margin-bottom:18px;">에디터를 열고 코드를 작성해보세요!</div>
+              <button class="launch-btn" style="background:var(--color-python);" onclick="location.href='wfs03b_python.html'">🐍 파이썬 에디터 열기 →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-check" id="python-check">
+          <span>📤</span>
+          <span style="flex:1;">에디터에서 코드를 작성하고 제출하면 자동으로 기록돼요.</span>
+          <button class="btn btn-ghost btn-sm" onclick="markDone('python-check',6,7)">완료 표시</button>
+        </div>
+      </div><!-- /step-6 -->
+
+
+      <!-- ▶ STEP 7: 평가형 문제 -->
+      <div class="step-panel" id="step-7">
+        <div class="step-header">
+          <div class="step-header-icon icon-eval">📝</div>
+          <div>
+            <div class="step-header-title">평가형 문제</div>
+            <div class="step-header-desc">오늘 배운 내용을 정리해요 · 3문항 · 30점</div>
+          </div>
+        </div>
+
+        <div class="hint-row">
+          <button class="hint-btn" onclick="alert('AI 힌트 기능은 실제 서비스에서 활성화됩니다. (목업)')">✨ AI 힌트</button>
+        </div>
+
+        <div class="eval-card">
+          <div class="eval-q-row">
+            <div class="eval-num">P1</div>
+            <span class="eval-badge eval-badge-code">코드 작성</span>
+            <div class="eval-q-text">다음 조건을 만족하는 파이썬 프로그램을 작성하시오. (10점)</div>
+          </div>
+          <div style="background:var(--color-light);border-radius:8px;padding:var(--space-md);font-size:13px;line-height:1.9;color:var(--color-ink);">
+            <strong>[조건]</strong><br>
+            ① 자신의 이름(str), 나이(int), 키(float)를 변수에 저장하시오.<br>
+            ② print()로 "나는 ○○이고, 나이는 ○살이며, 키는 ○cm입니다."를 출력하시오.<br>
+            ③ type()으로 각 변수의 자료형을 출력하시오.
+          </div>
+          <textarea class="code-area" placeholder="# 여기에 코드를 작성하세요" aria-label="P1 답안"></textarea>
+        </div>
+
+        <div class="eval-card">
+          <div class="eval-q-row">
+            <div class="eval-num">P2</div>
+            <span class="eval-badge eval-badge-fix">오류 수정</span>
+            <div class="eval-q-text">다음 코드의 오류를 찾아 수정하고, 올바른 실행 결과를 작성하시오. (10점)</div>
+          </div>
+          <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13px;line-height:1.9;margin-bottom:var(--space-sm);">
+            <span style="color:#82AAFF">1score</span> = <span style="color:#F78C6C">95</span><br>
+            <span style="color:#82AAFF">student name</span> = <span style="color:#C3E88D">"이서연"</span><br>
+            <span style="color:#C792EA">print</span>(<span style="color:#82AAFF">student name</span>, <span style="color:#C3E88D">"의 점수:"</span>, <span style="color:#82AAFF">1score</span>)
+          </div>
+          <textarea class="code-area" placeholder="# 수정된 코드를 작성하세요" aria-label="P2 답안" style="min-height:80px;"></textarea>
+        </div>
+
+        <div class="eval-card">
+          <div class="eval-q-row">
+            <div class="eval-num">P3</div>
+            <span class="eval-badge eval-badge-fill">프로그램 완성</span>
+            <div class="eval-q-text">아래 스타터 코드를 완성하여 가격 계산 프로그램을 만드시오. (10점)</div>
+          </div>
+          <div style="background:var(--color-dark);border-radius:8px;padding:var(--space-md);font-family:monospace;font-size:13px;line-height:1.9;margin-bottom:var(--space-sm);">
+            <span style="color:#546E7A"># 가격 계산 프로그램</span><br>
+            <span style="color:#82AAFF">item_name</span> = <span style="color:#C3E88D">"연필"</span><br>
+            <span style="color:#82AAFF">price</span>     = ___  <span style="color:#546E7A"># 단가 (int)</span><br>
+            <span style="color:#82AAFF">quantity</span>  = ___  <span style="color:#546E7A"># 수량 (int)</span><br>
+            <span style="color:#82AAFF">total</span>     = ___  <span style="color:#546E7A"># price × quantity</span><br>
+            <span style="color:#C792EA">print</span>(<span style="color:#C3E88D">"총액:"</span>, ___, <span style="color:#C3E88D">"원"</span>)
+          </div>
+          <textarea class="code-area" placeholder="# 완성된 코드를 작성하세요" aria-label="P3 답안"></textarea>
+        </div>
+
+        <div id="final-area" style="text-align:center;padding:var(--space-xl);background:var(--color-white);border:1px solid var(--color-border);border-radius:10px;margin-top:var(--space-md);">
+          <div style="font-size:15px;font-weight:700;color:var(--color-ink);margin-bottom:6px;">모든 문제를 풀었나요?</div>
+          <div style="font-size:13px;color:var(--color-gray);margin-bottom:var(--space-lg);">제출하면 AI가 채점하고 선생님께 전달돼요.</div>
+          <button class="btn btn-primary" style="padding:12px 36px;font-size:15px;" onclick="finalSubmit()">📝 최종 제출하기</button>
+        </div>
+
+        <div id="done-area" style="display:none;text-align:center;padding:var(--space-xl);background:rgba(13,148,136,0.06);border:2px solid var(--color-ok);border-radius:12px;margin-top:var(--space-md);">
+          <div style="font-size:40px;margin-bottom:12px;">🎉</div>
+          <div style="font-size:18px;font-weight:800;color:var(--color-ok);margin-bottom:8px;">수업 완료! 수고했어요.</div>
+          <div style="font-size:13px;color:var(--color-gray);margin-bottom:var(--space-lg);">AI 채점 결과는 선생님이 확인 후 알려드릴 거예요.</div>
+          <button class="btn btn-ghost" onclick="location.href='wfs02_dashboard.html'">← 홈으로 돌아가기</button>
+        </div>
+      </div><!-- /step-7 -->
+
+    </div><!-- /sl-content-inner -->
+  </div><!-- /sl-content -->
+
+</div><!-- /sl-layout -->
 
 <!-- 하단 네비게이션 -->
 <div class="bottom-nav">
@@ -1085,12 +979,58 @@
 <script>
   var cur = 2;
   var done = [1];
-  var TOTAL = 6;
+  var TOTAL = 7;
   var quizPicks = {};
+  var tocOpen = true;
 
-  /* ── 초기화 ── */
+  var STEP_LABELS = ['선행 퀴즈','개념자료','영상 학습','엔트리 실습 1','엔트리 실습 2','파이썬 실습','평가형 문제'];
+
   buildDots();
   renderNav();
+
+  /* ── 목차 토글 ── */
+  function toggleToc() {
+    tocOpen = !tocOpen;
+    var toc = document.getElementById('sl-toc');
+    var showBtn = document.getElementById('toc-show-btn');
+    if (tocOpen) {
+      toc.classList.remove('collapsed');
+      showBtn.style.display = 'none';
+    } else {
+      toc.classList.add('collapsed');
+      showBtn.style.display = 'flex';
+    }
+  }
+
+  function toggleUnit(el) {
+    var caret = el.querySelector('.toc-caret');
+    var children = el.nextElementSibling;
+    if (caret && children) {
+      caret.classList.toggle('open');
+      children.classList.toggle('open');
+    }
+  }
+
+  /* ── TOC 단계 상태 업데이트 ── */
+  function updateTocSteps() {
+    document.querySelectorAll('#toc-steps .toc-step').forEach(function(el) {
+      var n = parseInt(el.getAttribute('data-step'));
+      el.className = 'toc-step';
+      var dot = el.querySelector('.toc-step-dot');
+      if (done.indexOf(n) >= 0) {
+        el.classList.add('done');
+        if (dot) dot.textContent = '✓';
+      } else if (n === cur) {
+        el.classList.add('active');
+        if (dot) dot.textContent = n;
+      } else {
+        if (dot) dot.textContent = n;
+      }
+    });
+  }
+
+  /* ── 하단 점 & 버튼 ── */
+  var PRACTICE_LINKS = { 4: 'wfs03a_entry.html', 5: 'wfs03a_entry_v2.html', 6: 'wfs03b_python.html' };
 
   function buildDots() {
     var wrap = document.getElementById('step-dots');
@@ -1099,28 +1039,20 @@
       var d = document.createElement('div');
       d.className = 's-dot';
       d.setAttribute('data-step', i);
-      d.onclick = (function(n){ return function(){ goToStep(n); }; })(i);
+      if (PRACTICE_LINKS[i]) {
+        d.onclick = (function(url){ return function(){ location.href = url; }; })(PRACTICE_LINKS[i]);
+      } else {
+        d.onclick = (function(n){ return function(){ goToStep(n); }; })(i);
+      }
       wrap.appendChild(d);
     }
   }
 
   function renderNav() {
-    /* step panels */
     document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.remove('active'); });
     var panel = document.getElementById('step-' + cur);
     if (panel) panel.classList.add('active');
 
-    /* top step nav */
-    for (var i = 1; i <= TOTAL; i++) {
-      var el = document.getElementById('snav-' + i);
-      if (!el) continue;
-      el.className = 'step-nav-item';
-      if (done.indexOf(i) >= 0) el.classList.add('done');
-      else if (i === cur)        el.classList.add('active');
-      else                       el.classList.add('locked');
-    }
-
-    /* dots */
     document.querySelectorAll('.s-dot').forEach(function(d) {
       var n = parseInt(d.getAttribute('data-step'));
       d.className = 's-dot';
@@ -1128,11 +1060,12 @@
       else if (n === cur)        d.classList.add('active');
     });
 
-    /* prev btn */
     var pb = document.getElementById('btn-prev');
     pb.disabled = (cur === 1);
     pb.style.opacity = (cur === 1) ? '0.4' : '1';
     pb.style.pointerEvents = (cur === 1) ? 'none' : '';
+
+    updateTocSteps();
   }
 
   function goToStep(n) {
@@ -1141,30 +1074,31 @@
     }
     cur = n;
     renderNav();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelector('.sl-content').scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function prevStep() { if (cur > 1) goToStep(cur - 1); }
-  function nextStep() { if (cur < TOTAL) goToStep(cur + 1); }
+  function nextStep() {
+    if (cur < TOTAL) {
+      cur++;
+      renderNav();
+      document.querySelector('.sl-content').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 
   function completeStep(n) {
     if (done.indexOf(n) < 0) done.push(n);
-    var labels = ['선행퀴즈','개념자료','영상','엔트리실습','파이썬실습','평가'];
-    toast('✅ ' + labels[n-1] + ' 완료!', 'var(--color-ok)');
+    toast('✅ ' + STEP_LABELS[n-1] + ' 완료!', 'var(--color-ok)');
     setTimeout(function() { if (n < TOTAL) goToStep(n + 1); }, 900);
   }
 
   /* ── 퀴즈 ── */
   function pickOpt(btn, qId, isRight) {
     var card = document.getElementById(qId);
-    card.querySelectorAll('.s-opt').forEach(function(o) {
-      o.classList.remove('correct','wrong');
-    });
+    card.querySelectorAll('.s-opt').forEach(function(o) { o.classList.remove('correct','wrong'); });
     document.getElementById(qId + '-ok').style.display = 'none';
     document.getElementById(qId + '-err').style.display = 'none';
-
     quizPicks[qId] = isRight;
-
     if (isRight) {
       btn.classList.add('correct');
       document.getElementById(qId + '-ok').style.display = 'block';
@@ -1172,9 +1106,7 @@
     } else {
       btn.classList.add('wrong');
       card.querySelectorAll('.s-opt').forEach(function(o) {
-        if (o.getAttribute('onclick') && o.getAttribute('onclick').indexOf(',true)') > -1) {
-          o.classList.add('correct');
-        }
+        if (o.getAttribute('onclick') && o.getAttribute('onclick').indexOf(',true)') > -1) o.classList.add('correct');
       });
       document.getElementById(qId + '-err').style.display = 'block';
     }
@@ -1183,24 +1115,14 @@
   function submitQuiz() {
     var ids = ['sq1','sq2','sq3','sq4','sq5'];
     var correct = ids.filter(function(id) { return quizPicks[id] === true; }).length;
-
     document.getElementById('btn-quiz-submit').style.display = 'none';
     var result = document.getElementById('quiz-result');
     result.style.display = 'block';
     document.getElementById('score-num').textContent = correct;
-
     var msgs = ['더 공부해요!','조금 더 힘내요!','절반 맞혔어요!','잘 하고 있어요!','거의 완벽해요!','완벽해요! 👏'];
-    var subs = [
-      '개념자료를 꼭 읽어보세요.',
-      '개념자료에서 틀린 부분을 확인해보세요.',
-      '틀린 문제는 개념자료에서 확인해보세요.',
-      '조금만 더 하면 완벽해요!',
-      '거의 다 맞혔어요! 멋져요.',
-      '오늘 수업을 훌륭하게 시작했어요!'
-    ];
+    var subs = ['개념자료를 꼭 읽어보세요.','개념자료에서 틀린 부분을 확인해보세요.','틀린 문제는 개념자료에서 확인해보세요.','조금만 더 하면 완벽해요!','거의 다 맞혔어요! 멋져요.','오늘 수업을 훌륭하게 시작했어요!'];
     document.getElementById('score-msg').textContent = msgs[correct];
     document.getElementById('score-sub').textContent = subs[correct];
-
     if (done.indexOf(1) < 0) done.push(1);
     renderNav();
   }
@@ -1232,13 +1154,8 @@
     prog.style.display = 'block';
     var pct = 0;
     var iv = setInterval(function() {
-      pct += 2;
-      fill.style.width = pct + '%';
-      if (pct >= 100) {
-        clearInterval(iv);
-        playBtn.textContent = '✓';
-        toast('✅ 영상 시청 완료!', 'var(--color-ok)');
-      }
+      pct += 2; fill.style.width = pct + '%';
+      if (pct >= 100) { clearInterval(iv); playBtn.textContent = '✓'; toast('✅ 영상 시청 완료!', 'var(--color-ok)'); }
     }, 80);
   }
 
