@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수업 — 두 수 사칙연산 — 정보 AI 학습 플랫폼</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: #F8FAFC; overflow: hidden; }
+
+    /* ── 전체 2단 레이아웃 ───────────────────────── */
+    .sl-layout {
+      position: fixed;
+      top: var(--gnb-height);
+      left: 0; right: 0; bottom: 0;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── 좌측 목차 패널 ──────────────────────────── */
+    .sl-toc {
+      width: 240px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--color-border);
+      background: var(--color-white);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: width 0.25s ease;
+    }
+    .sl-toc.collapsed { width: 0; }
+
+    .sl-toc-header {
+      padding: var(--space-md);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: var(--color-white);
+    }
+
+    .toc-toggle-btn {
+      width: 22px; height: 22px; border-radius: 4px;
+      border: 1px solid var(--color-border);
+      background: transparent; color: var(--color-gray);
+      font-size: 12px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .toc-toggle-btn:hover { background: var(--color-light); color: var(--color-ink); }
+
+    .toc-show-btn {
+      position: fixed;
+      top: calc(var(--gnb-height) + 8px);
+      left: 4px;
+      z-index: 300;
+      display: none;
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--color-white);
+      color: var(--color-ink);
+      font-size: 14px; cursor: pointer;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      align-items: center; justify-content: center;
+    }
+    .toc-show-btn:hover { background: var(--color-light); }
+
+    .sl-toc-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .sl-toc-body::-webkit-scrollbar { width: 4px; }
+    .sl-toc-body::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+    /* 단원 헤더 */
+    .toc-unit-hd {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 9px var(--space-md);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--color-ink);
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid var(--color-border);
+      transition: background 0.15s;
+    }
+    .toc-unit-hd:hover { background: var(--color-light); }
+
+    .toc-caret {
+      font-size: 10px; width: 14px; text-align: center;
+      color: var(--color-gray);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .toc-caret.open { transform: rotate(90deg); }
+
+    .toc-children { display: none; flex-direction: column; }
+    .toc-children.open { display: flex; }
+
+    /* 차시 행 */
+    .toc-lesson-hd {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 8px var(--space-md) 8px 28px;
+      font-size: 12.5px;
+      color: var(--color-gray);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .toc-lesson-hd:hover { background: var(--color-light); color: var(--color-ink); }
+    .toc-lesson-hd.current {
+      background: rgba(6,90,130,0.06);
+      color: var(--color-mid);
+      font-weight: 700;
+      border-left-color: var(--color-mid);
+    }
+    .toc-lesson-hd.locked { opacity: 0.45; cursor: default; }
+    .toc-lesson-hd.locked:hover { background: none; }
+
+    .toc-lesson-steps { display: flex; flex-direction: column; }
+
+    /* 단계 행 */
+    .toc-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px var(--space-md) 6px 44px;
+      font-size: 12px;
+      color: var(--color-gray);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .toc-step:hover { background: var(--color-light); color: var(--color-ink); }
+    .toc-step.active {
+      background: rgba(6,90,130,0.07);
+      color: var(--color-mid);
+      font-weight: 600;
+      border-left-color: var(--color-mid);
+    }
+    .toc-step.done { color: var(--color-ok); }
+    .toc-step.done:hover { background: var(--color-light); }
+
+    .toc-step-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .toc-step.active .toc-step-dot { border-color: var(--color-mid); background: var(--color-mid); color: white; }
+    .toc-step.done   .toc-step-dot { border-color: var(--color-ok);  background: var(--color-ok);  color: white; }
+
+    /* TOC 하단 */
+    .sl-toc-footer {
+      padding: var(--space-sm) var(--space-md);
+      border-top: 1px solid var(--color-border);
+      font-size: 11px;
+      color: var(--color-gray);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      flex-shrink: 0;
+    }
+
+    /* ── 우측 콘텐츠 영역 ────────────────────────── */
+    .sl-content {
+      flex: 1;
+      overflow-y: auto;
+      height: 100%;
+      position: relative;
+      padding-bottom: 63px;
+    }
+
+    .sl-content-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    /* 단계 헤더 */
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+    .step-header-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .step-header-title { font-size: 18px; font-weight: 800; color: var(--color-ink); margin-bottom: 2px; }
+    .step-header-desc  { font-size: 13px; color: var(--color-gray); }
+
+    /* iframe */
+    .iframe-wrap {
+      border-radius: 10px;
+      overflow: hidden;
+      background: white;
+      border: 1px solid var(--color-border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .step-iframe {
+      width: 100%;
+      border: none;
+      display: block;
+      min-height: 500px;
+    }
+
+    /* 완료 CTA */
+    .step-cta {
+      margin-top: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--color-light);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      font-size: 13px;
+      color: var(--color-gray);
+    }
+    .step-cta.done {
+      background: rgba(13,148,136,0.08);
+      border: 1px solid rgba(13,148,136,0.2);
+      color: var(--color-ok);
+      font-weight: 600;
+    }
+
+    /* ── 하단 네비게이션 ─────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 240px; right: 0;
+      height: 60px;
+      background: var(--color-white);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-xl);
+      z-index: 200;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
+      transition: left 0.25s ease;
+    }
+
+    .step-dots { display: flex; gap: 8px; align-items: center; }
+    .s-dot { width: 8px; height: 8px; border-radius: 4px; background: var(--color-border); transition: all 0.25s; cursor: pointer; }
+    .s-dot.done   { background: var(--color-ok); }
+    .s-dot.active { background: var(--color-mid); width: 22px; }
+
+    /* 토스트 */
+    .s-toast {
+      position: fixed; bottom: 72px; left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: var(--color-ok); color: white;
+      padding: 10px 24px; border-radius: 24px; font-size: 13.5px; font-weight: 600;
+      z-index: 300; opacity: 0; pointer-events: none;
+      transition: all 0.3s; white-space: nowrap;
+    }
+    .s-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- GNB -->
+<header class="gnb" style="position:fixed;top:0;left:0;right:0;z-index:150;">
+  <div class="gnb-logo gnb-logo-compact">
+    <span class="logo-badge" style="background:var(--color-pre);">AI</span>
+    정보 AI 학습 플랫폼
+  </div>
+  <button class="gnb-back-btn" onclick="location.href='wfs_lesson.html'" aria-label="수업으로 이동">← 수업</button>
+  <span style="font-size:13px;color:var(--color-gray);margin-left:8px;border-left:1px solid var(--color-border);padding-left:12px;">Ⅲ-2-02 두 수 사칙연산</span>
+  <div class="gnb-spacer"></div>
+  <div class="gnb-actions">
+    <div class="gnb-teacher">
+      <span class="gnb-teacher-name">이서연</span>
+      <div class="gnb-avatar" style="background:var(--color-pre);" title="이서연">이</div>
+    </div>
+  </div>
+</header>
+
+<!-- 목차 복원 버튼 -->
+<button class="toc-show-btn" id="toc-show-btn" onclick="toggleToc()" aria-label="목차 열기">☰</button>
+
+<!-- ── 2단 레이아웃 ────────────────────────────────── -->
+<div class="sl-layout">
+
+  <!-- 좌측 목차 -->
+  <aside class="sl-toc" id="sl-toc">
+    <div class="sl-toc-header">
+      <span>목차</span>
+      <button class="toc-toggle-btn" onclick="toggleToc()" aria-label="목차 접기">✕</button>
+    </div>
+
+    <div class="sl-toc-body">
+
+      <!-- 단원 Ⅲ-2 -->
+      <div>
+        <div class="toc-unit-hd" onclick="toggleUnit(this)">
+          <span class="toc-caret open">▶</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Ⅲ-2. 프로그래밍하기</span>
+        </div>
+        <div class="toc-children open">
+
+          <!-- 차시 1 (이전 수업, 클릭 가능) -->
+          <div class="toc-lesson-hd" onclick="location.href='wfs_lesson.html'" style="cursor:pointer;">
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4;">✅ Ⅲ-2-01 변수와 자료형 이해하기</span>
+          </div>
+
+          <!-- 차시 2 (현재) -->
+          <div class="toc-lesson-hd current">
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4;">Ⅲ-2-02 두 수 사칙연산</span>
+          </div>
+          <div class="toc-lesson-steps" id="toc-steps">
+            <div class="toc-step" data-step="1" onclick="goToStep(1)">
+              <div class="toc-step-dot">1</div>
+              <span>표준 입력</span>
+            </div>
+            <div class="toc-step" data-step="2" onclick="goToStep(2)">
+              <div class="toc-step-dot">2</div>
+              <span>표준 출력</span>
+            </div>
+            <div class="toc-step" data-step="3" onclick="goToStep(3)">
+              <div class="toc-step-dot">3</div>
+              <span>입출력 활용 프로그램</span>
+            </div>
+            <div class="toc-step" data-step="4" onclick="goToStep(4)">
+              <div class="toc-step-dot">4</div>
+              <span>환율 변환 프로그램 만들기</span>
+            </div>
+            <div class="toc-step" data-step="5" onclick="goToStep(5)">
+              <div class="toc-step-dot">5</div>
+              <span>상태 표현과 구조화하기</span>
+            </div>
+          </div>
+
+          <!-- 차시 3 (잠금) -->
+          <div class="toc-lesson-hd locked">
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4;">🔒 Ⅲ-2-03 반복문 기초</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 단원 Ⅲ-3 (잠금) -->
+      <div>
+        <div class="toc-unit-hd" style="opacity:0.45;cursor:default;">
+          <span class="toc-caret">▶</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🔒 Ⅲ-3. 문제 해결과 알고리즘</span>
+        </div>
+      </div>
+
+    </div><!-- /sl-toc-body -->
+
+    <div class="sl-toc-footer">
+      <span id="toc-progress-text">0 / 5 단계 완료</span>
+    </div>
+
+  </aside>
+
+  <!-- 우측 콘텐츠 -->
+  <div class="sl-content" id="sl-content">
+    <div class="sl-content-inner">
+
+      <!-- ▶ STEP 1: 표준 입력 -->
+      <div class="step-panel active" id="step-1">
+        <div class="step-header">
+          <div class="step-header-icon" style="background:rgba(6,90,130,0.08);">⌨️</div>
+          <div>
+            <div class="step-header-title">표준 입력</div>
+            <div class="step-header-desc">input() 함수로 사용자 데이터를 입력받는 방법을 배워요 · 1/5단계</div>
+          </div>
+        </div>
+        <div class="iframe-wrap">
+          <iframe id="iframe-1" src="h-30203-06/index.html" class="step-iframe" title="표준 입력"></iframe>
+        </div>
+        <div class="step-cta" id="cta-1">
+          <span>내용을 모두 확인했나요?</span>
+          <button class="btn btn-primary btn-sm" onclick="completeStep(1)">✅ 완료 · 다음 단계로</button>
+        </div>
+      </div>
+
+      <!-- ▶ STEP 2: 표준 출력 -->
+      <div class="step-panel" id="step-2">
+        <div class="step-header">
+          <div class="step-header-icon" style="background:rgba(13,148,136,0.08);">🖨️</div>
+          <div>
+            <div class="step-header-title">표준 출력</div>
+            <div class="step-header-desc">print() 함수로 데이터를 화면에 출력하는 다양한 방법을 배워요 · 2/5단계</div>
+          </div>
+        </div>
+        <div class="iframe-wrap">
+          <iframe id="iframe-2" src="h-30203-07/index.html" class="step-iframe" title="표준 출력"></iframe>
+        </div>
+        <div class="step-cta" id="cta-2">
+          <span>내용을 모두 확인했나요?</span>
+          <button class="btn btn-primary btn-sm" onclick="completeStep(2)">✅ 완료 · 다음 단계로</button>
+        </div>
+      </div>
+
+      <!-- ▶ STEP 3: 입출력 활용 프로그램 -->
+      <div class="step-panel" id="step-3">
+        <div class="step-header">
+          <div class="step-header-icon" style="background:rgba(30,39,97,0.08);">🖥️</div>
+          <div>
+            <div class="step-header-title">입출력 활용 프로그램</div>
+            <div class="step-header-desc">표준 입출력을 결합해 실용적인 프로그램을 만들어봐요 · 3/5단계</div>
+          </div>
+        </div>
+        <div class="iframe-wrap">
+          <iframe id="iframe-3" src="h-30203-08/index.html" class="step-iframe" title="표준 입출력을 활용한 프로그램"></iframe>
+        </div>
+        <div class="step-cta" id="cta-3">
+          <span>내용을 모두 확인했나요?</span>
+          <button class="btn btn-primary btn-sm" onclick="completeStep(3)">✅ 완료 · 다음 단계로</button>
+        </div>
+      </div>
+
+      <!-- ▶ STEP 4: 환율 변환 프로그램 만들기 -->
+      <div class="step-panel" id="step-4">
+        <div class="step-header">
+          <div class="step-header-icon" style="background:rgba(217,119,6,0.08);">💱</div>
+          <div>
+            <div class="step-header-title">환율 변환 프로그램 만들기</div>
+            <div class="step-header-desc">입출력과 사칙연산을 활용해 환율 변환 프로그램을 완성해봐요 · 4/5단계</div>
+          </div>
+        </div>
+        <div class="iframe-wrap">
+          <iframe id="iframe-4" src="h-30203-09/index.html" class="step-iframe" title="환율 변환 프로그램 만들기"></iframe>
+        </div>
+        <div class="step-cta" id="cta-4">
+          <span>내용을 모두 확인했나요?</span>
+          <button class="btn btn-primary btn-sm" onclick="completeStep(4)">✅ 완료 · 다음 단계로</button>
+        </div>
+      </div>
+
+      <!-- ▶ STEP 5: 상태 표현과 구조화하기 -->
+      <div class="step-panel" id="step-5">
+        <div class="step-header">
+          <div class="step-header-icon" style="background:rgba(76,175,80,0.1);">🧩</div>
+          <div>
+            <div class="step-header-title">상태 표현과 구조화하기</div>
+            <div class="step-header-desc">문제의 상태를 표현하고 구조화하는 탐구 활동이에요 · 5/5단계</div>
+          </div>
+        </div>
+        <div class="iframe-wrap">
+          <iframe id="iframe-5" src="it-m-30101-12/index.html" class="step-iframe" title="문제의 상태 표현과 구조화하기"></iframe>
+        </div>
+        <div class="step-cta" id="cta-5">
+          <span>모든 단계를 완료했어요! 🎉</span>
+          <button class="btn btn-primary btn-sm" onclick="finalDone()">🏠 수업 화면으로 돌아가기</button>
+        </div>
+      </div>
+
+    </div><!-- /sl-content-inner -->
+  </div><!-- /sl-content -->
+
+</div><!-- /sl-layout -->
+
+<!-- 하단 네비게이션 -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="btn btn-ghost btn-sm" id="btn-prev" onclick="prevStep()">← 이전</button>
+  <div class="step-dots" id="step-dots"></div>
+  <button class="btn btn-primary btn-sm" id="btn-next" onclick="nextStep()">다음 →</button>
+</div>
+
+<div class="s-toast" id="s-toast">완료!</div>
+
+<script>
+  var cur = 1;
+  var done = [];
+  var TOTAL = 5;
+  var tocOpen = true;
+
+  var STEP_LABELS = [
+    '표준 입력',
+    '표준 출력',
+    '입출력 활용 프로그램',
+    '환율 변환 프로그램 만들기',
+    '상태 표현과 구조화하기'
+  ];
+
+  /* iframe 자동 높이 조정 (same-origin) */
+  function initIframe(n) {
+    var iframe = document.getElementById('iframe-' + n);
+    if (!iframe) return;
+    function resize() {
+      try {
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc) return;
+        var h = Math.max(
+          doc.body ? doc.body.scrollHeight : 0,
+          doc.documentElement ? doc.documentElement.scrollHeight : 0,
+          500
+        );
+        iframe.style.height = h + 'px';
+      } catch(e) {
+        iframe.style.height = '600px';
+      }
+    }
+    iframe.addEventListener('load', function() {
+      resize();
+      setTimeout(resize, 300);
+      setTimeout(resize, 900);
+    });
+  }
+
+  for (var _i = 1; _i <= TOTAL; _i++) { initIframe(_i); }
+
+  buildDots();
+  renderNav();
+
+  /* ── 목차 토글 ── */
+  function toggleToc() {
+    tocOpen = !tocOpen;
+    var toc = document.getElementById('sl-toc');
+    var showBtn = document.getElementById('toc-show-btn');
+    var nav = document.getElementById('bottom-nav');
+    if (tocOpen) {
+      toc.classList.remove('collapsed');
+      showBtn.style.display = 'none';
+      if (nav) nav.style.left = '240px';
+    } else {
+      toc.classList.add('collapsed');
+      showBtn.style.display = 'flex';
+      if (nav) nav.style.left = '0';
+    }
+  }
+
+  function toggleUnit(el) {
+    var caret = el.querySelector('.toc-caret');
+    var children = el.nextElementSibling;
+    if (caret && children) {
+      caret.classList.toggle('open');
+      children.classList.toggle('open');
+    }
+  }
+
+  /* ── TOC 단계 상태 갱신 ── */
+  function updateTocSteps() {
+    document.querySelectorAll('#toc-steps .toc-step').forEach(function(el) {
+      var n = parseInt(el.getAttribute('data-step'));
+      el.className = 'toc-step';
+      var dot = el.querySelector('.toc-step-dot');
+      if (done.indexOf(n) >= 0) {
+        el.classList.add('done');
+        if (dot) dot.textContent = '✓';
+      } else if (n === cur) {
+        el.classList.add('active');
+        if (dot) dot.textContent = n;
+      } else {
+        if (dot) dot.textContent = n;
+      }
+    });
+
+    var prog = document.getElementById('toc-progress-text');
+    if (prog) prog.textContent = done.length + ' / ' + TOTAL + ' 단계 완료';
+  }
+
+  /* ── 점 네비게이션 생성 ── */
+  function buildDots() {
+    var wrap = document.getElementById('step-dots');
+    wrap.innerHTML = '';
+    for (var i = 1; i <= TOTAL; i++) {
+      var d = document.createElement('div');
+      d.className = 's-dot';
+      d.setAttribute('data-step', i);
+      d.onclick = (function(n) { return function() { goToStep(n); }; })(i);
+      wrap.appendChild(d);
+    }
+  }
+
+  /* ── 화면 렌더링 ── */
+  function renderNav() {
+    /* 패널 전환 */
+    document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.remove('active'); });
+    var panel = document.getElementById('step-' + cur);
+    if (panel) panel.classList.add('active');
+
+    /* 점 상태 */
+    document.querySelectorAll('.s-dot').forEach(function(d) {
+      var n = parseInt(d.getAttribute('data-step'));
+      d.className = 's-dot';
+      if (done.indexOf(n) >= 0) d.classList.add('done');
+      else if (n === cur)        d.classList.add('active');
+    });
+
+    /* 이전 버튼 */
+    var pb = document.getElementById('btn-prev');
+    pb.disabled = (cur === 1);
+    pb.style.opacity = (cur === 1) ? '0.4' : '1';
+    pb.style.pointerEvents = (cur === 1) ? 'none' : '';
+
+    /* 다음 버튼 */
+    var nb = document.getElementById('btn-next');
+    if (cur === TOTAL) {
+      nb.textContent = '완료 🏠';
+    } else {
+      nb.textContent = '다음 →';
+    }
+
+    updateTocSteps();
+
+    /* 현재 단계 iframe 높이 재조정 */
+    var iframe = document.getElementById('iframe-' + cur);
+    if (iframe) {
+      try {
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (doc && doc.body) {
+          var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight, 500);
+          if (h > 500) iframe.style.height = h + 'px';
+        }
+      } catch(e) {}
+    }
+  }
+
+  function goToStep(n) {
+    cur = n;
+    renderNav();
+    document.getElementById('sl-content').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function prevStep() {
+    if (cur > 1) { goToStep(cur - 1); }
+  }
+
+  function nextStep() {
+    if (cur < TOTAL) {
+      goToStep(cur + 1);
+    } else {
+      finalDone();
+    }
+  }
+
+  function completeStep(n) {
+    if (done.indexOf(n) < 0) done.push(n);
+    var cta = document.getElementById('cta-' + n);
+    if (cta) {
+      cta.className = 'step-cta done';
+      cta.innerHTML = '<span>✅ ' + STEP_LABELS[n - 1] + ' 완료!</span>';
+    }
+    renderNav();
+    toast('✅ ' + STEP_LABELS[n - 1] + ' 완료!', 'var(--color-ok)');
+    if (n < TOTAL) {
+      setTimeout(function() { goToStep(n + 1); }, 700);
+    }
+  }
+
+  function finalDone() {
+    for (var i = 1; i <= TOTAL; i++) {
+      if (done.indexOf(i) < 0) done.push(i);
+    }
+    renderNav();
+    toast('🎉 Ⅲ-2-02 모든 단계 완료! 수고했어요.', 'var(--color-ok)');
+    setTimeout(function() { location.href = 'wfs_lesson.html'; }, 1400);
+  }
+
+  /* ── 토스트 ── */
+  var toastTimer;
+  function toast(msg, color) {
+    var el = document.getElementById('s-toast');
+    el.textContent = msg;
+    if (color) el.style.background = color;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { el.classList.remove('show'); }, 2500);
+  }
+</script>
+
+</body>
+</html>
