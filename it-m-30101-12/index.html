@@ -441,7 +441,12 @@
   'use strict';
 
   var root = window.__AI_CONTENT_ROOT__ || document;
-  var BASE = window.__AI_CONTENT_BASE__ || './';
+  var BASE = window.__AI_CONTENT_BASE__ || (function() {
+    var p = window.location.pathname;
+    if (p.indexOf('.') > p.lastIndexOf('/')) { p = p.substring(0, p.lastIndexOf('/') + 1); }
+    else if (p.slice(-1) !== '/') { p = p + '/'; }
+    return window.location.origin + p;
+  })();
 
   var app = root.getElementById('app');
 
