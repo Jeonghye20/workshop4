@@ -858,6 +858,10 @@
       bubbles: true, composed: true,
       detail: { height: app ? app.scrollHeight : 0 }
     }));
+    /* iframe → 부모 창으로 높이 재알림 (이미지 로드 후 대응) */
+    if (window.parent !== window) {
+      try { window.parent.postMessage({ type: 'content-resize', height: app ? app.scrollHeight : 0 }, '*'); } catch(e) {}
+    }
   }
 
   function onResize() { notifyResize(); }
@@ -867,6 +871,13 @@
   // 진입점
   // ================================================================
   render();
+
+  /* 이미지 로드 후 높이 재알림 */
+  if (app) {
+    app.querySelectorAll('img').forEach(function(img) {
+      if (!img.complete) { img.addEventListener('load', notifyResize); }
+    });
+  }
 
   void BASE;
 })();

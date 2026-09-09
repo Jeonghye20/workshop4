@@ -498,6 +498,7 @@
   ];
 
   /* iframe 자동 높이 조정 (same-origin) */
+  var _iframeResizers = {};
   function initIframe(n) {
     var iframe = document.getElementById('iframe-' + n);
     if (!iframe) return;
@@ -515,12 +516,37 @@
         iframe.style.height = '600px';
       }
     }
+    _iframeResizers[n] = resize;
     iframe.addEventListener('load', function() {
       resize();
+      /* 이미지 로드 완료 후 재계산 (동적 이미지 대응) */
+      try {
+        var doc2 = iframe.contentDocument || iframe.contentWindow.document;
+        doc2.querySelectorAll('img').forEach(function(img) {
+          if (!img.complete) {
+            img.addEventListener('load', resize);
+            img.addEventListener('error', resize);
+          }
+        });
+      } catch(e) {}
       setTimeout(resize, 300);
       setTimeout(resize, 900);
+      setTimeout(resize, 2000);
     });
   }
+
+  /* iframe → parent postMessage 로 높이 재알림 수신 */
+  window.addEventListener('message', function(e) {
+    if (!e.data || e.data.type !== 'content-resize') return;
+    for (var _ni = 1; _ni <= TOTAL; _ni++) {
+      var _fi = document.getElementById('iframe-' + _ni);
+      if (_fi && _fi.contentWindow === e.source) {
+        var _h = Math.max(Number(e.data.height) || 0, 500);
+        _fi.style.height = _h + 'px';
+        break;
+      }
+    }
+  });
 
   for (var _i = 1; _i <= TOTAL; _i++) { initIframe(_i); }
 
