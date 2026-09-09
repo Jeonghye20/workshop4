@@ -259,7 +259,7 @@ project/
 | 세션 19 | `wfs02_dashboard.html` 전면 재설계 — 좌측 사이드바(나의 학습·나의 교실) + 선생님 대시보드와 동일한 카드 레이아웃 + [수업 시작] 버튼(→ wfs_lesson.html) / `index.html`을 랜딩 선택 페이지로 유지 | ✅ 완료 |
 | 세션 20 | 학생 모드 GNB 개편 + 수업·실습 화면 연결 / `wfs02_dashboard.html` 6탭 분석 섹션 추가(AI추천·최근활동·강점약점·오답노트·성장확인·AI도움) / `wfs_lesson.html` 교과서 뷰어 2단 레이아웃으로 재설계 + 7단계 목차(엔트리실습1·2·파이썬실습 직접 연결) / 전체 학생 화면 GNB 교사 교과서 스타일로 통일(탭 제거, 로고·컨텍스트·아바타) / 엔트리·파이썬 실습에 `← 수업` 버튼 포함 GNB 복원 | ✅ 완료 |
 | 세션 21 | `wfs_lesson2.html` 신규 생성 — Ⅲ-2-02 두 수 사칙연산 (h-30203-06~09 + it-m-30101-12 iframe 통합, 5단계 뷰어) + wfs_lesson/entry/python TOC에서 Ⅲ-2-02 잠금 해제 | ✅ 완료 |
-| 세션 22 | 콘텐츠 폴더 iframe 버그 수정 3종: ① CSS/JS inline 삽입(404 해결) ② BASE 경로 동적 계산(이미지 깨짐 해결) ③ postMessage로 iframe 높이 재알림(it-m 이미지 로드 후 높이 오류 해결) + 교사·학생 수업 화면 콘텐츠 max-width 1100px로 확대 | ✅ 완료 |
+| 세션 22 | 콘텐츠 폴더 iframe 버그 수정 3종: ① CSS/JS inline 삽입(404 해결) ② BASE 경로 동적 계산(이미지 깨짐 해결) ③ postMessage로 iframe 높이 재알림(it-m 이미지 로드 후 높이 오류 해결) + 교사·학생 수업 화면 콘텐츠 max-width 1100px로 확대 + `wfs02_dashboard.html` GNB fixed 대응(body padding-top 추가·사이드바 위치 정상화) | ✅ 완료 |
 | 세션 23~ | 추가 작업 (예정) | - |
 
 각 세션 시작 시: "메모리 읽고 이어서 작업하자" 또는 "CLAUDE.md 읽고 [작업내용] 해줘" 형태로 지시.
