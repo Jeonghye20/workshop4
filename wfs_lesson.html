@@ -407,7 +407,7 @@
     /* ── 하단 네비게이션 ─────────────────────────── */
     .bottom-nav {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0; left: 240px; right: 0;
       height: 60px;
       background: var(--color-white);
       border-top: 1px solid var(--color-border);
@@ -417,6 +417,7 @@
       padding: 0 var(--space-xl);
       z-index: 200;
       box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
+      transition: left 0.25s ease;
     }
 
     .step-dots { display: flex; gap: 8px; align-items: center; }
@@ -456,7 +457,7 @@
 </header>
 
 <!-- 목차 복원 버튼 -->
-<button class="toc-show-btn" id="toc-show-btn" onclick="toggleToc()" aria-label="목차 열기">▶</button>
+<button class="toc-show-btn" id="toc-show-btn" onclick="toggleToc()" aria-label="목차 열기">☰</button>
 
 <!-- ── 2단 레이아웃 ────────────────────────────────── -->
 <div class="sl-layout">
@@ -465,7 +466,7 @@
   <aside class="sl-toc" id="sl-toc">
     <div class="sl-toc-header">
       <span>목차</span>
-      <button class="toc-toggle-btn" onclick="toggleToc()" aria-label="목차 접기">◀</button>
+      <button class="toc-toggle-btn" onclick="toggleToc()" aria-label="목차 접기">✕</button>
     </div>
 
     <div class="sl-toc-body">
@@ -536,10 +537,6 @@
 
     </div><!-- /sl-toc-body -->
 
-    <div class="sl-toc-footer">
-      <span>📊</span>
-      <span id="toc-progress-text">진행률 <strong>68%</strong></span>
-    </div>
   </aside>
 
   <!-- 우측 콘텐츠 -->
@@ -983,7 +980,16 @@
   var quizPicks = {};
   var tocOpen = true;
 
+  /* sessionStorage로 외부 실습 페이지 이동 후에도 단계 유지 */
+  (function() {
+    var sc = sessionStorage.getItem('wfs_lesson_cur');
+    var sd = sessionStorage.getItem('wfs_lesson_done');
+    if (sc) cur = parseInt(sc) || 2;
+    if (sd) { try { done = JSON.parse(sd); } catch(e) {} }
+  })();
+
   var STEP_LABELS = ['선행 퀴즈','개념자료','영상 학습','엔트리 실습 1','엔트리 실습 2','파이썬 실습','평가형 문제'];
+  var PRACTICE_LINKS = { 4: 'wfs03a_entry.html', 5: 'wfs03a_entry_v2.html', 6: 'wfs03b_python.html' };
 
   buildDots();
   renderNav();
@@ -993,12 +999,15 @@
     tocOpen = !tocOpen;
     var toc = document.getElementById('sl-toc');
     var showBtn = document.getElementById('toc-show-btn');
+    var bottomNav = document.querySelector('.bottom-nav');
     if (tocOpen) {
       toc.classList.remove('collapsed');
       showBtn.style.display = 'none';
+      if (bottomNav) bottomNav.style.left = '240px';
     } else {
       toc.classList.add('collapsed');
       showBtn.style.display = 'flex';
+      if (bottomNav) bottomNav.style.left = '0';
     }
   }
 
@@ -1029,9 +1038,13 @@
     });
   }
 
-  /* ── 하단 점 & 버튼 ── */
-  var PRACTICE_LINKS = { 4: 'wfs03a_entry.html', 5: 'wfs03a_entry_v2.html', 6: 'wfs03b_python.html' };
+  /* ── 상태 저장 ── */
+  function saveState() {
+    sessionStorage.setItem('wfs_lesson_cur', cur);
+    sessionStorage.setItem('wfs_lesson_done', JSON.stringify(done));
+  }
 
+  /* ── 하단 점 & 버튼 ── */
   function buildDots() {
     var wrap = document.getElementById('step-dots');
     wrap.innerHTML = '';
@@ -1040,7 +1053,7 @@
       d.className = 's-dot';
       d.setAttribute('data-step', i);
       if (PRACTICE_LINKS[i]) {
-        d.onclick = (function(url){ return function(){ location.href = url; }; })(PRACTICE_LINKS[i]);
+        d.onclick = (function(n, url){ return function(){ cur = n; saveState(); location.href = url; }; })(i, PRACTICE_LINKS[i]);
       } else {
         d.onclick = (function(n){ return function(){ goToStep(n); }; })(i);
       }
@@ -1069,25 +1082,43 @@
   }
 
   function goToStep(n) {
+    if (PRACTICE_LINKS[n]) { cur = n; saveState(); location.href = PRACTICE_LINKS[n]; return; }
     if (n > 1 && done.indexOf(n - 1) < 0 && done.indexOf(n) < 0) {
       toast('이전 단계를 먼저 완료해주세요!', '#D97706'); return;
     }
     cur = n;
     renderNav();
+    saveState();
     document.querySelector('.sl-content').scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function prevStep() { if (cur > 1) goToStep(cur - 1); }
+  function prevStep() {
+    if (cur > 1) {
+      var prev = cur - 1;
+      if (PRACTICE_LINKS[prev]) {
+        cur = prev;
+        saveState();
+        location.href = PRACTICE_LINKS[prev];
+      } else {
+        goToStep(prev);
+      }
+    }
+  }
+
   function nextStep() {
     if (cur < TOTAL) {
-      cur++;
+      var next = cur + 1;
+      if (PRACTICE_LINKS[next]) { cur = next; saveState(); location.href = PRACTICE_LINKS[next]; return; }
+      cur = next;
       renderNav();
+      saveState();
       document.querySelector('.sl-content').scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   function completeStep(n) {
     if (done.indexOf(n) < 0) done.push(n);
+    saveState();
     toast('✅ ' + STEP_LABELS[n-1] + ' 완료!', 'var(--color-ok)');
     setTimeout(function() { if (n < TOTAL) goToStep(n + 1); }, 900);
   }
@@ -1124,6 +1155,7 @@
     document.getElementById('score-msg').textContent = msgs[correct];
     document.getElementById('score-sub').textContent = subs[correct];
     if (done.indexOf(1) < 0) done.push(1);
+    saveState();
     renderNav();
   }
 
@@ -1140,6 +1172,7 @@
     document.getElementById('final-area').style.display = 'none';
     document.getElementById('done-area').style.display = 'block';
     for (var i = 1; i <= TOTAL; i++) { if (done.indexOf(i) < 0) done.push(i); }
+    saveState();
     renderNav();
     toast('🎉 수업 완료! 수고했어요!', 'var(--color-ok)');
   }

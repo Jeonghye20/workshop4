@@ -10,10 +10,117 @@
     body { overflow: hidden; }
 
     .practice-wrap {
+      position: fixed;
+      top: var(--gnb-height);
+      left: 240px;
+      right: 0;
+      bottom: 60px;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - var(--gnb-height));
+      overflow: hidden;
     }
+    /* ── 좌측 목차 ── */
+    .lesson-toc {
+      position: fixed;
+      top: var(--gnb-height);
+      left: 0; width: 240px; bottom: 60px;
+      background: var(--color-white);
+      border-right: 1px solid var(--color-border);
+      display: flex; flex-direction: column;
+      z-index: 100; overflow: hidden;
+      transition: left 0.25s ease;
+    }
+    .lesson-toc.collapsed { left: -240px; }
+    .lesson-toc-hd {
+      padding: var(--space-md);
+      font-size: 11px; font-weight: 700; color: var(--color-gray);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-border); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .toc-close-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--color-gray); font-size: 13px;
+      padding: 2px 5px; border-radius: 4px; line-height: 1;
+    }
+    .toc-close-btn:hover { background: var(--color-light); color: var(--color-ink); }
+    .toc-open-btn {
+      position: fixed;
+      top: calc(var(--gnb-height) + 8px);
+      left: 4px; z-index: 200;
+      display: none;
+      width: 32px; height: 32px; border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--color-white); color: var(--color-ink);
+      font-size: 16px; cursor: pointer;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      align-items: center; justify-content: center;
+    }
+    .toc-open-btn:hover { background: var(--color-light); }
+    .lesson-toc-body { flex: 1; overflow-y: auto; }
+    .toc-unit-hd {
+      display: flex; align-items: center; gap: var(--space-xs);
+      padding: 9px var(--space-md);
+      font-size: 12.5px; font-weight: 600; color: var(--color-ink);
+      cursor: pointer; user-select: none;
+      border-bottom: 1px solid var(--color-border);
+      transition: background 0.15s;
+    }
+    .toc-unit-hd:hover { background: var(--color-light); }
+    .toc-caret { font-size: 10px; width: 14px; text-align: center; color: var(--color-gray); transition: transform 0.2s; flex-shrink: 0; }
+    .toc-caret.open { transform: rotate(90deg); }
+    .toc-children { display: flex; flex-direction: column; }
+    .toc-lesson-hd {
+      display: flex; align-items: center;
+      padding: 8px var(--space-md) 8px 28px;
+      font-size: 12.5px; color: var(--color-gray);
+      border-left: 3px solid transparent; cursor: default; line-height: 1.4;
+    }
+    .toc-lesson-hd.current {
+      background: rgba(6,90,130,0.06); color: var(--color-mid);
+      font-weight: 700; border-left-color: var(--color-mid);
+    }
+    .toc-lesson-hd.locked { opacity: 0.45; }
+    .toc-step {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px var(--space-md) 6px 44px;
+      font-size: 12px; color: var(--color-gray);
+      cursor: pointer; border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .toc-step:hover { background: var(--color-light); color: var(--color-ink); }
+    .toc-step.active {
+      background: rgba(6,90,130,0.07); color: var(--color-mid);
+      font-weight: 600; border-left-color: var(--color-mid);
+    }
+    .toc-step.done { color: var(--color-ok); }
+    .toc-step.done:hover { background: var(--color-light); }
+    .toc-step-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; flex-shrink: 0; font-weight: 700; transition: all 0.2s;
+    }
+    .toc-step.active .toc-step-dot { border-color: var(--color-mid); background: var(--color-mid); color: white; }
+    .toc-step.done   .toc-step-dot { border-color: var(--color-ok);  background: var(--color-ok);  color: white; }
+    /* ── 하단 네비게이션 ── */
+    .practice-wrap { transition: left 0.25s ease; }
+    .lesson-bottom-nav {
+      position: fixed;
+      bottom: 0; left: 240px; right: 0; height: 60px;
+      transition: left 0.25s ease;
+      background: var(--color-white);
+      border-top: 1px solid var(--color-border);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-xl);
+      z-index: 200;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
+    }
+    .step-dots { display: flex; gap: 8px; align-items: center; }
+    .s-dot { width: 8px; height: 8px; border-radius: 4px; background: var(--color-border); cursor: pointer; transition: all 0.25s; }
+    .s-dot.done { background: var(--color-ok); }
+    .s-dot.active { background: var(--color-mid); width: 22px; }
 
     .practice-main {
       display: flex;
@@ -623,6 +730,16 @@
       transition: transform 0.15s, box-shadow 0.15s;
     }
     .ai-float-btn:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+    .btn-fullscreen {
+      height: 32px; border-radius: 6px; padding: 0 10px;
+      border: 1px solid var(--color-border);
+      background: transparent; color: var(--color-gray);
+      font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      transition: all 0.15s; flex-shrink: 0; white-space: nowrap;
+    }
+    .btn-fullscreen:hover { background: var(--color-light); color: var(--color-ink); }
+    .btn-fullscreen.active { background: var(--color-mid); color: white; border-color: var(--color-mid); }
   </style>
 </head>
 <body>
@@ -638,7 +755,7 @@
     <div class="gnb-spacer"></div>
     <div class="gnb-actions">
       <button class="btn-submit" onclick="submitWork()" aria-label="제출하기">제출하기</button>
-      <div style="display:flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--color-warn);">⏱ <span id="timer">23:45</span></div>
+      <button class="btn-fullscreen" id="btn-fullscreen" onclick="toggleFullscreen()" title="전체화면">⛶ 전체화면</button>
       <div class="gnb-teacher">
         <span class="gnb-teacher-name">김민준</span>
         <div class="gnb-avatar" style="background:var(--color-entry);" title="김민준">민</div>
@@ -647,6 +764,43 @@
   </header>
 
   <!-- 전체 래퍼 -->
+  <!-- 좌측 목차 -->
+  <!-- 삼선 버튼 (목차 접혔을 때 표시) -->
+  <button class="toc-open-btn" id="toc-open-btn" onclick="toggleLessonToc()" aria-label="목차 열기">☰</button>
+
+  <aside class="lesson-toc" id="lesson-toc">
+    <div class="lesson-toc-hd">
+      <span>목차</span>
+      <button class="toc-close-btn" onclick="toggleLessonToc()" aria-label="목차 닫기">✕</button>
+    </div>
+    <div class="lesson-toc-body">
+      <div>
+        <div class="toc-unit-hd">
+          <span class="toc-caret open">▶</span>
+          <span>Ⅲ-2. 프로그래밍하기</span>
+        </div>
+        <div class="toc-children">
+          <div class="toc-lesson-hd current">Ⅲ-2-01 변수와 자료형 이해하기</div>
+          <div class="toc-step done" onclick="goToLesson(1)"><div class="toc-step-dot">✓</div><span>선행 퀴즈</span></div>
+          <div class="toc-step done" onclick="goToLesson(2)"><div class="toc-step-dot">✓</div><span>개념자료</span></div>
+          <div class="toc-step done" onclick="goToLesson(3)"><div class="toc-step-dot">✓</div><span>영상 학습</span></div>
+          <div class="toc-step done" onclick="location.href='wfs03a_entry.html'"><div class="toc-step-dot">✓</div><span>엔트리 실습 1</span></div>
+          <div class="toc-step active"><div class="toc-step-dot">5</div><span>엔트리 실습 2</span></div>
+          <div class="toc-step" onclick="location.href='wfs03b_python.html'"><div class="toc-step-dot">6</div><span>파이썬 실습</span></div>
+          <div class="toc-step" onclick="goToLesson(7)"><div class="toc-step-dot">7</div><span>평가형 문제</span></div>
+          <div class="toc-lesson-hd locked">🔒 Ⅲ-2-02 두 수 사칙연산</div>
+          <div class="toc-lesson-hd locked">🔒 Ⅲ-2-03 반복문 기초</div>
+        </div>
+      </div>
+      <div>
+        <div class="toc-unit-hd" style="opacity:0.45;cursor:default;">
+          <span class="toc-caret">▶</span>
+          <span>🔒 Ⅲ-3. 문제 해결과 알고리즘</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
   <div class="practice-wrap">
     <div class="practice-main">
 
@@ -869,6 +1023,21 @@
 
     </div><!-- /.practice-main -->
   </div><!-- /.practice-wrap -->
+
+  <!-- 하단 네비게이션 -->
+  <div class="lesson-bottom-nav">
+    <button class="btn btn-ghost btn-sm" onclick="goPrev()">← 이전</button>
+    <div class="step-dots">
+      <div class="s-dot done" onclick="goToLesson(1)" title="선행 퀴즈"></div>
+      <div class="s-dot done" onclick="goToLesson(2)" title="개념자료"></div>
+      <div class="s-dot done" onclick="goToLesson(3)" title="영상 학습"></div>
+      <div class="s-dot done" onclick="location.href='wfs03a_entry.html'" title="엔트리 실습 1"></div>
+      <div class="s-dot active" title="엔트리 실습 2"></div>
+      <div class="s-dot" onclick="location.href='wfs03b_python.html'" title="파이썬 실습"></div>
+      <div class="s-dot" onclick="goToLesson(7)" title="평가형 문제"></div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="goNext()">다음 →</button>
+  </div>
 
   <!-- ── 이미지 팝업 모달 ── -->
   <div class="img-modal" id="modal-run-screen" onclick="handleModalBgClick(event,'run-screen')">
@@ -1236,16 +1405,67 @@
       });
     })();
 
-    /* ── 카운트다운 타이머 ── */
-    var secs = 23 * 60 + 45;
-    setInterval(function() {
-      if (secs > 0) secs--;
-      var m  = String(Math.floor(secs / 60)).padStart(2, '0');
-      var s  = String(secs % 60).padStart(2, '0');
-      var el = document.getElementById('timer');
-      el.textContent = m + ':' + s;
-      el.style.color = secs < 300 ? 'var(--color-danger)' : 'var(--color-warn)';
-    }, 1000);
+    // ── 목차 토글 ──
+    function toggleLessonToc() {
+      var toc  = document.getElementById('lesson-toc');
+      var wrap = document.querySelector('.practice-wrap');
+      var nav  = document.querySelector('.lesson-bottom-nav');
+      var btn  = document.getElementById('toc-open-btn');
+      var collapsed = toc.classList.toggle('collapsed');
+      var left = collapsed ? '0px' : '240px';
+      wrap.style.left = left;
+      nav.style.left  = left;
+      btn.style.display = collapsed ? 'flex' : 'none';
+    }
+
+    // ── 목차 네비게이션 ──
+    function goPrev() { location.href = 'wfs03a_entry.html'; }
+    function goNext() { location.href = 'wfs03b_python.html'; }
+    function goToLesson(step) {
+      sessionStorage.setItem('wfs_lesson_cur', step);
+      location.href = 'wfs_lesson.html';
+    }
+
+
+    var isFullscreen = false;
+    var tocWasCollapsed = false;
+
+    function toggleFullscreen() {
+      isFullscreen = !isFullscreen;
+      var btn       = document.getElementById('btn-fullscreen');
+      var toc       = document.getElementById('lesson-toc');
+      var wrap      = document.querySelector('.practice-wrap');
+      var nav       = document.querySelector('.lesson-bottom-nav');
+      var openBtn   = document.getElementById('toc-open-btn');
+      var stepPanel = document.querySelector('.step-panel');
+
+      if (isFullscreen) {
+        tocWasCollapsed = toc.classList.contains('collapsed');
+        btn.innerHTML = '⛶ 화면닫기';
+        btn.classList.add('active');
+        toc.classList.add('collapsed');
+        wrap.style.left = '0px';
+        nav.style.left  = '0px';
+        if (openBtn) openBtn.style.display = 'none';
+        if (stepPanel) stepPanel.style.display = 'none';
+      } else {
+        btn.innerHTML = '⛶ 전체화면';
+        btn.classList.remove('active');
+        if (stepPanel) stepPanel.style.display = '';
+        if (!tocWasCollapsed) {
+          toc.classList.remove('collapsed');
+          wrap.style.left = '240px';
+          nav.style.left  = '240px';
+          if (openBtn) openBtn.style.display = 'none';
+        } else {
+          if (openBtn) openBtn.style.display = 'flex';
+        }
+      }
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && isFullscreen) toggleFullscreen();
+    });
   </script>
 </body>
 </html>
