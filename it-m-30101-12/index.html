@@ -4,10 +4,872 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>문제의 상태 표현과 구조화하기 — 해 보기 ③</title>
-  <link rel="stylesheet" href="./css/app.css" />
+  <style>
+/*
+  [필수] body, html 선택자 사용 금지.
+  모든 스타일은 #app 기준으로 작성.
+*/
+
+@font-face {
+  font-family: 'NotoSansKR';
+  src: url('./fonts/NotoSansKR-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'NotoSansKR';
+  src: url('./fonts/NotoSansKR-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'NotoSansKR';
+  src: url('./fonts/NotoSansKR-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'LOTTESEOLLEIMcool';
+  src: url('./fonts/LOTTESEOLLEIMcool-SemiBold.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+#app {
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: 'NotoSansKR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  background: #fef7ef;
+  padding: 24px 20px 32px;
+  line-height: 1.6;
+}
+
+#app * { box-sizing: border-box; }
+
+/* ── 헤더 ── */
+.c-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+.c-header-left { display: flex; align-items: center; gap: 12px; }
+
+.badge-haebogi {
+  background: #f97316;
+  color: #fff;
+  font-weight: 700;
+  font-size: 22px;
+  padding: 8px 22px;
+  border-radius: 24px;
+  white-space: nowrap;
+}
+.c-subtitle { font-size: 22px; color: #555; font-weight: 500; }
+.c-header-right { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.badge-탐구 {
+  background: #f97316; color: #fff;
+  font-size: 14px; padding: 4px 14px;
+  border-radius: 20px; font-weight: 600;
+}
+.badge-개별 {
+  background: #e5e7eb; color: #555;
+  font-size: 14px; padding: 4px 12px;
+  border-radius: 20px; font-weight: 500;
+}
+
+/* ── 섹션 안내 문구 ── */
+.section-instruct {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.bul-robot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f97316;
+  flex-shrink: 0;
+  position: relative;
+}
+.bul-robot::before {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-radius: 2px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+  box-shadow: -3px 0 0 0 #fff, 3px 0 0 0 #fff;
+}
+.bul-robot::after {
+  content: '';
+  display: block;
+  width: 2px;
+  height: 6px;
+  background: #fff;
+  border-radius: 1px;
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ── 지문 (이미지 배경) ── */
+.passage-wrap {
+  position: relative;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.passage-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.passage-text {
+  position: absolute;
+  top: 7.5%;
+  left: 2.7%;
+  width: 50%;
+  margin: 0;
+  font-size: clamp(13px, 2.2vw, 28px);
+  line-height: 1.85;
+  color: #222;
+  font-weight: 500;
+}
+
+/* ── 문제 블록 공통 ── */
+.q-block {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.q-title {
+  font-size: 21px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+}
+.q-num { font-size: 24px; margin-right: 4px; }
+.q-note {
+  display: block;
+  font-size: 16px;
+  font-weight: 400;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* ── ①번 ── */
+.q1-given-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #eff6ff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.q1-tag {
+  display: inline-block;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 2px 12px;
+  border-radius: 12px;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+.q1-given-text { font-size: 17px; color: #1e3a5f; line-height: 1.7; }
+.q1-input-wrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.q1-example {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+.q1-ex-label {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 600;
+  background: #e2e8f0;
+  padding: 1px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.q1-ex-text { font-size: 17px; color: #475569; }
+.q1-field { padding: 2px 0 0; }
+.q1-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 10px 14px;
+  font-size: 17px;
+  font-family: inherit;
+  color: #1e293b;
+  resize: none;
+  background: #fff;
+  line-height: 1.6;
+}
+.q1-input::placeholder { color: #94a3b8; }
+.q1-input[readonly]    { background: #f8fafc; cursor: default; }
+
+/* ── ②번 이미지 오버레이 ── */
+.q2-pair {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.q2-group-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+.q2-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.q2-state-label {
+  position: absolute;
+  top: 3%;
+  left: 1%;
+  width: 17%;
+  height: 40%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: clamp(11px, 1.6vw, 24px);
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+  white-space: pre-line;
+}
+.q2-char-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(10px, 1.2vw, 18px);
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+}
+.q2-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1.5px dashed rgba(100,100,200,0.5);
+  background: rgba(255,255,255,0.6);
+  transition: background 0.12s, border-color 0.12s;
+  user-select: none;
+}
+.q2-cell:hover {
+  background: rgba(220, 240, 255, 0.85);
+  border-color: #38bdf8;
+}
+
+/* ── ③번 이미지 오버레이 ── */
+.q3-img-wrap {
+  position: relative;
+  width: 100%;
+}
+.q3-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.q3-col-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(10px, 1.3vw, 20px);
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+}
+.q3-row-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(9px, 1.1vw, 17px);
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  white-space: nowrap;
+}
+.q3-cell-fixed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(13px, 1.6vw, 24px);
+  font-weight: 700;
+  color: #1a1a1a;
+  background: rgba(255,255,255,0.5);
+  border-radius: 3px;
+}
+.ex-label {
+  font-size: 0.65em;
+  color: #999;
+  margin-right: 2px;
+  font-weight: 400;
+}
+.q3-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 3px;
+  border: 1.5px dashed rgba(100,100,200,0.4);
+  background: rgba(255,255,255,0.6);
+  transition: background 0.12s, border-color 0.12s;
+  user-select: none;
+}
+.q3-cell:hover {
+  background: rgba(220,240,255,0.85);
+  border-color: #38bdf8;
+}
+
+/* 펜슬 아이콘 & 값 텍스트 (공통) */
+.pencil {
+  font-size: clamp(12px, 1.4vw, 20px);
+  color: #94a3b8;
+  pointer-events: none;
+}
+.cell-val {
+  font-size: clamp(14px, 1.8vw, 26px);
+  font-weight: 700;
+  color: #1e293b;
+  pointer-events: none;
+}
+
+/* 정답/오답 공통 */
+.cell-correct {
+  background: rgba(240,253,244,0.95) !important;
+  border: 2px solid #22c55e !important;
+  cursor: default;
+}
+.cell-correct .cell-val { color: #15803d; }
+
+.cell-wrong {
+  background: rgba(255,241,242,0.95) !important;
+  border: 2px solid #f43f5e !important;
+  cursor: default;
+}
+.cell-wrong .cell-val { color: #be123c; }
+
+.cell-warn {
+  border-color: #f97316 !important;
+  background: rgba(255,247,237,0.95) !important;
+  animation: warn-shake 0.35s ease;
+}
+@keyframes warn-shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-4px); }
+  75%       { transform: translateX(4px); }
+}
+
+/* ── 하단 버튼/결과 ── */
+.c-warning {
+  min-height: 24px;
+  font-size: 16px;
+  color: #ea580c;
+  font-weight: 600;
+  margin: 4px 2px 0;
+}
+.c-result {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 10px 0 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+.c-result-ok { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.c-result-no { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+.c-btn-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.c-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.13s, transform 0.1s;
+}
+.c-btn:active       { transform: scale(0.97); }
+.c-btn-submit       { background: #16a34a; color: #fff; }
+.c-btn-submit:hover { background: #15803d; }
+.c-btn-reset        { background: #6b7280; color: #fff; }
+.c-btn-reset:hover  { background: #4b5563; }
+  </style>
 </head>
 <body>
   <div id="app"></div>
-  <script src="./js/app.js"></script>
+  <script>
+(function () {
+  'use strict';
+
+  var root = window.__AI_CONTENT_ROOT__ || document;
+  var BASE = window.__AI_CONTENT_BASE__ || './';
+
+  var app = root.getElementById('app');
+
+  // ================================================================
+  // 상수
+  // ================================================================
+  var COLS = ['농부', '늑대', '염소', '양배추'];
+
+  // ②번 정답
+  var Q2_INIT_ANS = [0, 0, 0, 0];
+  var Q2_GOAL_ANS = [1, 1, 1, 1];
+
+  // ③번 정답
+  var Q3_ANSWERS = [
+    [0, 0, 0, 0],
+    [1, 0, 1, 0],
+    [0, 0, 1, 0],
+    [1, 1, 1, 0],
+    [0, 1, 0, 0],
+    [1, 1, 0, 1],
+    [0, 1, 0, 1],
+    [1, 1, 1, 1]
+  ];
+
+  // ③번 고정 셀 (농부 열 일부)
+  var Q3_FIXED = [
+    [true,  false, false, false],
+    [true,  false, false, false],
+    [false, false, false, false],
+    [false, false, false, false],
+    [false, false, false, false],
+    [false, false, false, false],
+    [false, false, false, false],
+    [true,  false, false, false]
+  ];
+
+  // ③번 그리드 위치 (원본 1316×626 기준 %)
+  var Q3_ROW_TOPS  = [11.82, 22.84, 33.87, 44.89, 55.91, 66.93, 77.96, 88.98];
+  var Q3_COL_LEFTS = [16.19, 36.76, 57.33, 77.91];
+  var Q3_CELL_W    = 20.57;
+  var Q3_CELL_H    = 11.02;
+
+  // ③번 레이블 위치 (원본 1316×626 기준 %)
+  var Q3_COL_LABEL_TOPS  = [2.24, 2.24, 2.24, 2.24];
+  var Q3_COL_LABEL_LEFTS = [22.0, 42.5, 63.2, 83.8];
+  var Q3_ROW_LABEL_LEFTS = 1.37;
+  var Q3_ROW_LABEL_TOPS  = [13.42, 51.12, 89.14];
+  var Q3_ROW_LABELS      = ['초기 상태', '현재 상태', '목표 상태'];
+
+  // ②번 그리드 위치 (원본 620×243 기준 %)
+  var Q2_INPUT_TOP   = 73.3;
+  var Q2_INPUT_H     = 23.0;
+  var Q2_COL_LEFTS   = [15.3, 36.4, 57.4, 78.5];
+  var Q2_INPUT_W     = 19.4;
+  var Q2_NAME_TOP    = 50.6;
+  var Q2_NAME_LEFTS  = [14.5, 35.6, 56.8, 78.1];
+  var Q2_NAME_W      = 21.0;
+
+  // ================================================================
+  // 상태
+  // ================================================================
+  var _q1text  = '';
+  var _q2init  = [null, null, null, null];
+  var _q2goal  = [null, null, null, null];
+  var _q3cells = makeQ3Cells();
+  var _graded  = false;
+  var _warning = false;
+  var _warnTimer    = 0;
+  var _inputEnabled = true;
+
+  function makeQ3Cells() {
+    var a = [];
+    for (var i = 0; i < 8; i++) a.push([null, null, null, null]);
+    return a;
+  }
+
+  // ================================================================
+  // [필수] 정리 함수
+  // ================================================================
+  function cleanup() {
+    clearTimeout(_warnTimer);
+    window.removeEventListener('resize', onResize);
+  }
+  if (window.__AI_CONTENT_DISPOSE__) window.__AI_CONTENT_DISPOSE__.push(cleanup);
+
+  // ================================================================
+  // [연동] 뷰어 훅
+  // ================================================================
+  function collectState() {
+    return {
+      q1: _q1text,
+      q2init: _q2init.slice(),
+      q2goal: _q2goal.slice(),
+      q3: JSON.parse(JSON.stringify(_q3cells)),
+      graded: _graded
+    };
+  }
+
+  function restoreState(saved) {
+    if (!saved) return;
+    _q1text  = saved.q1 || '';
+    _q2init  = saved.q2init ? saved.q2init.slice() : [null, null, null, null];
+    _q2goal  = saved.q2goal ? saved.q2goal.slice() : [null, null, null, null];
+    _q3cells = saved.q3 ? JSON.parse(JSON.stringify(saved.q3)) : makeQ3Cells();
+    _graded  = !!saved.graded;
+    render();
+  }
+
+  function resetState() {
+    _q1text  = '';
+    _q2init  = [null, null, null, null];
+    _q2goal  = [null, null, null, null];
+    _q3cells = makeQ3Cells();
+    _graded  = false;
+    _warning = false;
+    _inputEnabled = true;
+    render();
+  }
+
+  function isQ2Correct() {
+    for (var i = 0; i < 4; i++) {
+      if (_q2init[i] === null || +_q2init[i] !== Q2_INIT_ANS[i]) return false;
+      if (_q2goal[i] === null || +_q2goal[i] !== Q2_GOAL_ANS[i]) return false;
+    }
+    return true;
+  }
+
+  function isQ3Correct() {
+    for (var r = 0; r < 8; r++) {
+      for (var c = 0; c < 4; c++) {
+        if (!Q3_FIXED[r][c] && (_q3cells[r][c] === null || +_q3cells[r][c] !== Q3_ANSWERS[r][c])) return false;
+      }
+    }
+    return true;
+  }
+
+  function allCorrect() { return isQ2Correct() && isQ3Correct(); }
+
+  function isQ2Filled() {
+    for (var i = 0; i < 4; i++) {
+      if (_q2init[i] === null || _q2goal[i] === null) return false;
+    }
+    return true;
+  }
+
+  function isQ3Filled() {
+    for (var r = 0; r < 8; r++) {
+      for (var c = 0; c < 4; c++) {
+        if (!Q3_FIXED[r][c] && _q3cells[r][c] === null) return false;
+      }
+    }
+    return true;
+  }
+
+  if (window.__AI_CONTENT_HOOKS__) {
+    Object.assign(window.__AI_CONTENT_HOOKS__, {
+      getUserInputs: function () {
+        return [{
+          result: _graded ? (allCorrect() ? 'y' : 'n') : '',
+          solved: _graded ? 'all' : ((isQ2Filled() && isQ3Filled()) ? 'partial' : ''),
+          input:  collectState()
+        }];
+      },
+      setUserInputs: function (inputs) {
+        var saved = inputs && inputs[0] && inputs[0].input;
+        if (saved) restoreState(saved);
+      },
+      clearUserInputs: resetState,
+      setMute:         function () {},
+      setUnMute:       function () {},
+      setDisableInput: function () { _inputEnabled = false; applyLock(); },
+      setEnableInput:  function () { _inputEnabled = true;  applyLock(); }
+    });
+  }
+
+  function applyLock() {
+    if (app) app.style.pointerEvents = _inputEnabled ? '' : 'none';
+  }
+
+  // ================================================================
+  // 렌더링
+  // ================================================================
+
+  function pct(top, left, w, h) {
+    return 'position:absolute;top:' + top + '%;left:' + left + '%;width:' + w + '%;height:' + h + '%;';
+  }
+
+  function renderHeader() {
+    return '<div class="c-header">'
+         +   '<div class="c-header-left">'
+         +     '<span class="badge-haebogi">해 보기</span>'
+         +     '<span class="c-subtitle">문제의 상태 표현과 구조화하기</span>'
+         +   '</div>'
+         +   '<div class="c-header-right">'
+         +     '<span class="badge-탐구">탐구</span>'
+         +     '<span class="badge-개별">개별</span>'
+         +   '</div>'
+         + '</div>'
+         + '<h3 class="section-instruct">'
+         +   '<span class="bul-robot"></span>'
+         +   '다음을 읽고, 물음에 답해 보자.'
+         + '</h3>';
+  }
+
+  function renderPassage() {
+    return '<div class="passage-wrap">'
+         +   '<img src="' + BASE + 'assets/it_m_30101_12_bg.png" class="passage-bg" alt="강 건너기 문제">'
+         +   '<p class="passage-text">'
+         +     '농부가 늑대, 염소, 양배추를 배에 싣고 강을 건너려고 한다.<br>'
+         +     '배에는 농부 외에 한 가지만 더 실을 수 있다. 그런데 양배추를<br>'
+         +     '싣고 염소와 늑대를 남겨 두면 늑대가 염소를 잡아먹는다. 또<br>'
+         +     '늑대를 싣고 염소와 양배추를 남겨 두면 염소가 양배추를 먹어<br>'
+         +     '버린다. 이러한 상황에서 모두 안전하게 강을 건너야 한다.'
+         +   '</p>'
+         + '</div>';
+  }
+
+  function renderQ1() {
+    return '<div class="q-block">'
+         +   '<p class="q-title"><span class="q-num">❶</span> 강 건너기 문제의 조건을 써 보자.</p>'
+         +   '<div class="q1-given-wrap">'
+         +     '<span class="q1-tag">조건</span>'
+         +     '<span class="q1-given-text">농부는 혼자 이동 가능하지만 늑대, 양배추, 염소는 반드시 사람과 함께 이동해야 한다.</span>'
+         +   '</div>'
+         +   '<div class="q1-input-wrap">'
+         +     '<div class="q1-example">'
+         +       '<span class="q1-ex-label">예</span>'
+         +       '<span class="q1-ex-text">늑대와 염소는 한 장소에 있을 수 없다.</span>'
+         +     '</div>'
+         +     '<div class="q1-field">'
+         +       '<textarea class="q1-input" rows="2" placeholder="또 다른 조건을 써 보세요." '
+         +         + (_graded ? 'readonly ' : '') + '></textarea>'
+         +     '</div>'
+         +   '</div>'
+         + '</div>';
+  }
+
+  function renderQ2Group(group, imgFile, stateLabel) {
+    var arr = group === 'init' ? _q2init : _q2goal;
+    var ans = group === 'init' ? Q2_INIT_ANS : Q2_GOAL_ANS;
+
+    var h = '<div class="q2-group-wrap">';
+    h += '<img src="' + BASE + 'assets/' + imgFile + '" class="q2-bg" alt="' + stateLabel + '">';
+
+    h += '<div class="q2-state-label">' + stateLabel + '</div>';
+
+    for (var i = 0; i < 4; i++) {
+      h += '<div class="q2-char-name" style="' + pct(Q2_NAME_TOP, Q2_NAME_LEFTS[i], Q2_NAME_W, 12) + '">'
+         +   COLS[i]
+         + '</div>';
+    }
+
+    for (var j = 0; j < 4; j++) {
+      var val = arr[j];
+      var cls = 'q2-cell';
+      if (_graded) {
+        cls += (val !== null && +val === ans[j]) ? ' cell-correct' : ' cell-wrong';
+      }
+      h += '<div class="' + cls + '" data-action="q2cycle" data-group="' + group + '" data-idx="' + j + '" '
+         +   'style="' + pct(Q2_INPUT_TOP, Q2_COL_LEFTS[j], Q2_INPUT_W, Q2_INPUT_H) + '">'
+         +   (val === null ? '<span class="pencil">✏</span>' : '<span class="cell-val">' + val + '</span>')
+         + '</div>';
+    }
+
+    h += '</div>';
+    return h;
+  }
+
+  function renderQ2() {
+    return '<div class="q-block">'
+         +   '<p class="q-title"><span class="q-num">❷</span> 문제의 상태를 수행 가능한 상태로 구조화하여 나타내 보자.'
+         +     '<span class="q-note">(단, 강을 건너기 전 출발 위치를 0, 강을 건넌 후 도착 위치를 1이라고 한다.)</span>'
+         +   '</p>'
+         +   '<div class="q2-pair">'
+         +     renderQ2Group('init', 'left-list1.png', '초기\n상태')
+         +     renderQ2Group('goal', 'left-list-2.png', '목표\n상태')
+         +   '</div>'
+         + '</div>';
+  }
+
+  function renderQ3() {
+    var h = '<div class="q-block">'
+          +   '<p class="q-title"><span class="q-num">❸</span> ❷에서 구조화한 상태를 이용하여 초기 상태에서 목표 상태에 도달하는 현재 상태의 단계를 나타내 보자.</p>'
+          +   '<div class="q3-img-wrap">'
+          +     '<img src="' + BASE + 'assets/it_m_30101_12_2.png" class="q3-bg" alt="상태 단계 표">';
+
+    for (var c = 0; c < 4; c++) {
+      h += '<div class="q3-col-label" style="' + pct(Q3_COL_LABEL_TOPS[c], Q3_COL_LABEL_LEFTS[c], 12, 8) + '">' + COLS[c] + '</div>';
+    }
+
+    for (var s = 0; s < 3; s++) {
+      h += '<div class="q3-row-label" style="' + pct(Q3_ROW_LABEL_TOPS[s], Q3_ROW_LABEL_LEFTS, 13, 10) + '">'
+         +   Q3_ROW_LABELS[s]
+         + '</div>';
+    }
+
+    for (var r = 0; r < 8; r++) {
+      for (var col = 0; col < 4; col++) {
+        var style = pct(Q3_ROW_TOPS[r], Q3_COL_LEFTS[col], Q3_CELL_W, Q3_CELL_H);
+        if (Q3_FIXED[r][col]) {
+          h += '<div class="q3-cell-fixed" style="' + style + '">'
+             +   '<span class="ex-label">예</span>' + Q3_ANSWERS[r][col]
+             + '</div>';
+        } else {
+          var val  = _q3cells[r][col];
+          var tdCls = 'q3-cell';
+          if (_graded) {
+            tdCls += (val !== null && +val === Q3_ANSWERS[r][col]) ? ' cell-correct' : ' cell-wrong';
+          } else if (_warning && val === null) {
+            tdCls += ' cell-warn';
+          }
+          h += '<div class="' + tdCls + '" data-action="q3cycle" data-r="' + r + '" data-c="' + col + '" style="' + style + '">'
+             +   (val === null ? '<span class="pencil">✏</span>' : '<span class="cell-val">' + val + '</span>')
+             + '</div>';
+        }
+      }
+    }
+
+    h += '</div></div>';
+    return h;
+  }
+
+  function render() {
+    var h = renderHeader()
+          + renderPassage()
+          + renderQ1()
+          + renderQ2()
+          + renderQ3();
+
+    h += '<div class="c-warning">' + (_warning ? '✗ ②와 ③의 빈 칸을 모두 채워 주세요.' : '') + '</div>';
+
+    if (_graded) {
+      var ok = allCorrect();
+      h += '<div class="c-result ' + (ok ? 'c-result-ok' : 'c-result-no') + '">'
+         +   (ok ? '정답입니다! 🎉' : '틀린 칸이 있어요. 다시 확인해 보세요.')
+         + '</div>';
+    }
+
+    h += '<div class="c-btn-wrap">';
+    h += _graded
+       ? '<button class="c-btn c-btn-reset" data-action="reset">↺ 다시 풀기</button>'
+       : '<button class="c-btn c-btn-submit" data-action="submit">제출하기 ▶</button>';
+    h += '</div>';
+
+    if (app) app.innerHTML = h;
+
+    var ta = root.querySelector('.q1-input');
+    if (ta) ta.value = _q1text;
+
+    notifyResize();
+  }
+
+  // ================================================================
+  // 이벤트 위임
+  // ================================================================
+  root.addEventListener('input', function (e) {
+    var ta = e.target.closest('.q1-input');
+    if (ta) _q1text = ta.value;
+  });
+
+  root.addEventListener('click', function (e) {
+    if (!_inputEnabled) return;
+    var el = e.target.closest('[data-action]');
+    if (!el) return;
+
+    var action = el.dataset.action;
+
+    if (action === 'q2cycle' && !_graded) {
+      var grp = el.dataset.group;
+      var idx = +el.dataset.idx;
+      var arr = grp === 'init' ? _q2init : _q2goal;
+      arr[idx] = arr[idx] === null ? '0' : (arr[idx] === '0' ? '1' : null);
+      if (_warning) { _warning = false; clearTimeout(_warnTimer); }
+      render();
+
+    } else if (action === 'q3cycle' && !_graded) {
+      var r = +el.dataset.r;
+      var c = +el.dataset.c;
+      _q3cells[r][c] = _q3cells[r][c] === null ? '0' : (_q3cells[r][c] === '0' ? '1' : null);
+      if (_warning) { _warning = false; clearTimeout(_warnTimer); }
+      render();
+
+    } else if (action === 'submit') {
+      if (!isQ2Filled() || !isQ3Filled()) {
+        _warning = true;
+        render();
+        clearTimeout(_warnTimer);
+        _warnTimer = setTimeout(function () { _warning = false; render(); }, 2500);
+        return;
+      }
+      _graded = true;
+      render();
+      notifyScore(allCorrect() ? 100 : 0);
+
+    } else if (action === 'reset') {
+      resetState();
+    }
+  });
+
+  // ================================================================
+  // EventBridge
+  // ================================================================
+  function notifyScore(score) {
+    var host = root.host || root;
+    host.dispatchEvent(new CustomEvent('embed-score', {
+      bubbles: true, composed: true,
+      detail: { score: score, solved: 'all' }
+    }));
+  }
+
+  function notifyResize() {
+    var host = root.host || root;
+    host.dispatchEvent(new CustomEvent('embed-resize', {
+      bubbles: true, composed: true,
+      detail: { height: app ? app.scrollHeight : 0 }
+    }));
+  }
+
+  function onResize() { notifyResize(); }
+  window.addEventListener('resize', onResize);
+
+  // ================================================================
+  // 진입점
+  // ================================================================
+  render();
+
+  void BASE;
+})();
+  </script>
 </body>
 </html>

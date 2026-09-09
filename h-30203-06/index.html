@@ -4,10 +4,167 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>표준 입력</title>
-  <link rel="stylesheet" href="./css/app.css" />
+  <style>
+#app {
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", Arial, sans-serif;
+  color: #243041;
+  line-height: 1.5;
+  background: #fff;
+}
+#app * { box-sizing: border-box; }
+#app .shell { width: min(100%, 1280px); margin: 0 auto; padding: 24px 32px 36px; }
+#app .topbar { display:flex; align-items:center; justify-content:space-between; gap:20px; border-bottom:3px solid #dbeafe; padding:8px 4px 18px; }
+#app .eyebrow { font-weight:800; font-size:18px; color:#3b82f6; }
+#app .subtitle { color:#64748b; font-weight:700; font-size:16px; }
+#app .title-row { display:flex; align-items:center; gap:14px; margin:24px 0 18px; }
+#app .num { width:48px; height:48px; border-radius:16px; display:grid; place-items:center; background:#60a5fa; color:white; font-size:27px; font-weight:900; box-shadow:0 5px 12px rgba(37,99,235,.2); flex:0 0 auto; }
+#app h1 { margin:0; font-size:clamp(28px,3.2vw,40px); line-height:1.25; }
+#app p { margin:0; }
+#app .panel { border:2px solid #e2e8f0; border-radius:18px; background:#f8fafc; padding:24px; }
+#app .bullet { display:flex; gap:14px; align-items:flex-start; font-size:clamp(20px,2.4vw,30px); }
+#app .bullet + .bullet { margin-top:13px; }
+#app .dot { width:11px; height:11px; border-radius:50%; background:#93c5fd; margin-top:.62em; flex:0 0 auto; }
+#app .definition { display:grid; grid-template-columns:190px 1fr; border:2px solid #a7f3d0; border-radius:18px; overflow:hidden; margin-top:34px; min-height:125px; }
+#app .definition strong { display:grid; place-items:center; background:#a7f3d0; color:#047857; font-size:30px; }
+#app .definition code { display:grid; place-items:center; background:#ecfdf5; color:#047857; font-size:clamp(24px,3vw,35px); font-weight:800; padding:20px; white-space:normal; text-align:center; }
+#app button { font:inherit; }
+#app .btn { border:0; border-radius:999px; padding:10px 18px; font-size:19px; font-weight:800; cursor:pointer; }
+#app .btn:disabled { opacity:.45; cursor:not-allowed; }
+#app .btn-primary { background:#f97316; color:#fff; }
+#app .btn-secondary { background:#475569; color:#f8fafc; }
+#app .btn-blue { background:#2563eb; color:#fff; }
+#app .controls { display:flex; justify-content:flex-end; gap:10px; margin-top:14px; flex-wrap:wrap; }
+#app .codebox { background:#0f172a; color:#e2e8f0; border-radius:18px; overflow:auto; padding:22px 24px; font:600 clamp(18px,2.2vw,28px)/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre; }
+#app .codebox .str { color:#fcd34d; }
+#app .codebox .fn { color:#7dd3fc; }
+#app .codebox .numlit { color:#86efac; }
+#app .codebox .comment { color:#6ee7b7; font-family:inherit; font-size:.78em; }
+#app .result { margin-top:18px; border:2px solid #fed7aa; border-radius:18px; padding:16px 22px; min-height:120px; background:#fff; }
+#app .result-label { color:#0f766e; font-weight:900; font-size:18px; margin-bottom:8px; }
+#app .terminal { font:600 clamp(18px,2.2vw,28px)/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre-wrap; }
+#app .orange { color:#f97316; font-weight:900; }
+#app .nav { display:flex; align-items:center; justify-content:space-between; margin-top:20px; gap:12px; }
+#app .nav button { width:46px; height:46px; border-radius:50%; border:0; background:#2563eb; color:#fff; font-size:25px; cursor:pointer; }
+#app .nav button:disabled { opacity:.3; cursor:not-allowed; }
+#app .slide-count { font-weight:800; color:#64748b; }
+#app .tooltip-wrap { position:relative; display:inline-block; }
+#app .info-btn { border:0; border-radius:8px; background:white; color:#2563eb; font-weight:900; cursor:pointer; padding:1px 5px; box-shadow:0 0 0 1px #bfdbfe inset; }
+#app .tooltip { position:absolute; z-index:4; top:46px; left:50%; transform:translateX(-50%); width:min(520px,80vw); background:#fff; border:2px solid #3b82f6; border-radius:20px; padding:20px; font-size:20px; box-shadow:0 12px 28px rgba(15,23,42,.14); }
+#app .diagram { position:relative; margin:28px auto 0; max-width:1000px; }
+#app .diagram img { display:block; width:100%; height:auto; }
+#app .activity-labels { display:flex; justify-content:flex-end; gap:12px; color:#cbd5e1; font-weight:800; margin-bottom:10px; }
+#app .activity-labels .on { color:#f97316; }
+#app .prompt { font-size:clamp(24px,3vw,36px); font-weight:800; margin-bottom:24px; }
+#app .hint { margin-top:24px; border:2px solid #fcd34d; background:#fffbeb; border-radius:20px; padding:20px 24px; font-size:22px; }
+#app .hint-button { margin-top:18px; border:0; background:#fff7ed; color:#c2410c; border:2px solid #fdba74; border-radius:999px; padding:10px 18px; font-weight:900; cursor:pointer; }
+#app .blank { display:inline-flex; min-width:62px; justify-content:center; border:1px solid #38bdf8; border-radius:7px; color:#7dd3fc; background:rgba(56,189,248,.15); padding:0 6px; cursor:pointer; }
+#app .blank.solved { background:transparent; border-color:transparent; font-weight:900; }
+#app .tabs { display:flex; gap:8px; margin-bottom:-2px; }
+#app .tab { border:2px solid #cbd5e1; border-bottom-color:#f59e0b; border-radius:12px 12px 0 0; background:#fff; color:#64748b; padding:8px 18px; font-size:20px; font-weight:900; cursor:pointer; }
+#app .tab.active { background:#0f172a; color:#fff; border-color:#34d399; border-bottom-color:#0f172a; }
+#app .tab-panel { border:2px solid #34d399; border-radius:0 16px 16px 16px; overflow:hidden; min-height:420px; position:relative; }
+#app .tab-panel .codebox { border-radius:0; min-height:420px; }
+#app .enter-btn { border:0; background:transparent; padding:0; cursor:pointer; vertical-align:middle; }
+#app .enter-btn img { width:86px; height:auto; display:block; }
+#app .muted-note { font-size:14px; color:#94a3b8; }
+#app.is-disabled { pointer-events:none; }
+@media (max-width: 760px) {
+  #app .shell { padding:16px; }
+  #app .definition { grid-template-columns:1fr; }
+  #app .definition strong { padding:12px; }
+  #app .topbar { align-items:flex-start; flex-direction:column; }
+  #app .codebox { padding:16px; }
+}
+  </style>
 </head>
 <body>
   <div id="app"></div>
-  <script src="./js/app.js"></script>
+  <script>
+(function () {
+  'use strict';
+  var root = window.__AI_CONTENT_ROOT__ || document;
+  var BASE = window.__AI_CONTENT_BASE__ || './';
+  var app = root.getElementById('app');
+  var _inputEnabled = true;
+  var _muted = false;
+  var _rafId = 0;
+
+  function cleanup() {
+    cancelAnimationFrame(_rafId);
+  }
+  if (window.__AI_CONTENT_DISPOSE__) window.__AI_CONTENT_DISPOSE__.push(cleanup);
+
+  function notifyResize() {
+    var host = root.host || root;
+    host.dispatchEvent(new CustomEvent('embed-resize', {
+      bubbles: true, composed: true,
+      detail: { height: app ? app.scrollHeight : 0 }
+    }));
+  }
+
+  function scheduleResize() {
+    cancelAnimationFrame(_rafId);
+    _rafId = requestAnimationFrame(notifyResize);
+  }
+
+  function setInputEnabled(enabled) {
+    _inputEnabled = enabled;
+    if (app) app.classList.toggle('is-disabled', !enabled);
+  }
+
+  var state = { slide: 0, infoOpen: false };
+  function collectState() { return { slide: state.slide, infoOpen: state.infoOpen }; }
+  function stateHasActivity() { return state.slide > 0 || state.infoOpen; }
+  function stateSolved() { return state.slide === 1 ? 'all' : (stateHasActivity() ? 'partial' : ''); }
+  function restoreState(saved) {
+    state.slide = saved.slide === 1 ? 1 : 0;
+    state.infoOpen = !!saved.infoOpen;
+    render();
+  }
+  function resetState() { state = { slide: 0, infoOpen: false }; render(); }
+  function render() {
+    if (!app) return;
+    var content = state.slide === 0
+      ? '<div class="panel"><div class="bullet"><span class="dot"></span><span>표준 입력이란 사용자가 키보드와 같은 <span class="tooltip-wrap"><button class="info-btn" data-action="toggle-info">ⓘ 기본 입력 장치</button>' + (state.infoOpen ? '<span class="tooltip">사용자가 프로그램에 데이터를 입력하기 위해 가장 기본적으로 사용하는 하드웨어 장치를 말한다.</span>' : '') + '</span>를 이용하여 프로그램에 정보를 입력하는 것이다.</span></div><div class="bullet"><span class="dot"></span><span>표준 입력은 기본적으로 키보드 입력을 의미하지만 사용자의 편의를 위해 마우스, 터치스크린 등의 다양한 입력 방식을 지원한다.</span></div></div><div class="diagram"><img src="' + BASE + 'assets/input-flow.png" alt="키오스크의 입출력 흐름"></div>'
+      : '<div class="panel"><div class="bullet"><span class="dot"></span><span>파이선에서는 표준 입력을 위한 함수로 <strong>input()</strong> 함수를 지원한다.</span></div><div class="bullet"><span class="dot"></span><span>괄호 안에 입력한 내용이 먼저 출력되고 사용자의 입력을 기다린다.</span></div><div class="bullet"><span class="dot"></span><span>사용자가 키보드로 입력한 정보는 지정된 변수에 저장된다.</span></div></div><div class="definition"><strong>정의</strong><code>변수명 = input(내용)</code></div>';
+    app.innerHTML = '<div class="shell"><div class="topbar"><div><div class="eyebrow">핵심 개념</div><div class="subtitle">1. 표준 입출력</div></div><div class="muted-note">CMS 조작형 콘텐츠</div></div><div class="title-row"><span class="num">1</span><h1>표준 입력</h1></div>' + content + '<div class="nav"><button data-action="prev" ' + (state.slide===0?'disabled':'') + '>‹</button><span class="slide-count">' + (state.slide+1) + ' / 2</span><button data-action="next" ' + (state.slide===1?'disabled':'') + '>›</button></div></div>';
+    scheduleResize();
+  }
+  root.addEventListener('click', function (e) {
+    if (!_inputEnabled) return;
+    var btn = e.target.closest('[data-action]'); if (!btn) return;
+    var a = btn.getAttribute('data-action');
+    if (a === 'prev') state.slide = Math.max(0, state.slide-1);
+    if (a === 'next') state.slide = Math.min(1, state.slide+1);
+    if (a === 'toggle-info') state.infoOpen = !state.infoOpen;
+    render();
+  });
+
+  if (window.__AI_CONTENT_HOOKS__) {
+    Object.assign(window.__AI_CONTENT_HOOKS__, {
+      getUserInputs: function () {
+        return [{ result: '', solved: (typeof stateSolved === 'function' ? stateSolved() : (stateHasActivity() ? 'partial' : '')), input: collectState() }];
+      },
+      setUserInputs: function (inputs) {
+        var saved = inputs && inputs[0] && inputs[0].input;
+        if (saved) restoreState(saved);
+      },
+      clearUserInputs: function () {
+        setInputEnabled(true);
+        resetState();
+      },
+      setMute: function () { _muted = true; },
+      setUnMute: function () { _muted = false; },
+      setDisableInput: function () { setInputEnabled(false); },
+      setEnableInput: function () { setInputEnabled(true); }
+    });
+  }
+
+  render();
+})();
+  </script>
 </body>
 </html>
