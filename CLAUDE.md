@@ -190,6 +190,7 @@ project/
 ├── wfs03a_entry.html          ← 학생 엔트리 실습 (원본)
 ├── wfs02_dashboard.html       ← 학생 대시보드 (좌측 사이드바 + 카드 레이아웃)
 ├── wfs03a_entry_v2.html       ← 학생 엔트리 실습 v2 (UI/UX 개선)
+├── wfs_lesson2.html           ← 학생 수업 화면 Ⅲ-2-02 (iframe 5단계 뷰어)
 ├── wfs03b_python.html         ← 학생 파이썬 실습
 ├── entry-editor.html          ← 실제 Entry.js 로드 (iframe src)
 └── assets/
@@ -256,7 +257,10 @@ project/
 | 세션 17 | `wfs02_dashboard.html` 신규 생성 — 학생 대시보드 테스트 목업 (4개 통계 카드 + 6탭) + 전체 wf-nav에 학생대시보드 링크 추가 + `wfs03b_python.html` 콘솔 개선 (버튼 위로, '실행 결과' 용어) | ✅ 완료 |
 | 세션 18 | 랜딩 페이지(`index.html`) 신규 생성 — 선생님/학생 모드 선택 / 현 `index.html` → `teacher_home.html` 이동 / 전체 파일(13개) wf-nav 제거 + GNB top 수정 + 페이지 타이틀 정리 / 학생 GNB에 탭 네비게이션(대시보드·수업·엔트리·파이썬) 추가 | ✅ 완료 |
 | 세션 19 | `wfs02_dashboard.html` 전면 재설계 — 좌측 사이드바(나의 학습·나의 교실) + 선생님 대시보드와 동일한 카드 레이아웃 + [수업 시작] 버튼(→ wfs_lesson.html) / `index.html`을 랜딩 선택 페이지로 유지 | ✅ 완료 |
-| 세션 20~ | 기타 화면 세부 수정 또는 신규 기능 | - |
+| 세션 20 | 학생 모드 GNB 개편 + 수업·실습 화면 연결 / `wfs02_dashboard.html` 6탭 분석 섹션 추가(AI추천·최근활동·강점약점·오답노트·성장확인·AI도움) / `wfs_lesson.html` 교과서 뷰어 2단 레이아웃으로 재설계 + 7단계 목차(엔트리실습1·2·파이썬실습 직접 연결) / 전체 학생 화면 GNB 교사 교과서 스타일로 통일(탭 제거, 로고·컨텍스트·아바타) / 엔트리·파이썬 실습에 `← 수업` 버튼 포함 GNB 복원 | ✅ 완료 |
+| 세션 21 | `wfs_lesson2.html` 신규 생성 — Ⅲ-2-02 두 수 사칙연산 (h-30203-06~09 + it-m-30101-12 iframe 통합, 5단계 뷰어) + wfs_lesson/entry/python TOC에서 Ⅲ-2-02 잠금 해제 | ✅ 완료 |
+| 세션 22 | 콘텐츠 폴더 iframe 버그 수정 3종: ① CSS/JS inline 삽입(404 해결) ② BASE 경로 동적 계산(이미지 깨짐 해결) ③ postMessage로 iframe 높이 재알림(it-m 이미지 로드 후 높이 오류 해결) + 교사·학생 수업 화면 콘텐츠 max-width 1100px로 확대 | ✅ 완료 |
+| 세션 23~ | 추가 작업 (예정) | - |
 
 각 세션 시작 시: "메모리 읽고 이어서 작업하자" 또는 "CLAUDE.md 읽고 [작업내용] 해줘" 형태로 지시.
 세션 완료 후 위 표의 상태를 `✅ 완료`로 업데이트할 것.
